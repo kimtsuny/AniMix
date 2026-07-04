@@ -1,9 +1,9 @@
 import { memo } from "react";
 import HeroBackground from "./HeroBackground";
-import { AnimeHeroSlide } from "../../types/hero";
+import type { HeroAnime } from "../../types/hero";
 
 interface HeroSlideProps {
-    slide: AnimeHeroSlide;
+    slide: HeroAnime;
     priority?: boolean;
 }
 
@@ -14,7 +14,7 @@ function HeroSlide({ slide, priority = false }: HeroSlideProps) {
             aria-label={`Slide for ${slide.title}`}
         >
             <HeroBackground
-                imagePath={slide.imagePath}
+                imagePath={slide.bannerImage ?? slide.coverImage}
                 title={slide.title}
                 priority={priority}
             />

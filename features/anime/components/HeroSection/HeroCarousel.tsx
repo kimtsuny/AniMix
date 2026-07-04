@@ -13,10 +13,12 @@ import {
 import { cn } from "@/shared/lib/utils";
 import HeroSlide from "./HeroSlide";
 import HeroContent from "./HeroContent";
-import { mockHeroSlides } from "../../data/mockHeroSlides";
 import ActionButtons from "./ActionButtons";
+import { useHeroAnime } from "../../hooks/useHeroAnime";
 
 function HeroCarousel() {
+    const { data, loading, error } = useHeroAnime();
+    
     const [api, setApi] = useState<CarouselApi>();
     const [current, setCurrent] = useState(0);
     const [count, setCount] = useState(0);
@@ -46,7 +48,7 @@ function HeroCarousel() {
         api?.scrollTo(index);
     }, [api]);
 
-    const activeSlide = mockHeroSlides[current];
+    const activeSlide = data[current];
 
     const handleWatchNow = useCallback(() => {
         console.log(`Watch Now: ${activeSlide?.title}`);
@@ -55,6 +57,22 @@ function HeroCarousel() {
     const handleMoreActions = useCallback(() => {
         console.log(`More Actions: ${activeSlide?.title}`);
     }, [activeSlide]);
+
+    if (loading) {
+    return (
+        <section className="flex h-[88vh] items-center justify-center bg-black text-white">
+            Loading...
+        </section>
+    );
+}
+
+if (error) {
+    return (
+        <section className="flex h-[88vh] items-center justify-center bg-black text-red-500">
+            Failed to load hero anime.
+        </section>
+    );
+}
 
     return (
         <section
@@ -67,7 +85,7 @@ function HeroCarousel() {
                 className="h-full w-full"
             >
                 <CarouselContent className="h-full -ml-0">
-                    {mockHeroSlides.map((slide, index) => (
+                    {data.map((slide, index) => (
                         <CarouselItem key={slide.id} className="h-full w-full pl-0 basis-full">
                             <HeroSlide
                                 slide={slide}

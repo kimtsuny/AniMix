@@ -1,4 +1,16 @@
-import { AnimeHeroSlide } from "../types/hero";
+interface AnimeHeroSlide {
+    id: string;
+    title: string;
+    status: string;
+    rating: number;
+    year: number;
+    type: string;
+    episodes: number;
+    duration: string;
+    genres: string[];
+    description: string;
+    imagePath: string;
+}
 
 export const mockHeroSlides: AnimeHeroSlide[] = [
     {

@@ -6,7 +6,7 @@ interface MetadataRowProps {
     year: string | number;
     type: string;
     episodes: number;
-    duration: string;
+    duration: string | number;
 }
 
 function MetadataRow({

@@ -8,7 +8,7 @@ export const mockRecentlyAdded: AnimeSectionItem[] = [
         type: "TV",
         season: "Fall",
         year: 2026,
-        imagePath: "/animesection/1.jpg",
+        imagePath: "/animesection/10.jpg",
     },
     {
         id: "frieren",
@@ -89,7 +89,7 @@ export const mockRecentlyAdded: AnimeSectionItem[] = [
         type: "Special",
         season: "Winter",
         year: 2025,
-        imagePath: "/anime/demon1.jpg",
+        imagePath: "/animesection/4.jpg",
     },
     {
         id: "orbital-special-3",

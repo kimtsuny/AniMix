@@ -9,9 +9,16 @@ import type { Swiper as SwiperInstance } from "swiper";
 import { cn } from "@/shared/lib/utils";
 import AnimeCard from "./AnimeCard";
 import "swiper/css";
-import { mockRecentlyAdded } from "../../data/mockRecentlyAdded";
+import type { SectionAnime } from "../../types/section-anime";
 
-export default function AnimeSection() {
+interface AnimeSectionProps {
+    title: string;
+    items: SectionAnime[];
+    loading: boolean;
+    error: Error | null;
+}
+
+export default function AnimeSection({ title, items, loading, error }: AnimeSectionProps) {
     const swiperRef = useRef<SwiperInstance | null>(null);
     const swiperId = useId().replace(/:/g, "");
     const prevButtonClass = `anime-section-prev-${swiperId}`;
@@ -21,16 +28,42 @@ export default function AnimeSection() {
         swiperRef.current = swiper;
     }, []);
 
+    if (loading) {
+        return (
+            <section className="w-full space-y-5">
+                <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-[1.7rem]">
+                    {title}
+                </h2>
+                <div className="flex h-[280px] items-center justify-center text-white/40">
+                    Loading...
+                </div>
+            </section>
+        );
+    }
+
+    if (error) {
+        return (
+            <section className="w-full space-y-5">
+                <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-[1.7rem]">
+                    {title}
+                </h2>
+                <div className="flex h-[280px] items-center justify-center text-red-500/80">
+                    Failed to load anime.
+                </div>
+            </section>
+        );
+    }
+
     return (
         <section className="group/section relative w-full space-y-5 ">
             <div className="flex items-baseline justify-between gap-4">
                 <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-[1.7rem]">
-                    Trending Now
+                    {title}
                 </h2>
 
                 <Link
                     href="/anime"
-                    aria-label="View all recently added anime"
+                    aria-label={`View all ${title} anime`}
                     className="group/see-all inline-flex shrink-0 items-center gap-1 text-sm font-medium text-white/60 transition-colors duration-250 hover:text-white"
                 >
                     <span>See All</span>
@@ -71,7 +104,7 @@ export default function AnimeSection() {
                     }}
                     className="w-full"
                 >
-                    {mockRecentlyAdded.map((anime) => (
+                    {items.map((anime) => (
                         <SwiperSlide key={anime.id} className="!h-auto">
                             <AnimeCard anime={anime} />
                         </SwiperSlide>

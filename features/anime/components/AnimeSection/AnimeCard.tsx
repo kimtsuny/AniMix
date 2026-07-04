@@ -1,9 +1,9 @@
 import Image from "next/image";
 import { memo } from "react";
-import { AnimeSectionItem } from "../../types/section";
+import type { SectionAnime } from "../../types/section-anime";
 
 interface AnimeCardProps {
-  anime: AnimeSectionItem;
+  anime: SectionAnime;
 }
 
 function AnimeCard({ anime }: AnimeCardProps) {
@@ -11,9 +11,10 @@ function AnimeCard({ anime }: AnimeCardProps) {
     <article className="group/card w-full cursor-pointer">
       <div className="relative aspect-[2/3] w-full overflow-hidden rounded-[18px] bg-white/5 shadow-md shadow-black/30 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-black/60">
         <Image
-          src={anime.imagePath}
+          src={anime.coverImage}
           alt={anime.title}
           fill
+          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 12.5vw"
           className="object-cover transition-transform duration-300 ease-out group-hover/card:scale-[1.04]"
         />
         <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
@@ -25,14 +26,16 @@ function AnimeCard({ anime }: AnimeCardProps) {
             {anime.title}
           </h3>
           <p className="mt-1 text-xs text-neutral-400 font-medium">
-            {anime.season} {anime.year}
+            {anime.season} {anime.seasonYear}
           </p>
         </div>
-        <div className="shrink-0">
-          <span className="inline-block rounded-full bg-white/5 border border-white/10 px-2.5 py-0.5 text-[10px] font-semibold text-neutral-300 uppercase tracking-wider">
-            {anime.type}
-          </span>
-        </div>
+        {anime.format && (
+          <div className="shrink-0">
+            <span className="inline-block rounded-full bg-white/5 border border-white/10 px-2.5 py-0.5 text-[10px] font-semibold text-neutral-300 uppercase tracking-wider">
+              {anime.format}
+            </span>
+          </div>
+        )}
       </div>
     </article>
   );

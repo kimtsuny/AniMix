@@ -2,10 +2,10 @@ import { memo } from "react";
 import GenreBadge from "./GenreBadge";
 import MetadataRow from "./MetadataRow";
 import StatusBadge from "./StatusBadge";
-import { AnimeHeroSlide } from "../../types/hero";
+import type { HeroAnime } from "../../types/hero";
 
 interface HeroContentProps {
-    slide: AnimeHeroSlide;
+    slide: HeroAnime;
     isActive?: boolean;
 }
 
@@ -21,21 +21,18 @@ function HeroContent({
                     : "opacity-0 translate-y-4"
             }`}
         >
-            {/* Trending Badge */}
-            <div className=" left-0">
-                <StatusBadge status={slide.status} />
-            </div>
+            <StatusBadge status="Trending" />
 
             <h1 className="text-balance text-3xl font-extrabold tracking-tight text-white leading-tight sm:text-4xl md:text-5xl lg:text-6xl drop-shadow-lg">
                 {slide.title}
             </h1>
 
             <MetadataRow
-                rating={slide.rating}
-                year={slide.year}
-                type={slide.type}
-                episodes={slide.episodes}
-                duration={slide.duration}
+                rating={slide.score ?? 0}
+                year={slide.seasonYear ?? 0}
+                type={slide.format}
+                episodes={slide.episodes ?? 0}
+                duration={slide.duration ?? 0}
             />
 
             <div className="flex flex-wrap gap-2">
@@ -44,7 +41,7 @@ function HeroContent({
                 ))}
             </div>
 
-            <p className="max-w-[38rem] text-sm leading-relaxed text-zinc-300 md:text-base line-clamp-3 drop-shadow-md">
+            <p className="max-w-[38rem] text-sm leading-relaxed text-zinc-300 md:text-base line-clamp-3">
                 {slide.description}
             </p>
         </div>

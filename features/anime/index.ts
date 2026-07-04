@@ -1,6 +1,14 @@
 export { HeroCarousel } from "./components/HeroSection";
 export { AnimeSection } from "./components/AnimeSection";
+export { TrendingSection } from "./components/AnimeSection";
+export { PopularSection } from "./components/AnimeSection";
+export { TopRatedSection } from "./components/AnimeSection";
+export { SeasonSection } from "./components/AnimeSection";
+export { UpcomingSection } from "./components/AnimeSection";
 export * from "./types/hero";
-export * from "./types/section";
-export * from "./data/mockHeroSlides";
-export * from "./data/mockRecentlyAdded";
+export * from "./types/section-anime";
+export * from "./types/trending";
+export * from "./types/popular";
+export * from "./types/top-rated";
+export * from "./types/season";
+export * from "./types/upcoming";
