@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { getPopularAnime } from "../api/services/popular.service";
+import { getPopularAnime } from "../api/services/home/popular.service";
 import type { PopularAnime } from "../types/popular";
 
 export function usePopularAnime() {

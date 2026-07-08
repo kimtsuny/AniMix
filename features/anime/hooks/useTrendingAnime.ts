@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { getTrendingAnime } from "../api/services/trending.service";
+import { getTrendingAnime } from "../api/services/home/trending.service";
 import type { TrendingAnime } from "../types/trending";
 
 export function useTrendingAnime() {

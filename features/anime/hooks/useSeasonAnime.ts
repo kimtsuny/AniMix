@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { getSeasonAnime } from "../api/services/season.service";
+import { getSeasonAnime } from "../api/services/home/season.service";
 import type { SeasonAnime } from "../types/season";
 
 export function useSeasonAnime() {

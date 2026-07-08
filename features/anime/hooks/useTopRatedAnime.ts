@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { getTopRatedAnime } from "../api/services/top-rated.service";
+import { getTopRatedAnime } from "../api/services/home/top-rated.service";
 import type { TopRatedAnime } from "../types/top-rated";
 
 export function useTopRatedAnime() {

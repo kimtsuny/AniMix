@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { getUpcomingAnime } from "../api/services/upcoming.service";
+import { getUpcomingAnime } from "../api/services/home/upcoming.service";
 import type { UpcomingAnime } from "../types/upcoming";
 
 export function useUpcomingAnime() {

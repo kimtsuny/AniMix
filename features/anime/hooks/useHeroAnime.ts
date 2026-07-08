@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { getHeroAnime } from "../api/services/hero.service";
+import { getHeroAnime } from "../api/services/home/hero.service";
 import type { HeroAnime } from "../types/hero";
 
 export function useHeroAnime() {
