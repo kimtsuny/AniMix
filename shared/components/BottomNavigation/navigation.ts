@@ -1,12 +1,28 @@
+import { Clapperboard, Heart, Settings } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
 export interface NavigationItemConfig {
-    label: string;
+    ariaLabel: string;
     path: string;
+    icon: LucideIcon;
 }
 
 export const navigationItems: NavigationItemConfig[] = [
-    { label: "Anime", path: "/anime" },
-    { label: "Manga", path: "/manga" },
-    { label: "Manhwa", path: "/manhwa" },
+    {
+        ariaLabel: "Anime",
+        path: "/anime",
+        icon: Clapperboard,
+    },
+    {
+        ariaLabel: "Favorites",
+        path: "/favorites",
+        icon: Heart,
+    },
+    {
+        ariaLabel: "Settings",
+        path: "/settings",
+        icon: Settings,
+    },
 ];
 
 export const searchRoute = "/search";

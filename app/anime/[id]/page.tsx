@@ -1,12 +1,7 @@
 import { notFound } from "next/navigation";
 import {
-  getAnimeDetails,
-  getAnimeRelations,
+  getAnimeDetailsPage,
   getAnimeEpisodes,
-  getAnimeCharacters,
-  getAnimeStaff,
-  getAnimeRecommendations,
-  buildSeasonChain
 } from "@/features/anime/api/services/details";
 import { Hero } from "@/features/anime/components/details/Hero";
 import { Synopsis } from "@/features/anime/components/details/Synopsis";
@@ -26,30 +21,18 @@ export default async function AnimeDetailsPage({
   const { id } = await params;
   const initialSeasonId = parseInt(id, 10);
 
-  // Fetch ALL data in parallel at the page level
-  const [
-    anime,
-    relations,
-    episodes,
-    characters,
-    staff,
-    recommendations,
-  ] = await Promise.all([
-    getAnimeDetails(initialSeasonId),
-    getAnimeRelations(initialSeasonId),
+  // Fetch ALL static data in a single request, and episodes separately
+  const [pageData, episodes] = await Promise.all([
+    getAnimeDetailsPage(initialSeasonId),
     getAnimeEpisodes(initialSeasonId),
-    getAnimeCharacters(initialSeasonId),
-    getAnimeStaff(initialSeasonId),
-    getAnimeRecommendations(initialSeasonId),
   ]);
 
   // Handle not found
-  if (!anime) {
+  if (!pageData || !pageData.details) {
     notFound();
   }
 
-  // Fetch season chain
-  const seasons = await buildSeasonChain(initialSeasonId, anime);
+  const { details: anime, relations, characters, staff, recommendations, seasons } = pageData;
 
   // Exclude TV seasons from related content
   const seasonIds = new Set(seasons.map(s => s.id));
@@ -61,7 +44,7 @@ export default async function AnimeDetailsPage({
     <main className="dark min-h-screen bg-black text-white pb-16">
       <Hero anime={anime} />
 
-      <div className="relative z-10 flex w-full flex-col gap-10 px-6 md:px-22 pt-4 pb-8">          <SeasonsAndEpisodes
+      <div className="relative z-10 flex w-full flex-col gap-10 px-6 md:px-22 pt-24 md:pt-28 pb-8">          <SeasonsAndEpisodes
         seasons={seasons}
         initialEpisodes={episodes}
         initialSeasonId={initialSeasonId}

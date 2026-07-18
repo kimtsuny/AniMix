@@ -41,6 +41,7 @@ export function Episodes({ episodes, fallbackImage }: EpisodesProps) {
                   src={fallbackImage!}
                   alt="Fallback Image"
                   fill
+                  sizes="(max-width: 768px) 280px, 320px"
                   className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                 />
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">

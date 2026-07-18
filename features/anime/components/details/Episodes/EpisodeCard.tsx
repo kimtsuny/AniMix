@@ -21,6 +21,7 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
             src={episode.thumbnail}
             alt={episode.title || "Episode Thumbnail"}
             fill
+            sizes="(max-width: 768px) 280px, 320px"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (

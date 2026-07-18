@@ -15,6 +15,7 @@ export function RecommendationCard({ recommendation }: RecommendationCardProps) 
             src={recommendation.coverImage}
             alt={recommendation.title}
             fill
+            sizes="(max-width: 768px) 160px, 200px"
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (

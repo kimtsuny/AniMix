@@ -14,6 +14,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
             src={character.image}
             alt={character.name}
             fill
+            sizes="(max-width: 768px) 140px, 160px"
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (

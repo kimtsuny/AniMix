@@ -1,5 +1,3 @@
-"use server";
-
 import { getAnimeEpisodes } from "../services/details";
 
 export async function fetchSeasonEpisodes(seasonId: number) {

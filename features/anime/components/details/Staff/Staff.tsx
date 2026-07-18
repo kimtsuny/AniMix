@@ -23,14 +23,14 @@ export function Staff({ staff }: StaffProps) {
         }}
         className="w-full"
       >
-        <SectionHeader 
-          title="Staff" 
-          action={<CarouselNavigation />} 
+        <SectionHeader
+          title="Staff"
+          action={<CarouselNavigation />}
         />
-        
+
         <CarouselContent className="-ml-4">
           {staff.map((person) => (
-            <CarouselItem key={person.id} className="pl-4 basis-auto">
+            <CarouselItem key={`${person.id}-${person.role}`} className="pl-4 basis-auto">
               <StaffCard staff={person} />
             </CarouselItem>
           ))}

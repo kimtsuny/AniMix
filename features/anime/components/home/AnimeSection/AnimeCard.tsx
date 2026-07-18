@@ -15,8 +15,6 @@ function AnimeCard({ anime }: AnimeCardProps) {
           src={anime.coverImage}
           alt={anime.title}
           fill
-          loading="lazy"
-          quality={75}
           sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 12.5vw"
           className="object-cover transition-transform duration-300 ease-out group-hover/card:scale-[1.04]"
         />

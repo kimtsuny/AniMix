@@ -16,6 +16,7 @@ export function StaffCard({ staff }: StaffCardProps) {
             src={staff.image}
             alt={staff.name}
             fill
+            sizes="(max-width: 768px) 140px, 160px"
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
