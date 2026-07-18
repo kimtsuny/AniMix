@@ -1,0 +1,23 @@
+{"timestamp":"00:10:20.172","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:10:20.176","source":"Server","level":"ERROR","message":"⨯ \"unhandledRejection:\" Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:10:20.180","source":"Server","level":"ERROR","message":"⨯ \"unhandledRejection: \" Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:10:20.201","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:10:20.205","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:10:20.237","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:10:20.240","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:10:20.253","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:10:20.256","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:10:26.633","source":"Server","level":"ERROR","message":"⨯ Module not found: Error: Can't resolve 'next-flight-client-entry-loader' in '/home/kimtsuny/Desktop/anime-catalog'"}
+{"timestamp":"00:10:26.999","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:10:27.002","source":"Server","level":"ERROR","message":"⨯ \"unhandledRejection:\" Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:10:27.004","source":"Server","level":"ERROR","message":"⨯ \"unhandledRejection: \" Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:11:08.189","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:11:08.193","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:11:08.890","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:11:08.894","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:11:09.204","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:11:09.206","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:11:09.461","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:11:09.464","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:11:09.723","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
+{"timestamp":"00:11:09.727","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/home/kimtsuny/Desktop/anime-catalog/app'"}
