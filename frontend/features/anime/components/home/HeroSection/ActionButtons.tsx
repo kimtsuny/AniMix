@@ -1,3 +1,5 @@
+"use client";
+
 import { memo } from "react";
 import { MoreHorizontal, Play } from "lucide-react";
 

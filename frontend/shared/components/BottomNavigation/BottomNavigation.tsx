@@ -1,52 +1,23 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import NavigationItem from "./NavigationItem";
 import SearchButton from "./SearchButton";
-import SearchInput from "./SearchInput";
 import { navigationItems } from "./navigation";
+import { useSearchStore } from "@/features/search";
 
 export default function BottomNavigation() {
     const pathname = usePathname();
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [searchValue, setSearchValue] = useState("");
-    const inputRef = useRef<HTMLInputElement>(null);
+    const { isOpen, openSearch, closeSearch } = useSearchStore();
 
-    const openSearch = useCallback(() => {
-        setIsSearchOpen(true);
-    }, []);
-
-    const closeSearch = useCallback(() => {
-        setIsSearchOpen(false);
-        setSearchValue("");
-    }, []);
-
-    const toggleSearch = useCallback(() => {
-        if (isSearchOpen) {
+    const toggleSearch = () => {
+        if (isOpen) {
             closeSearch();
         } else {
             openSearch();
         }
-    }, [isSearchOpen, openSearch, closeSearch]);
-
-    
-   
-
-    // Close on Escape key (global handler as backup)
-    useEffect(() => {
-        if (!isSearchOpen) return;
-
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
-                closeSearch();
-            }
-        };
-
-        document.addEventListener("keydown", handleKeyDown);
-        return () => document.removeEventListener("keydown", handleKeyDown);
-    }, [isSearchOpen, closeSearch]);
+    };
 
     return (
         <div
@@ -71,60 +42,33 @@ export default function BottomNavigation() {
                     rounded-full
                     shadow-[0_8px_32px_rgba(0,0,0,0.55),0_0_12px_rgba(255,255,255,0.06)]
                     overflow-hidden
-                    ${isSearchOpen
-                        ? "w-[calc(100vw-7rem)] max-w-[620px] h-14 px-1"
-                        : "gap-2 px-3 py-2"
-                    }
+                    gap-2 px-3 py-2
                 `}
                 style={{
-                    // Prevent layout shift during animation
                     willChange: "width",
                 }}
             >
                 <AnimatePresence mode="wait" initial={false}>
-                    {isSearchOpen ? (
-                        <motion.div
-    key="search-input"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    transition={{
-        duration: 0.2,
-    }}
-    onAnimationComplete={() => {
-        inputRef.current?.focus();
-    }}
-    className="flex items-center w-full"
->
-    <SearchInput
-        ref={inputRef}
-        value={searchValue}
-        onChange={setSearchValue}
-        onEscape={closeSearch}
-    />
-</motion.div>
-                    ) : (
-                        <motion.div
-                            key="nav-items"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ duration: 0.15 }}
-                            className="flex items-center gap-2"
-                        >
-                            {navigationItems.map((item) => (
-                                <NavigationItem
-                                    key={item.path}
-                                    item={item}
-                                    isActive={pathname.startsWith(item.path)}
-                                />
-                            ))}
-                        </motion.div>
-                    )}
+                    <motion.div
+                        key="nav-items"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.15 }}
+                        className="flex items-center gap-2"
+                    >
+                        {navigationItems.map((item) => (
+                            <NavigationItem
+                                key={item.path}
+                                item={item}
+                                isActive={pathname.startsWith(item.path)}
+                            />
+                        ))}
+                    </motion.div>
                 </AnimatePresence>
             </motion.nav>
 
-            <SearchButton isSearchOpen={isSearchOpen} onToggle={toggleSearch} />
+            <SearchButton isSearchOpen={isOpen} onToggle={toggleSearch} />
         </div>
     );
 }

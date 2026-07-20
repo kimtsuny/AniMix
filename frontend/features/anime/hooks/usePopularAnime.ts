@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 import { getPopularAnime } from "../api/services/home/popular.service";

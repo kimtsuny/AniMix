@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 import { getSeasonAnime } from "../api/services/home/season.service";

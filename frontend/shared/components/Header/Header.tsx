@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logo from "./Logo";
-import UserAvatar from "./UserAvatar";
+import { UserMenu } from "@/features/auth";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -59,7 +59,7 @@ export default function Header() {
         })}
       </nav>
 
-      <UserAvatar />
+      <UserMenu />
     </header>
   );
 }

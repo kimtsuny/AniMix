@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 import { getTrendingAnime } from "../api/services/home/trending.service";

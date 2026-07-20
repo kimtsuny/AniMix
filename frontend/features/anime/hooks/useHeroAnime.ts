@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 import { getHeroAnime } from "../api/services/home/hero.service";

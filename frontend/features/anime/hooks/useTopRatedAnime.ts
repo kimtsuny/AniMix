@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 import { getTopRatedAnime } from "../api/services/home/top-rated.service";

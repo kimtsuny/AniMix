@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 import { getUpcomingAnime } from "../api/services/home/upcoming.service";
