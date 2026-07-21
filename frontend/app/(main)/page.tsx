@@ -1,11 +1,5 @@
-import { HeroCarousel, getHeroAnime } from "@/features/anime";
+import { redirect } from "next/navigation";
 
-export default async function HomePage() {
-    const heroData = await getHeroAnime().catch(() => []);
-
-    return (
-        <main className="min-h-screen">
-            <HeroCarousel data={heroData} />
-        </main>
-    );
+export default function HomePage() {
+  redirect("/anime");
 }

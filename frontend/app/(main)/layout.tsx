@@ -1,6 +1,5 @@
 import Header from "@/shared/components/Header/Header";
 import BottomNavigation from "@/shared/components/BottomNavigation";
-import IntroLoader from "@/shared/components/IntroLoader/IntroLoader";
 import { SearchProvider, SearchOverlay } from "@/features/search";
 
 /**
@@ -14,7 +13,6 @@ export default function MainLayout({
 }>) {
   return (
     <SearchProvider>
-      <IntroLoader />
       <Header />
 
       <main className="flex-1 pb-24  ">
