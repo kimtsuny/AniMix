@@ -30,8 +30,7 @@ Modern Anime Discovery Platform built with Next.js.
 
 ## 🚀 Live Demo
 
-https://vercel.com/altyym59-5983s-projects/anime-catalog/GcVDHKR9qCudkYE7ybUjQbZsnAho
-
+https://anime-catalog-wheat.vercel.app/
 ---
 
 ## 📦 Installation
