@@ -1,6 +1,7 @@
 import Header from "@/shared/components/Header/Header";
 import BottomNavigation from "@/shared/components/BottomNavigation";
 import { SearchProvider, SearchOverlay } from "@/features/search";
+import ScrollToTop from "@/shared/components/ScrollToTop";
 
 /**
  * Main app layout — includes Header, BottomNavigation, and IntroLoader.
@@ -8,14 +9,16 @@ import { SearchProvider, SearchOverlay } from "@/features/search";
  */
 export default function MainLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <SearchProvider>
+      <ScrollToTop />
+
       <Header />
 
-      <main className="flex-1 pb-24  ">
+      <main className="flex-1 pb-24">
         {children}
       </main>
 

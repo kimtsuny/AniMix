@@ -27,7 +27,7 @@ export function HeroSkeleton() {
         />
       </div>
 
-      <div className="relative z-10 w-full max-w-[1700px] mx-auto px-6 md:px-16 xl:px-24 pt-24 pb-12 md:pt-[22vh] lg:pt-[28vh] md:pb-24 flex flex-col md:flex-row gap-8 lg:gap-16 items-center md:items-start">
+      <div className="relative z-10 w-full max-w-[1700px] mx-auto px-6 md:px-16 xl:px-24 pt-0 pb-12 md:pt-[22vh] lg:pt-[28vh] md:pb-24 flex flex-col md:flex-row gap-8 lg:gap-16 items-center md:items-start">
         {/* Poster Skeleton */}
         <div className="w-[180px] md:w-[280px] lg:w-[320px] shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl bg-muted/40 aspect-[2/3] animate-pulse" />
 

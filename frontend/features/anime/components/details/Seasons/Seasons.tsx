@@ -15,16 +15,6 @@ export function Seasons({ seasons, activeSeasonId, onSeasonSelect }: SeasonsProp
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    if (activeRef.current && scrollContainerRef.current) {
-      activeRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
-      });
-    }
-  }, [activeSeasonId]);
-
   if (!seasons || seasons.length === 0) {
     return null;
   }

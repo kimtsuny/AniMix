@@ -9,11 +9,8 @@ interface AnimeCardProps {
 
 function AnimeCard({ anime }: AnimeCardProps) {
   return (
-<Link
-  href={`/anime/${anime.id}`}
-  scroll
-  className="group/card w-full cursor-pointer"
->     <div className="relative aspect-[2/3] w-full overflow-hidden rounded-[18px] bg-white/5 shadow-md shadow-black/30 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-black/60">
+<Link href={`/anime/${anime.id}`}   scroll={true}
+> <div className="relative aspect-[2/3] w-full overflow-hidden rounded-[18px] bg-white/5 shadow-md shadow-black/30 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-black/60">
         <Image
           src={anime.coverImage}
           alt={anime.title}
