@@ -1,17 +1,16 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { AnimatePresence } from "framer-motion";
+import { useEffect } from "react";
 import { useSearchStore } from "../store/search.store";
 import { useSearch } from "../hooks/useSearch";
-import { SearchInput } from "./SearchInput";
-import { SearchResults } from "./SearchResults";
-import { SearchBackdrop } from "./SearchBackdrop";
-import { SearchPanel } from "./SearchPanel";
 
+/**
+ * Invisible wiring component — manages the search API lifecycle
+ * and global keyboard shortcuts. All visible UI is handled by
+ * BottomNavigation.
+ */
 export function SearchOverlay() {
-  const { isOpen, closeSearch, openSearch } = useSearchStore();
-  const overlayRef = useRef<HTMLDivElement>(null);
+  const { openSearch } = useSearchStore();
 
   // Initialize the search hook which manages API calls
   useSearch();
@@ -30,24 +29,5 @@ export function SearchOverlay() {
     return () => document.removeEventListener("keydown", handleGlobalKeyDown);
   }, [openSearch]);
 
-  // Handle clicks outside the search container
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === overlayRef.current) {
-      closeSearch();
-    }
-  };
-
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <SearchBackdrop onClick={handleOverlayClick}>
-          <div ref={overlayRef} className="absolute inset-0 z-[-1]" />
-          <SearchPanel>
-            <SearchInput />
-            <SearchResults />
-          </SearchPanel>
-        </SearchBackdrop>
-      )}
-    </AnimatePresence>
-  );
+  return null;
 }

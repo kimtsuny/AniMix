@@ -1,5 +1,6 @@
 export { SearchOverlay } from "./SearchOverlay";
 export { SearchBackdrop } from "./SearchBackdrop";
+export { SearchBackdropInline } from "./SearchBackdropInline";
 export { SearchPanel } from "./SearchPanel";
 export { SearchInput } from "./SearchInput";
 export { SearchResults } from "./SearchResults";

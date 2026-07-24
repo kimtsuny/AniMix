@@ -13,7 +13,7 @@ export function SearchInput() {
     // Small timeout ensures focus works correctly after framer-motion mount
     const timeout = setTimeout(() => {
       inputRef.current?.focus();
-    }, 50);
+    }, 100);
     return () => clearTimeout(timeout);
   }, []);
 
@@ -50,13 +50,13 @@ export function SearchInput() {
   };
 
   return (
-    <div className="relative flex items-center w-full h-14 bg-zinc-950/80 backdrop-blur-md border border-white/10 rounded-2xl px-4 shadow-lg focus-within:border-white/30 focus-within:bg-zinc-900/90 transition-all duration-200">
+    <div className="relative flex items-center w-full h-full px-4 gap-3">
       <Search
-        size={22}
+        size={20}
         className="text-white/40 shrink-0"
         strokeWidth={2}
       />
-      
+
       <input
         ref={inputRef}
         type="text"
@@ -64,7 +64,7 @@ export function SearchInput() {
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Search anime..."
-        className="w-full h-full bg-transparent border-none outline-none text-white text-lg px-4 placeholder:text-white/30"
+        className="w-full h-full bg-transparent border-none outline-none text-white text-base placeholder:text-white/30"
         role="combobox"
         aria-expanded={results.length > 0}
         aria-controls="search-results"
@@ -75,10 +75,10 @@ export function SearchInput() {
         <button
           type="button"
           onClick={clearQuery}
-          className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors shrink-0"
+          className="flex items-center justify-center w-7 h-7 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors shrink-0 cursor-pointer"
           aria-label="Clear search"
         >
-          <X size={18} strokeWidth={2} />
+          <X size={16} strokeWidth={2} />
         </button>
       )}
     </div>
