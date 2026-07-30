@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import type { MenuItem } from "../types/auth";
 
 interface UserDropdownProps {
@@ -7,8 +8,12 @@ interface UserDropdownProps {
   onItemClick: () => void;
 }
 
-export default function UserDropdown({ items, onItemClick }: UserDropdownProps) {
-  // Find the index where we need a separator (before Settings in unauthenticated, before Logout in authenticated)
+export default function UserDropdown({
+  items,
+  onItemClick,
+}: UserDropdownProps) {
+  const router = useRouter();
+
   const separatorIndex = items.findIndex(
     (item) => item.variant === "destructive" || item.label === "Settings"
   );
@@ -28,16 +33,29 @@ export default function UserDropdown({ items, onItemClick }: UserDropdownProps) 
             {showSeparator && (
               <div className="my-1.5 border-t border-white/[0.06]" />
             )}
+
             <button
               role="menuitem"
               onClick={() => {
                 item.onClick?.();
+
+                // إذا كان Login أو Create Account
+                if (item.label === "Login") {
+                  router.push("/login");
+                }
+
+                if (item.label === "Create Account") {
+                  router.push("/login");
+                  // أو /register إذا عندك صفحة تسجيل مستقلة
+                }
+
                 onItemClick();
               }}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors duration-150 ${isDestructive
+              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors duration-150 ${
+                isDestructive
                   ? "text-red-400 hover:bg-red-500/10"
                   : "text-zinc-300 hover:bg-white/[0.06] hover:text-white"
-                }`}
+              }`}
             >
               <Icon className="h-4 w-4 shrink-0" />
               <span>{item.label}</span>

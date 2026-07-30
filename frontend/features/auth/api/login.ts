@@ -1,9 +1,21 @@
-/**
- * Login API call.
- * Will be implemented when the backend auth endpoints are ready.
- */
-export async function login(username: string, password: string) {
-  // TODO: Connect to backend
-  console.log("Login called with:", username, password);
-  return null;
+import { httpClient } from "@/shared/api/http-client";
+
+interface LoginResponse {
+  message: string;
+  token: string;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+  };
+}
+
+export async function login(email: string, password: string) {
+  return httpClient<LoginResponse>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({
+      email,
+      password,
+    }),
+  });
 }
