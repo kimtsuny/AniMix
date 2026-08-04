@@ -10,7 +10,7 @@ import LoginForm from "./LoginForm";
 import type { LoginFormData, SocialProvider } from "../types/auth";
 import { login } from "../api/login";
 import { socialLogin } from "../api/social-login";
-
+import { useRouter } from "next/navigation";
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -39,15 +39,17 @@ const itemVariants: Variants = {
  */
 export default function LoginCard() {
   const [isLoading, setIsLoading] = useState(false);
+const router = useRouter();
 
   const handleFormSubmit = useCallback(async (data: LoginFormData) => {
     setIsLoading(true);
     try {
       await login(data.email, data.password);
+      router.replace('/');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [router]);
 
   const handleSocialLogin = useCallback(async (provider: SocialProvider) => {
     setIsLoading(true);

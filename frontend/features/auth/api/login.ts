@@ -2,7 +2,6 @@ import { httpClient } from "@/shared/api/http-client";
 
 interface LoginResponse {
   message: string;
-  token: string;
   user: {
     id: number;
     username: string;

@@ -1,16 +1,35 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { User } from "../types/auth";
-import { MOCK_USER } from "../lib/auth";
+import { me } from "../api/me";
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(MOCK_USER);
-  const [isLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const currentUser = await me();
+        setUser(currentUser);
+      } catch {
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadUser();
+  }, []);
 
   const logout = useCallback(() => {
     setUser(null);
   }, []);
 
-  return { user, isLoading, logout };
+  return {
+    user,
+    isLoading,
+    logout,
+  };
 }

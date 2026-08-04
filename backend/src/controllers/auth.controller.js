@@ -105,15 +105,53 @@ export async function login(req, res) {
       }
     );
 
-    res.status(200).json({
-      message: "Login successful",
-      token,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
+    res.cookie("token", token, {
+  httpOnly: true,
+  secure: false, // أثناء التطوير فقط
+  sameSite: "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
+
+
+   res.status(200).json({
+  message: "Login successful",
+  user: {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+  },
+});
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+}
+
+
+export async function me(req, res) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.user.id,
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        createdAt: true,
       },
     });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json(user);
   } catch (error) {
     console.error(error);
 

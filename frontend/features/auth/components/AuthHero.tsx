@@ -28,7 +28,7 @@ export default function AuthHero() {
         className="absolute inset-0"
       >
         <Image
-          src="/images/jjk.jpg"
+          src="/images/hero/aot.jpg"
           alt="Anime character in a mystical moonlit scene"
           fill
           priority

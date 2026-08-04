@@ -7,7 +7,7 @@ interface UserAvatarProps {
   size?: number;
 }
 
-export default function UserAvatar({ user, size = 50 }: UserAvatarProps) {
+export default function UserAvatar({ user, size = 40 }: UserAvatarProps) {
   if (!user) {
     return (
       <div
@@ -25,7 +25,7 @@ export default function UserAvatar({ user, size = 50 }: UserAvatarProps) {
       style={{ width: size, height: size }}
     >
       <Image
-        src={user.avatar}
+        src="/images/hero/aot.jpg"
         alt={user.username}
         fill
         sizes={`${size}px`}
