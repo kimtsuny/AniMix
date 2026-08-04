@@ -1,9 +1,11 @@
-/**
- * Logout API call.
- * Will be implemented when the backend auth endpoints are ready.
- */
+import { httpClient } from "@/shared/api/http-client";
+
+interface LogoutResponse {
+  message: string;
+}
+
 export async function logout() {
-  // TODO: Connect to backend
-  console.log("Logout called");
-  return null;
+  return httpClient<LogoutResponse>("/auth/logout", {
+    method: "POST",
+  });
 }

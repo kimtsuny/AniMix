@@ -27,15 +27,14 @@ export default function AuthHero() {
         transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="absolute inset-0"
       >
-        <Image
-          src="/images/hero/aot.jpg"
-          alt="Anime character in a mystical moonlit scene"
-          fill
-          priority
-          sizes="55vw"
-          className="object-cover"
-          style={{ objectPosition: "center 20%" }}
-        />
+ <Image
+  src="/images/hero/aot.jpg"
+  alt="..."
+  fill
+  priority
+  unoptimized
+  className="object-cover"
+/>
       </motion.div>
 
       {/* Gradient overlays for text readability */}
@@ -87,7 +86,7 @@ export default function AuthHero() {
             animate="visible"
             className="text-4xl lg:text-5xl xl:text-[3.25rem] font-extrabold tracking-tight"
           >
-            <span className="text-white">Anime</span>
+            <span className="text-white">Ani</span>
             <span
               className="bg-clip-text text-transparent"
               style={{
@@ -95,7 +94,7 @@ export default function AuthHero() {
                   "linear-gradient(135deg, #c084fc, #ec4899)",
               }}
             >
-              Hub
+              Mix
             </span>
           </motion.h1>
 
