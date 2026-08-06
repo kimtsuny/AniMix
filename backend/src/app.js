@@ -25,7 +25,12 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
-
+app.get("/", (req, res) => {
+  res.json({
+    status: "OK",
+    message: "AniMix Backend Running 🚀",
+  });
+});
 app.use("/auth", authRoutes);
 app.use("/favorites", favoritesRoutes);
 
