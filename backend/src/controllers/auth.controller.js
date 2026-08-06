@@ -71,22 +71,27 @@ export async function login(req, res) {
       });
     }
 
-    const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+  const user = await prisma.user.findUnique({
+  where: {
+    email,
+  },
+});
 
-    if (!user) {
-      return res.status(401).json({
-        message: "Invalid email or password",
-      });
-    }
+console.log("Email from request:", email);
+console.log("User from DB:", user);
 
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      user.password
-    );
+if (!user) {
+  return res.status(401).json({
+    message: "Invalid email or password",
+  });
+}
+
+const isPasswordCorrect = await bcrypt.compare(
+  password,
+  user.password
+);
+
+console.log("Password correct:", isPasswordCorrect);
 
     if (!isPasswordCorrect) {
       return res.status(401).json({
