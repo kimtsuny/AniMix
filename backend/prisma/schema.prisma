@@ -8,9 +8,22 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  email     String   @unique
+  id        Int        @id @default(autoincrement())
+  username  String     @unique
+  email     String     @unique
   password  String
+  createdAt DateTime   @default(now())
+
+  favorites Favorite[]
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  animeId   Int
   createdAt DateTime @default(now())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, animeId])
 }

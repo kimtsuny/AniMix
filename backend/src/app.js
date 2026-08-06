@@ -2,19 +2,31 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
-
+import favoritesRoutes from "./routes/favorites.routes.js";
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://anime-catalog-wheat.vercel.app",
+];
+
 app.use(
-    cors({
-        origin: "http://localhost:3000", // عنوان Next.js
-        credentials: true,
-    })
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
 );
 
 app.use(express.json());
 app.use(cookieParser());
 
 app.use("/auth", authRoutes);
+app.use("/favorites", favoritesRoutes);
 
 export default app;

@@ -1,7 +1,10 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import { AnimeDetails } from "@/features/anime/types/anime-details";
 import { Button } from "@/shared/components/ui/button";
-import { Play, Plus, Share2, Star, Trophy, Users, Heart, Clock, Film, Tv, Globe, BookOpen } from "lucide-react";
+import { Play, Share2, Star, Trophy, Users, Heart, Clock, Film, Tv, Globe, BookOpen } from "lucide-react";
 import { Badge } from "../common/Badge";
 import { InfoChip } from "../common/InfoChip";
 import { StatItem } from "../common/StatItem";
@@ -11,6 +14,8 @@ interface HeroProps {
 }
 
 export function Hero({ anime }: HeroProps) {
+  const [isFavorite, setIsFavorite] = useState(false);
+
   if (!anime) return null;
 
   const title = anime.title.english || anime.title.romaji || "Unknown Title";
@@ -200,8 +205,21 @@ export function Hero({ anime }: HeroProps) {
             <Button size="lg" className="w-full md:w-auto h-12 px-8 bg-white text-black hover:bg-white/90 shadow-xl shadow-black/20 rounded-xl font-bold text-base transition-all active:scale-95">
               <Play className="mr-2 h-5 w-5 fill-current" /> Watch Now
             </Button>
-            <Button size="lg" variant="secondary" className="w-full md:w-auto h-12 px-6 rounded-xl font-medium border border-white/10 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-all">
-              <Plus className="mr-2 h-5 w-5" /> Add to List
+            <Button
+              size="lg"
+              variant="secondary"
+              onClick={() => setIsFavorite(prev => !prev)}
+              className={`w-full md:w-auto h-12 px-6 rounded-xl font-medium border backdrop-blur-md transition-all duration-300 ease-in-out active:scale-95 ${
+                isFavorite
+                  ? "border-red-500/40 bg-red-500/20 hover:bg-red-500/30 text-red-400"
+                  : "border-white/10 bg-white/10 hover:bg-white/20 text-white"
+              }`}
+            >
+              <Heart
+                className={`mr-2 h-5 w-5 transition-all duration-300 ease-in-out ${isFavorite ? "scale-110 text-red-500" : "scale-100"}`}
+                fill={isFavorite ? "currentColor" : "none"}
+              />
+              {isFavorite ? "Favorited" : "Add to Favorites"}
             </Button>
             <Button size="icon-lg" variant="ghost" className="h-12 w-12 rounded-xl border border-white/10 hover:bg-white/10 bg-white/5 text-white backdrop-blur-md hidden md:inline-flex">
               <Share2 className="h-5 w-5" />
