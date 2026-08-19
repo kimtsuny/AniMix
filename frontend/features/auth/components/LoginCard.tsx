@@ -9,6 +9,7 @@ import SocialLoginButtons from "./SocialLoginButtons";
 import LoginForm from "./LoginForm";
 import type { LoginFormData, SocialProvider } from "../types/auth";
 import { login } from "../api/login";
+import { register } from "../api/register";
 import { socialLogin } from "../api/social-login";
 import { useRouter } from "next/navigation";
 const containerVariants: Variants = {
@@ -40,16 +41,34 @@ const itemVariants: Variants = {
 export default function LoginCard() {
   const [isLoading, setIsLoading] = useState(false);
 const router = useRouter();
+const [mode, setMode] = useState<"login" | "register">("login");
+const isRegisterMode = mode === "register";
 
-  const handleFormSubmit = useCallback(async (data: LoginFormData) => {
+  const handleFormSubmit = useCallback(
+  async (data: LoginFormData) => {
     setIsLoading(true);
+
     try {
-      await login(data.email, data.password);
-      router.replace('/');
+      if (mode === "register") {
+        await register(
+          data.username!,
+          data.email,
+          data.password
+        );
+      } else {
+        await login(
+          data.email,
+          data.password
+        );
+      }
+
+      router.replace("/");
     } finally {
       setIsLoading(false);
     }
-  }, [router]);
+  },
+  [mode, router]
+);
 
   const handleSocialLogin = useCallback(async (provider: SocialProvider) => {
     setIsLoading(true);
@@ -110,15 +129,21 @@ const router = useRouter();
           <AuthLogo />
         </motion.div>
 
-        {/* Heading */}
-        <motion.div variants={itemVariants} className="text-center mt-6 mb-8">
-          <h2 className="text-2xl sm:text-[26px] font-bold text-white tracking-tight">
-            Welcome Back!
-          </h2>
-          <p className="mt-2 text-sm text-white/40">
-            Log in to continue your anime journey
-          </p>
-        </motion.div>
+{/* Heading */}
+<motion.div
+  variants={itemVariants}
+  className="text-center mt-6 mb-8"
+>
+  <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+    {isRegisterMode ? "Create Account" : "Welcome Back!"}
+  </h2>
+
+  <p className="mt-2 text-sm sm:text-base text-white/50">
+    {isRegisterMode
+      ? "Create an account and start your anime journey"
+      : "Log in to continue your anime journey"}
+  </p>
+</motion.div>
 
         {/* Social login buttons */}
         <motion.div variants={itemVariants} className="w-full">
@@ -139,7 +164,7 @@ const router = useRouter();
 
         {/* Login form */}
         <motion.div variants={itemVariants} className="w-full">
-          <LoginForm onSubmit={handleFormSubmit} isLoading={isLoading} />
+          <LoginForm onSubmit={handleFormSubmit} isLoading={isLoading}  mode={mode}/>
         </motion.div>
 
         {/* Sign In button */}
@@ -168,23 +193,24 @@ const router = useRouter();
             />
 
             <span className="relative z-10 flex items-center justify-center gap-2">
-              {isLoading ? (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 1,
-                    ease: "linear",
-                  }}
-                  className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                />
-              ) : (
-                <>
-                  Sign In
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </span>
+  {isLoading ? (
+    <motion.div
+      animate={{ rotate: 360 }}
+      transition={{
+        repeat: Infinity,
+        duration: 1,
+        ease: "linear",
+      }}
+      className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+    />
+  ) : (
+    <>
+      {isRegisterMode ? "Create Account" : "Sign In"}
+      <ArrowRight className="w-4 h-4" />
+    </>
+  )}
+</span>
+
           </motion.button>
         </motion.div>
 
@@ -194,12 +220,14 @@ const router = useRouter();
           className="mt-6 text-sm text-white/40 text-center"
         >
           Don&apos;t have an account?{" "}
-          <Link
-            href="/register"
-            className="text-purple-400 hover:text-purple-300 font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50 focus-visible:rounded-sm"
-          >
-            Sign up
-          </Link>
+         <button
+  type="button"
+  onClick={() =>
+    setMode(isRegisterMode ? "login" : "register")
+  }
+>
+  {isRegisterMode ? "Sign in" : "Sign up"}
+</button>
         </motion.p>
       </motion.div>
     </div>

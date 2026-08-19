@@ -18,6 +18,7 @@ export interface MenuItem {
 }
 
 export interface LoginFormData {
+    username: "",
   email: string;
   password: string;
 }

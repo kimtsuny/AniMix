@@ -2,16 +2,19 @@ import prisma from "../config/prisma.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+
 export async function register(req, res) {
   try {
     const { username, email, password } = req.body;
 
+    // التحقق من الحقول
     if (!username || !email || !password) {
       return res.status(400).json({
         message: "All fields are required",
       });
     }
 
+    // التحقق من وجود مستخدم بنفس الإيميل
     const existingUser = await prisma.user.findUnique({
       where: {
         email,
@@ -24,8 +27,10 @@ export async function register(req, res) {
       });
     }
 
+    // تشفير كلمة المرور
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // إنشاء المستخدم
     const user = await prisma.user.create({
       data: {
         username,
@@ -34,7 +39,28 @@ export async function register(req, res) {
       },
     });
 
-    res.status(201).json({
+    // إنشاء JWT
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    // حفظ JWT داخل HttpOnly Cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false, // للتطوير المحلي فقط
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // إرسال الاستجابة
+    return res.status(201).json({
       message: "Account created successfully",
       user: {
         id: user.id,
@@ -44,15 +70,13 @@ export async function register(req, res) {
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error("REGISTER ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Internal server error",
     });
   }
 }
-
-
 
 
 
@@ -71,27 +95,27 @@ export async function login(req, res) {
       });
     }
 
-  const user = await prisma.user.findUnique({
-  where: {
-    email,
-  },
-});
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
 
-console.log("Email from request:", email);
-console.log("User from DB:", user);
+    console.log("Email from request:", email);
+    console.log("User from DB:", user);
 
-if (!user) {
-  return res.status(401).json({
-    message: "Invalid email or password",
-  });
-}
+    if (!user) {
+      return res.status(401).json({
+        message: "Invalid email or password",
+      });
+    }
 
-const isPasswordCorrect = await bcrypt.compare(
-  password,
-  user.password
-);
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      user.password
+    );
 
-console.log("Password correct:", isPasswordCorrect);
+    console.log("Password correct:", isPasswordCorrect);
 
     if (!isPasswordCorrect) {
       return res.status(401).json({
@@ -111,21 +135,21 @@ console.log("Password correct:", isPasswordCorrect);
     );
 
     res.cookie("token", token, {
-  httpOnly: true,
-  secure: false, // أثناء التطوير فقط
-  sameSite: "lax",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-});
+      httpOnly: true,
+      secure: false, // أثناء التطوير فقط
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
 
-   res.status(200).json({
-  message: "Login successful",
-  user: {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-  },
-});
+    res.status(200).json({
+      message: "Login successful",
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
+    });
   } catch (error) {
     console.error(error);
 
