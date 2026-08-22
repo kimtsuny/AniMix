@@ -7,6 +7,15 @@ const nextConfig: NextConfig = {
     appNewScrollHandler: true,
   },
 
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "https://animix-6nh7.onrender.com/:path*",
+      },
+    ];
+  },
+
   images: {
     remotePatterns: [
       {
