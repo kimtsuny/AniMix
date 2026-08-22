@@ -54,8 +54,8 @@ export async function register(req, res) {
     // حفظ JWT داخل HttpOnly Cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // للتطوير المحلي فقط
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -136,11 +136,10 @@ export async function login(req, res) {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // أثناء التطوير فقط
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-
 
     res.status(200).json({
       message: "Login successful",
@@ -193,11 +192,11 @@ export async function me(req, res) {
 
 
 export async function logout(req, res) {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: false, // أثناء التطوير
-    sameSite: "lax",
-  });
+ res.clearCookie("token", {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+});
 
   res.status(200).json({
     message: "Logout successful",
