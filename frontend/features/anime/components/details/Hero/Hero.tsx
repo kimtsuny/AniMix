@@ -41,16 +41,17 @@ async function handleFavorite() {
 }
 
   if (!anime) return null;
-
-  useEffect(() => {
+useEffect(() => {
   if (!anime) return;
+
+  const animeId = anime.id;
 
   async function checkFavorite() {
     try {
       const data = await getFavorites();
 
       const exists = data.favorites.some(
-        (favorite) => favorite.animeId === anime.id
+        (favorite) => favorite.animeId === animeId
       );
 
       setIsFavorite(exists);
