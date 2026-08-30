@@ -10,8 +10,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/:path*",
-        destination: "https://animix-6nh7.onrender.com/:path*",
+       source: "/api/:path*",
+      destination: "https://animix-6nh7.onrender.com/api/:path*",
       },
     ];
   },
