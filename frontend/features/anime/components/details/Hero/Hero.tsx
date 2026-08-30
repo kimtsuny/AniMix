@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { AnimeDetails } from "@/features/anime/types/anime-details";
 import { Button } from "@/shared/components/ui/button";
@@ -8,15 +8,59 @@ import { Play, Share2, Star, Trophy, Users, Heart, Clock, Film, Tv, Globe, BookO
 import { Badge } from "../common/Badge";
 import { InfoChip } from "../common/InfoChip";
 import { StatItem } from "../common/StatItem";
-
+import { addFavorite } from "@/features/favorites/api/add-favorite";
+import { removeFavorite } from "@/features/favorites/api/remove-favorite";
+import { getFavorites } from "@/features/favorites/api/get-favorites";
 interface HeroProps {
   anime: AnimeDetails | null;
 }
 
 export function Hero({ anime }: HeroProps) {
-  const [isFavorite, setIsFavorite] = useState(false);
+ const [isFavorite, setIsFavorite] = useState(false);
+const [isAddingFavorite, setIsAddingFavorite] = useState(false);
+async function handleFavorite() {
+  if (!anime) return;
+
+  try {
+    setIsAddingFavorite(true);
+
+    if (isFavorite) {
+      await removeFavorite(anime.id);
+
+      setIsFavorite(false);
+    } else {
+      await addFavorite(anime.id);
+
+      setIsFavorite(true);
+    }
+  } catch (error) {
+    console.error("Failed to update favorite:", error);
+  } finally {
+    setIsAddingFavorite(false);
+  }
+}
 
   if (!anime) return null;
+
+  useEffect(() => {
+  if (!anime) return;
+
+  async function checkFavorite() {
+    try {
+      const data = await getFavorites();
+
+      const exists = data.favorites.some(
+        (favorite) => favorite.animeId === anime.id
+      );
+
+      setIsFavorite(exists);
+    } catch (error) {
+      console.error("Failed to check favorite:", error);
+    }
+  }
+
+  checkFavorite();
+}, [anime]);
 
   const title = anime.title.english || anime.title.romaji || "Unknown Title";
   const nativeTitle = anime.title.native;
@@ -208,7 +252,8 @@ export function Hero({ anime }: HeroProps) {
             <Button
               size="lg"
               variant="secondary"
-              onClick={() => setIsFavorite(prev => !prev)}
+onClick={handleFavorite}
+              disabled={isAddingFavorite}
               className={`w-full md:w-auto h-12 px-6 rounded-xl font-medium border backdrop-blur-md transition-all duration-300 ease-in-out active:scale-95 ${
                 isFavorite
                   ? "border-red-500/40 bg-red-500/20 hover:bg-red-500/30 text-red-400"

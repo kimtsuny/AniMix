@@ -1,4 +1,4 @@
-const API_URL = "/api";
+const API_URL = "http://localhost:5000/api";
 
 export async function httpClient<T>(
   endpoint: string,
@@ -22,4 +22,4 @@ export async function httpClient<T>(
   }
 
   return data;
-}
+} 

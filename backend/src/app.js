@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import favoritesRoutes from "./routes/favorites.routes.js";
+
 const app = express();
 
 const allowedOrigins = [
@@ -25,13 +26,15 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
+
 app.get("/", (req, res) => {
   res.json({
     status: "OK",
     message: "AniMix Backend Running 🚀",
   });
 });
-app.use("/auth", authRoutes);
-app.use("/favorites", favoritesRoutes);
+
+app.use("/api/auth", authRoutes);
+app.use("/api/favorites", favoritesRoutes);
 
 export default app;

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { mockFavorites } from "../data/mock-favorites";
 import type { FavoriteAnime, FavoriteFilter, FavoriteSort } from "../types/favorite.types";
 
 export interface FavoritesStore {
   /** All favorites (source of truth) */
   favorites: FavoriteAnime[];
+  setFavorites: (favorites: FavoriteAnime[]) => void;
   /** Filtered + sorted list ready for rendering */
   filteredFavorites: FavoriteAnime[];
   /** Total count (before search/filter) */
@@ -29,8 +29,7 @@ export interface FavoritesStore {
 }
 
 export function useFavoritesStore(): FavoritesStore {
-  const [favorites, setFavorites] = useState<FavoriteAnime[]>(mockFavorites);
-  const [search, setSearch] = useState("");
+const [favorites, setFavorites] = useState<FavoriteAnime[]>([]);  const [search, setSearch] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<FavoriteFilter>("All");
   const [selectedSort, setSelectedSort] = useState<FavoriteSort>("newest");
 
@@ -83,6 +82,7 @@ export function useFavoritesStore(): FavoritesStore {
 
   return {
     favorites,
+    setFavorites,
     filteredFavorites,
     totalCount,
     search,
