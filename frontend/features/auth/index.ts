@@ -19,3 +19,6 @@ export { register } from "./api/register";
 export { logout } from "./api/logout";
 export { me } from "./api/me";
 export { socialLogin } from "./api/social-login";
+
+// Providers
+export { AuthProvider, useAuthContext } from "./AuthProvider";
