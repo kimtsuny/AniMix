@@ -40,9 +40,13 @@ export default async function AnimeDetailsPage({
 
   const fallbackImage = anime.bannerImage || anime.coverImage.large;
 
+  // Determine the 1-based season number for the current anime within its seasons list
+  const seasonIndex = seasons.findIndex(s => s.id === anime.id);
+  const seasonNumber = seasonIndex >= 0 ? seasonIndex + 1 : 1;
+
   return (
     <main className="dark min-h-screen bg-black text-white pb-16">
-      <Hero anime={anime} />
+      <Hero anime={anime} seasonNumber={seasonNumber} />
 
       <div className="relative z-10 flex w-full flex-col gap-10 px-6 md:px-22 pt-24 md:pt-28 pb-8">          <SeasonsAndEpisodes
         seasons={seasons}

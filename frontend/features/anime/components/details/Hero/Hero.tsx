@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { AnimeDetails } from "@/features/anime/types/anime-details";
 import { Button } from "@/shared/components/ui/button";
 import { Play, Share2, Star, Trophy, Users, Heart, Clock, Film, Tv, Globe, BookOpen } from "lucide-react";
@@ -13,9 +14,10 @@ import { removeFavorite } from "@/features/favorites/api/remove-favorite";
 import { getFavorites } from "@/features/favorites/api/get-favorites";
 interface HeroProps {
   anime: AnimeDetails | null;
+  seasonNumber?: number;
 }
 
-export function Hero({ anime }: HeroProps) {
+export function Hero({ anime, seasonNumber = 1 }: HeroProps) {
  const [isFavorite, setIsFavorite] = useState(false);
 const [isAddingFavorite, setIsAddingFavorite] = useState(false);
 async function handleFavorite() {
@@ -247,9 +249,11 @@ useEffect(() => {
 
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4 w-full">
-            <Button size="lg" className="w-full md:w-auto h-12 px-8 bg-white text-black hover:bg-white/90 shadow-xl shadow-black/20 rounded-xl font-bold text-base transition-all active:scale-95">
-              <Play className="mr-2 h-5 w-5 fill-current" /> Watch Now
-            </Button>
+            <Link href={`/watch/${anime.id}/${seasonNumber}/1`}>
+              <Button size="lg" className="w-full md:w-auto h-12 px-8 bg-white text-black hover:bg-white/90 shadow-xl shadow-black/20 rounded-xl font-bold text-base transition-all active:scale-95">
+                <Play className="mr-2 h-5 w-5 fill-current" /> Watch Now
+              </Button>
+            </Link>
             <Button
               size="lg"
               variant="secondary"
