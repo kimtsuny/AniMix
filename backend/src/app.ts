@@ -3,6 +3,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import favoritesRoutes from "./routes/favorites.routes.js";
+import episodesRoutes from "./routes/episodes.routes.js";
+import animeRoutes from "./routes/anime.routes.js";
 
 const app = express();
 
@@ -34,7 +36,9 @@ app.get("/", (_req, res) => {
   });
 });
 
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes); 
 app.use("/api/favorites", favoritesRoutes);
+app.use("/api/episodes", episodesRoutes);
+app.use("/api/anime", animeRoutes);
 
 export default app;

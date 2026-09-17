@@ -1,5 +1,5 @@
 import {
-  GogoanimeProvider as SdkGogoanimeProvider,
+  AnimeParadiseProvider as SdkAnimeParadiseProvider,
   HttpClient,
 } from "anime-sdk";
 
@@ -15,16 +15,10 @@ const http = new HttpClient({
   timeoutMs: 25000,
 });
 
-const provider = new SdkGogoanimeProvider(http);
+const provider = new SdkAnimeParadiseProvider(http);
 
-/**
- * Gogoanime streaming provider.
- *
- * Wraps the anime-sdk GogoanimeProvider and
- * conforms to our application's StreamingProvider interface.
- */
-export const gogoanimeProvider: StreamingProvider = {
-  name: "gogoanime",
+export const animeParadiseProvider: StreamingProvider = {
+  name: "animeparadise",
 
   async search(query: string): Promise<IMediaSearchResult[]> {
     return provider.search(query);

@@ -1,9 +1,5 @@
-/**
- * Simple streaming test — run with:
- *   pnpm exec tsx src/services/streaming/test.ts
- */
-import { getEpisodeStream } from "./providers/gogoanime.provider.js";
+import { mapAnimeToGogoanime } from "../anime/anime-mapping.service.js";
 
-const result = await getEpisodeStream("/watch/one-piece/ep-1");
+const result = await mapAnimeToGogoanime(21);
 
 console.dir(result, { depth: null });

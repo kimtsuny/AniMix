@@ -1,49 +1,95 @@
-import type { IVideoPayload } from "anime-sdk";
+/**
+ * Subtitle track returned by a streaming provider.
+ */
+export interface RawSubtitle {
+  url: string;
+  label: string;
+  language: string;
+  format: string;
+}
 
 /**
- * Normalized stream data for the application layer.
- *
- * Provider-specific raw responses are mapped into this shape so the
- * rest of the backend (and eventually the frontend) works with a
- * consistent structure regardless of which provider resolved the stream.
+ * Raw stream returned by a streaming provider.
+ */
+export interface RawStream {
+  sourceUrl: string;
+  isHLS: boolean;
+  quality: string;
+  language?: string;
+  headers?: Record<string, string>;
+  subtitles?: RawSubtitle[];
+}
+
+/**
+ * Raw result returned by a streaming provider.
+ */
+export interface RawStreamResult {
+  type: "video" | "manga";
+  streams?: RawStream[];
+}
+
+/**
+ * Normalized subtitle used by the application layer.
+ */
+export interface NormalizedSubtitle {
+  url: string;
+  label: string;
+  language: string;
+  format: string;
+}
+
+/**
+ * Normalized stream used by the application layer.
  */
 export interface NormalizedStream {
   url: string;
   isHLS: boolean;
-  quality: IVideoPayload["quality"];
+  quality: string;
+  language?: string;
   headers?: Record<string, string>;
+  subtitles: NormalizedSubtitle[];
 }
 
+/**
+ * Normalized result returned by the streaming layer.
+ */
 export interface NormalizedStreamResult {
   type: "video" | "manga";
   streams: NormalizedStream[];
 }
 
 /**
- * Map a raw video stream result from any provider into the normalized
- * application-level format.
- *
- * Currently handles the "video" type from ResolvedMediaStream.
- * Manga support can be added here when needed.
+ * Converts provider stream data into
+ * the application's normalized format.
  */
 export function normalizeStreamResult(
-  raw: { type: string; streams?: IVideoPayload[] }
+  raw: RawStreamResult
 ): NormalizedStreamResult {
-  if (raw.type === "video" && raw.streams) {
+  if (raw.type !== "video") {
     return {
-      type: "video",
-      streams: raw.streams.map((stream) => ({
-        url: stream.sourceUrl,
-        isHLS: stream.isHLS,
-        quality: stream.quality,
-        headers: stream.headers,
-      })),
+      type: raw.type,
+      streams: [],
     };
   }
 
-  // Fallback for unsupported types — return empty streams
   return {
-    type: raw.type as "video" | "manga",
-    streams: [],
+    type: "video",
+
+    streams: (raw.streams ?? []).map((stream) => ({
+      url: stream.sourceUrl,
+      isHLS: stream.isHLS,
+      quality: stream.quality,
+      language: stream.language,
+      headers: stream.headers,
+
+      subtitles: (stream.subtitles ?? []).map(
+        (subtitle) => ({
+          url: subtitle.url,
+          label: subtitle.label,
+          language: subtitle.language,
+          format: subtitle.format,
+        })
+      ),
+    })),
   };
 }
