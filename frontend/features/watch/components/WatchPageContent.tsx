@@ -1,18 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+
 import { WatchPlayer } from "./WatchPlayer";
 import { EpisodeSelector } from "./EpisodeSelector";
 import { YouMightLike } from "./YouMightLike";
-import {
-  MOCK_ANIME,
-  MOCK_EPISODES,
-  MOCK_RECOMMENDATIONS,
-  MOCK_SEASONS,
-  type MockEpisode,
-} from "@/features/watch/data/mock-data";
+import { useWatch } from "../hooks/useWatch";
 
 interface WatchPageContentProps {
   animeId: string;
@@ -25,26 +20,63 @@ export function WatchPageContent({
   season,
   episode,
 }: WatchPageContentProps) {
-  const currentEpisodeNumber = parseInt(episode, 10) || 12;
-  const [selectedEpisode, setSelectedEpisode] = useState(currentEpisodeNumber);
-  const [selectedSeason, setSelectedSeason] = useState(season || "1");
+  const animeIdNumber = Number(animeId);
+  const seasonNumber = Number(season) || 1;
+  const episodeNumber = Number(episode) || 1;
 
-  const handleEpisodeSelect = useCallback((ep: MockEpisode) => {
-    setSelectedEpisode(ep.number);
-  }, []);
+  const {
+    anime,
+    seasons,
+    episodes,
+    selectedEpisode,
+    stream,
+    isEpisodesLoading,
+    isStreamLoading,
+    episodesError,
+    streamError,
+    selectEpisode,
+    selectSeason,
+    previousEpisode,
+    nextEpisode,
+  } = useWatch(
+    animeIdNumber,
+    seasonNumber,
+    episodeNumber
+  );
 
-  const handlePreviousEpisode = useCallback(() => {
-    setSelectedEpisode((prev) => Math.max(1, prev - 1));
-  }, []);
+  const handleEpisodeSelect = useCallback(
+    (ep: { id: number }) => {
+      selectEpisode(ep.id);
+    },
+    [selectEpisode]
+  );
 
-  // Breadcrumb items
-  const breadcrumbs = [
-    { label: "Home", href: "/" },
-    { label: "Anime", href: "/" },
-    { label: MOCK_ANIME.title, href: `/anime/${animeId}` },
-    { label: `Season ${selectedSeason}`, href: "#" },
-    { label: `Episode ${selectedEpisode}`, href: "#", active: true },
-  ];
+  const handleSeasonChange = useCallback(
+    (value: string) => {
+      selectSeason(Number(value));
+    },
+    [selectSeason]
+  );
+
+  if (isEpisodesLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p className="text-white/50">
+          Loading episodes...
+        </p>
+      </div>
+    );
+  }
+
+  if (episodesError) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p className="text-red-400">
+          {episodesError}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black">
@@ -54,47 +86,82 @@ export function WatchPageContent({
         aria-label="Breadcrumb"
       >
         <ol className="flex items-center gap-1 md:gap-1.5 text-xs md:text-[13px] flex-wrap">
-          {breadcrumbs.map((crumb, index) => (
-            <li key={index} className="flex items-center gap-1 md:gap-1.5">
-              {index > 0 && (
-                <ChevronRight className="size-3 text-white/30 flex-shrink-0" />
-              )}
-              {crumb.active ? (
-                <span className="text-[#e63946] font-medium">{crumb.label}</span>
-              ) : (
-                <Link
-                  href={crumb.href}
-                  className="text-white/50 hover:text-white/80 transition-colors truncate max-w-[150px] md:max-w-none"
-                >
-                  {crumb.label}
-                </Link>
-              )}
-            </li>
-          ))}
+          <li>
+            <Link
+              href="/"
+              className="text-white/50 hover:text-white/80 transition-colors"
+            >
+              Home
+            </Link>
+          </li>
+
+          <li className="flex items-center gap-1 md:gap-1.5">
+            <ChevronRight className="size-3 text-white/30" />
+
+            <Link
+              href="/"
+              className="text-white/50 hover:text-white/80 transition-colors"
+            >
+              Anime
+            </Link>
+          </li>
+
+          <li className="flex items-center gap-1 md:gap-1.5">
+            <ChevronRight className="size-3 text-white/30" />
+
+            <Link
+              href={`/anime/${animeId}`}
+              className="text-white/50 hover:text-white/80 transition-colors"
+            >
+              {anime?.title ?? "Anime"}
+            </Link>
+          </li>
+
+          <li className="flex items-center gap-1 md:gap-1.5">
+            <ChevronRight className="size-3 text-white/30" />
+
+            <span className="text-white/50">
+              Season {seasonNumber}
+            </span>
+          </li>
+
+          <li className="flex items-center gap-1 md:gap-1.5">
+            <ChevronRight className="size-3 text-white/30" />
+
+            <span className="text-[#e63946] font-medium">
+              Episode {selectedEpisode?.number ?? episodeNumber}
+            </span>
+          </li>
         </ol>
       </nav>
 
       {/* Video Player */}
       <WatchPlayer
-        posterImage={MOCK_ANIME.banner}
-        onPreviousEpisode={handlePreviousEpisode}
+        posterImage={anime?.bannerImage ?? undefined}
+        stream={stream}
+        isLoading={isStreamLoading}
+        error={streamError}
+        onPreviousEpisode={previousEpisode}
+        onNextEpisode={nextEpisode}
       />
 
-      {/* Episodes & You Might Like */}
+      {/* Episodes */}
       <div className="px-4 md:px-8 lg:px-12">
         <EpisodeSelector
-          episodes={MOCK_EPISODES}
-          seasons={MOCK_SEASONS}
-          selectedEpisodeNumber={selectedEpisode}
-          selectedSeason={selectedSeason}
-          totalEpisodes={MOCK_EPISODES.length}
+          episodes={episodes}
+          seasons={seasons}
+          selectedEpisodeNumber={
+            selectedEpisode?.number ?? episodeNumber
+          }
+          selectedSeason={String(seasonNumber)}
+          totalEpisodes={episodes.length}
           onEpisodeSelect={handleEpisodeSelect}
-          onSeasonChange={setSelectedSeason}
+          onSeasonChange={handleSeasonChange}
         />
 
         <div className="border-t border-white/5" />
 
-        <YouMightLike recommendations={MOCK_RECOMMENDATIONS} />
+        <YouMightLike recommendations={[]} />
       </div>
     </div>
   );

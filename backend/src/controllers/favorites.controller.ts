@@ -1,9 +1,6 @@
 import type { Request, Response } from "express";
 import prisma from "../config/prisma.js";
-
-// ---------------------------------------------------------------------------
-// Request body types
-// ---------------------------------------------------------------------------
+import { getOrCreateAnime } from "../services/anime/anime.service.js";
 
 interface AddFavoriteBody {
   animeId?: number;
@@ -21,29 +18,24 @@ export async function addFavorite(
     const { animeId } = req.body as AddFavoriteBody;
     const userId = req.user!.id;
 
-    if (!animeId) {
+    // animeId القادم من Frontend هو AniList ID
+    if (!animeId || !Number.isInteger(animeId) || animeId <= 0) {
       res.status(400).json({
-        message: "Anime ID is required",
+        message: "Valid AniList anime ID is required",
       });
       return;
     }
 
-    // animeId القادم من الـ Frontend هو AniList ID
-    // نبحث عن الأنمي داخل قاعدة بياناتنا
-    const anime = await prisma.anime.findUnique({
-      where: {
-        anilistId: animeId,
-      },
-    });
+    // ---------------------------------------------------------
+    // الحصول على الأنمي أو إنشاؤه
+    // ---------------------------------------------------------
 
-    if (!anime) {
-      res.status(404).json({
-        message: "Anime not found in database",
-      });
-      return;
-    }
+    const anime = await getOrCreateAnime(animeId);
 
-    // نتأكد أن الأنمي غير موجود مسبقًا في المفضلة
+    // ---------------------------------------------------------
+    // التحقق هل هو موجود بالمفضلة
+    // ---------------------------------------------------------
+
     const existingFavorite = await prisma.favorite.findUnique({
       where: {
         userId_animeId: {
@@ -60,11 +52,18 @@ export async function addFavorite(
       return;
     }
 
-    // هنا نستخدم Anime.id الداخلي وليس AniList ID
+    // ---------------------------------------------------------
+    // إضافة للمفضلة
+    // ---------------------------------------------------------
+
     const favorite = await prisma.favorite.create({
       data: {
         userId,
         animeId: anime.id,
+      },
+
+      include: {
+        anime: true,
       },
     });
 
@@ -76,7 +75,10 @@ export async function addFavorite(
     console.error("ADD FAVORITE ERROR:", error);
 
     res.status(500).json({
-      message: "Internal server error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Internal server error",
     });
   }
 }
@@ -96,9 +98,11 @@ export async function getFavorites(
       where: {
         userId,
       },
+
       include: {
         anime: true,
       },
+
       orderBy: {
         createdAt: "desc",
       },
@@ -127,17 +131,20 @@ export async function removeFavorite(
   try {
     const userId = req.user!.id;
 
-    // الـ ID القادم من الـ URL هو AniList ID
+    // الـ ID القادم من URL هو AniList ID
     const anilistId = Number(req.params.animeId);
 
     if (!Number.isInteger(anilistId) || anilistId <= 0) {
       res.status(400).json({
-        message: "Invalid Anime ID",
+        message: "Invalid AniList ID",
       });
       return;
     }
 
-    // نبحث عن الأنمي باستخدام AniList ID
+    // ---------------------------------------------------------
+    // نبحث عن Anime باستخدام AniList ID
+    // ---------------------------------------------------------
+
     const anime = await prisma.anime.findUnique({
       where: {
         anilistId,
@@ -151,7 +158,10 @@ export async function removeFavorite(
       return;
     }
 
-    // نبحث عن المفضلة باستخدام الـ ID الداخلي للأنمي
+    // ---------------------------------------------------------
+    // نبحث عن Favorite باستخدام الـ ID الداخلي
+    // ---------------------------------------------------------
+
     const favorite = await prisma.favorite.findUnique({
       where: {
         userId_animeId: {
@@ -167,6 +177,10 @@ export async function removeFavorite(
       });
       return;
     }
+
+    // ---------------------------------------------------------
+    // حذف المفضلة
+    // ---------------------------------------------------------
 
     await prisma.favorite.delete({
       where: {

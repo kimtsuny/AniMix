@@ -1,17 +1,19 @@
 import type { Request, Response } from "express";
 import prisma from "../config/prisma.js";
+import { mapAnimeToAnimeParadise } from "../services/anime/anime-mapping.service.js";
+import { syncSeasonEpisodes } from "../services/anime/episode.service.js";
 
 export async function getSeasonEpisodes(
   req: Request,
   res: Response
 ): Promise<void> {
   try {
-    const animeId = Number(req.params.animeId);
+    const anilistId = Number(req.params.animeId);
     const seasonNumber = Number(req.params.seasonNumber);
 
     if (
-      !Number.isInteger(animeId) ||
-      animeId <= 0 ||
+      !Number.isInteger(anilistId) ||
+      anilistId <= 0 ||
       !Number.isInteger(seasonNumber) ||
       seasonNumber <= 0
     ) {
@@ -21,56 +23,65 @@ export async function getSeasonEpisodes(
       return;
     }
 
-    const anime = await prisma.anime.findUnique({
+    // ============================================================
+    // 1. Find Anime in our database
+    // ============================================================
+
+    let anime = await prisma.anime.findUnique({
       where: {
-        id: animeId,
+        anilistId,
       },
+    });
 
-      select: {
-        id: true,
-        anilistId: true,
-        title: true,
-        description: true,
-        coverImage: true,
-        bannerImage: true,
+    // ============================================================
+    // 2. Anime does not exist
+    //    → Create Anime + Seasons + Provider mappings
+    // ============================================================
 
-        seasons: {
-          orderBy: {
-            number: "asc",
-          },
+    if (!anime) {
+      console.log(
+        `[Anime Controller] Anime ${anilistId} not found. Mapping anime...`
+      );
 
-          select: {
-            id: true,
-            number: true,
-            title: true,
+      const mapped = await mapAnimeToAnimeParadise(anilistId);
 
-            episodes: {
-              orderBy: {
-                number: "asc",
-              },
+      anime = mapped.anime;
+    }
 
-              select: {
-                id: true,
-                number: true,
-                title: true,
-                thumbnail: true,
-              },
-            },
-          },
+    // ============================================================
+    // 3. Find requested season
+    // ============================================================
+
+    let season = await prisma.animeSeason.findUnique({
+      where: {
+        animeId_number: {
+          animeId: anime.id,
+          number: seasonNumber,
         },
       },
     });
 
-    if (!anime) {
-      res.status(404).json({
-        message: "Anime not found",
-      });
-      return;
-    }
+    // ============================================================
+    // 4. Season does not exist
+    //    → Re-run mapping to make sure seasons are available
+    // ============================================================
 
-    const season = anime.seasons.find(
-      (item) => item.number === seasonNumber
-    );
+    if (!season) {
+      console.log(
+        `[Anime Controller] Season ${seasonNumber} not found. Mapping anime...`
+      );
+
+      await mapAnimeToAnimeParadise(anilistId);
+
+      season = await prisma.animeSeason.findUnique({
+        where: {
+          animeId_number: {
+            animeId: anime.id,
+            number: seasonNumber,
+          },
+        },
+      });
+    }
 
     if (!season) {
       res.status(404).json({
@@ -78,6 +89,87 @@ export async function getSeasonEpisodes(
       });
       return;
     }
+
+    // ============================================================
+    // 5. Check episodes
+    // ============================================================
+
+    let episodes = await prisma.episode.findMany({
+      where: {
+        seasonId: season.id,
+      },
+
+      select: {
+        id: true,
+        number: true,
+        title: true,
+        thumbnail: true,
+      },
+
+      orderBy: {
+        number: "asc",
+      },
+    });
+
+    // ============================================================
+    // 6. No episodes
+    //    → Fetch episodes from AnimeParadise and save them
+    // ============================================================
+
+    if (episodes.length === 0) {
+      console.log(
+        `[Anime Controller] No episodes found for season ${season.id}. Syncing...`
+      );
+
+      await syncSeasonEpisodes(season.id);
+
+      episodes = await prisma.episode.findMany({
+        where: {
+          seasonId: season.id,
+        },
+
+        select: {
+          id: true,
+          number: true,
+          title: true,
+          thumbnail: true,
+        },
+
+        orderBy: {
+          number: "asc",
+        },
+      });
+    }
+
+    // ============================================================
+    // 7. Get all seasons with episode counts
+    // ============================================================
+
+    const seasons = await prisma.animeSeason.findMany({
+      where: {
+        animeId: anime.id,
+      },
+
+      orderBy: {
+        number: "asc",
+      },
+
+      select: {
+        id: true,
+        number: true,
+        title: true,
+
+        _count: {
+          select: {
+            episodes: true,
+          },
+        },
+      },
+    });
+
+    // ============================================================
+    // 8. Return watch data
+    // ============================================================
 
     res.status(200).json({
       anime: {
@@ -89,18 +181,18 @@ export async function getSeasonEpisodes(
         bannerImage: anime.bannerImage,
       },
 
-      seasons: anime.seasons.map((item) => ({
+      seasons: seasons.map((item) => ({
         id: item.id,
         number: item.number,
         title: item.title,
-        episodeCount: item.episodes.length,
+        episodeCount: item._count.episodes,
       })),
 
       season: {
         id: season.id,
         number: season.number,
         title: season.title,
-        episodes: season.episodes,
+        episodes,
       },
     });
   } catch (error: unknown) {
@@ -110,7 +202,10 @@ export async function getSeasonEpisodes(
     );
 
     res.status(500).json({
-      message: "Internal server error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Internal server error",
     });
   }
 }

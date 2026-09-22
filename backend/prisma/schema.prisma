@@ -8,49 +8,39 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  email     String   @unique
+  id        Int        @id @default(autoincrement())
+  username  String     @unique
+  email     String     @unique
   password  String
-  createdAt DateTime @default(now())
-
+  createdAt DateTime   @default(now())
   favorites Favorite[]
 }
 
 model Anime {
-  id          Int      @id @default(autoincrement())
-  anilistId   Int      @unique
-
-  title       String
-  description String?
-  coverImage  String?
-  bannerImage String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  favorites        Favorite[]
+  id               Int                    @id @default(autoincrement())
+  anilistId        Int                    @unique
+  title            String
+  description      String?
+  coverImage       String?
+  bannerImage      String?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
   providerMappings AnimeProviderMapping[]
   seasons          AnimeSeason[]
+  favorites        Favorite[]
 }
 
 model AnimeSeason {
-  id        Int      @id @default(autoincrement())
-  animeId   Int
-  number    Int
-  title     String?
-
-  // Provider-specific anime/season ID
-  // Example:
-  // animeparadise:NIUsb960SxtXls4h
+  id         Int       @id @default(autoincrement())
+  animeId    Int
+  number     Int
+  title      String?
   provider   String?
   providerId String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  anime    Anime     @relation(fields: [animeId], references: [id], onDelete: Cascade)
-  episodes Episode[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  anime      Anime     @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  episodes   Episode[]
 
   @@unique([animeId, number])
   @@unique([provider, providerId])
@@ -60,11 +50,9 @@ model Favorite {
   id        Int      @id @default(autoincrement())
   animeId   Int
   createdAt DateTime @default(now())
-
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  userId    Int
+  anime     Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, animeId])
 }
@@ -74,23 +62,20 @@ model AnimeProviderMapping {
   animeId    Int
   provider   String
   providerId String
-
-  anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  anime      Anime  @relation(fields: [animeId], references: [id], onDelete: Cascade)
 
   @@unique([animeId, provider])
   @@unique([provider, providerId])
 }
 
 model Episode {
-  id         Int      @id @default(autoincrement())
-  seasonId   Int
-  number     Int
-  title      String?
-  thumbnail  String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id               Int                      @id @default(autoincrement())
+  number           Int
+  title            String?
+  thumbnail        String?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  seasonId         Int
   season           AnimeSeason              @relation(fields: [seasonId], references: [id], onDelete: Cascade)
   providerMappings EpisodeProviderMapping[]
 
@@ -98,12 +83,11 @@ model Episode {
 }
 
 model EpisodeProviderMapping {
-  id         Int    @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
   episodeId  Int
   provider   String
   providerId String
-
-  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  episode    Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
 
   @@unique([episodeId, provider])
   @@unique([provider, providerId])

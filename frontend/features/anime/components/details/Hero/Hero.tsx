@@ -18,53 +18,60 @@ interface HeroProps {
 }
 
 export function Hero({ anime, seasonNumber = 1 }: HeroProps) {
- const [isFavorite, setIsFavorite] = useState(false);
-const [isAddingFavorite, setIsAddingFavorite] = useState(false);
-async function handleFavorite() {
-  if (!anime) return;
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isAddingFavorite, setIsAddingFavorite] = useState(false);
 
-  try {
-    setIsAddingFavorite(true);
+  useEffect(() => {
+    if (!anime) return;
 
-    if (isFavorite) {
-      await removeFavorite(anime.id);
+    async function checkFavorite() {
+      try {
+        const data = await getFavorites();
 
-      setIsFavorite(false);
-    } else {
-      await addFavorite(anime.id);
+        const exists = data.favorites.some(
+          (favorite) =>
+            favorite.anime.anilistId === anime.id
+        );
 
-      setIsFavorite(true);
+        setIsFavorite(exists);
+      } catch (error) {
+        console.error(
+          "Failed to check favorite:",
+          error
+        );
+      }
     }
-  } catch (error) {
-    console.error("Failed to update favorite:", error);
-  } finally {
-    setIsAddingFavorite(false);
+
+    checkFavorite();
+  }, [anime]);
+
+  async function handleFavorite() {
+    if (!anime) return;
+
+    try {
+      setIsAddingFavorite(true);
+
+      if (isFavorite) {
+        await removeFavorite(anime.id);
+
+        setIsFavorite(false);
+      } else {
+        await addFavorite(anime.id);
+
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      console.error(
+        "Failed to update favorite:",
+        error
+      );
+    } finally {
+      setIsAddingFavorite(false);
+    }
   }
-}
 
   if (!anime) return null;
-useEffect(() => {
-  if (!anime) return;
-
-  const animeId = anime.id;
-
-  async function checkFavorite() {
-    try {
-      const data = await getFavorites();
-
-      const exists = data.favorites.some(
-        (favorite) => favorite.animeId === animeId
-      );
-
-      setIsFavorite(exists);
-    } catch (error) {
-      console.error("Failed to check favorite:", error);
-    }
-  }
-
-  checkFavorite();
-}, [anime]);
-
+  
   const title = anime.title.english || anime.title.romaji || "Unknown Title";
   const nativeTitle = anime.title.native;
   const bannerImage = anime.bannerImage || anime.coverImage.extraLarge || anime.coverImage.large;

@@ -4,6 +4,15 @@ export interface FavoriteRecord {
   id: number;
   animeId: number;
   createdAt: string;
+
+  anime: {
+    id: number;
+    anilistId: number;
+    title: string;
+    description: string | null;
+    coverImage: string | null;
+    bannerImage: string | null;
+  };
 }
 
 interface GetFavoritesResponse {

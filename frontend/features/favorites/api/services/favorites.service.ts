@@ -8,38 +8,36 @@ import type { FavoriteAnime } from "../../types/favorite.types";
 
 export async function getFavoriteAnime(): Promise<FavoriteAnime[]> {
   try {
-    // 1. جلب سجلات المفضلة من قاعدة البيانات
     const response = await getFavorites();
 
     const favorites = response.favorites;
 
-    // إذا المستخدم ما عنده مفضلات
     if (favorites.length === 0) {
       return [];
     }
 
-    // 2. استخراج anime IDs
-    const animeIds = favorites.map(
-      (favorite) => favorite.animeId
+    // AniList IDs الحقيقية
+    const anilistIds = favorites.map(
+      (favorite) => favorite.anime.anilistId
     );
 
-    // 3. جلب بيانات الأنمي من AniList
     const data = await graphqlClient.request(
       FAVORITES_ANIME_QUERY,
       {
-        ids: animeIds,
+        ids: anilistIds,
       }
     );
 
     const animeList = data.Page.media;
 
-    // 4. دمج بيانات قاعدة البيانات مع بيانات AniList
     return animeList.map((anime: any) => {
       const favorite = favorites.find(
-        (favorite) => favorite.animeId === anime.id
+        (favorite) =>
+          favorite.anime.anilistId === anime.id
       );
 
       return {
+        // نستخدم AniList ID كرابط صفحة الأنمي
         id: anime.id,
 
         title:
@@ -47,27 +45,37 @@ export async function getFavoriteAnime(): Promise<FavoriteAnime[]> {
           anime.title.romaji ||
           "Unknown",
 
-        coverImage: anime.coverImage?.large || "",
+        coverImage:
+          anime.coverImage?.large || "",
 
         year: anime.seasonYear || 0,
 
-        format: anime.format || "Unknown",
+        format:
+          anime.format || "Unknown",
 
-        score: anime.averageScore
-          ? anime.averageScore / 10
-          : 0,
+        score:
+          anime.averageScore
+            ? anime.averageScore / 10
+            : 0,
 
-        episodes: anime.episodes || 0,
+        episodes:
+          anime.episodes || 0,
 
-        genres: anime.genres || [],
+        genres:
+          anime.genres || [],
 
         favorite: true,
 
-        addedAt: favorite?.createdAt || new Date().toISOString(),
+        addedAt:
+          favorite?.createdAt ||
+          new Date().toISOString(),
       };
     });
   } catch (error) {
-    console.error("Failed to fetch favorites:", error);
+    console.error(
+      "Failed to fetch favorites:",
+      error
+    );
 
     return [];
   }
