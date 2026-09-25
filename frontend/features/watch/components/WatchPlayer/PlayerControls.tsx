@@ -23,6 +23,7 @@ interface PlayerControlsProps {
   muted: boolean;
   isFullscreen: boolean;
   quality: string;
+  availableQualities?: string[];
   playbackRate: number;
   subtitles: Subtitle[];
   activeSubtitleIndex: number | null;
@@ -55,6 +56,7 @@ export function PlayerControls({
   muted,
   isFullscreen,
   quality,
+  availableQualities,
   playbackRate,
   subtitles,
   activeSubtitleIndex,
@@ -151,6 +153,7 @@ export function PlayerControls({
             {/* Settings */}
             <PlayerSettings
               quality={quality}
+              availableQualities={availableQualities}
               playbackRate={playbackRate}
               onQualityChange={onQualityChange}
               onPlaybackRateChange={onPlaybackRateChange}

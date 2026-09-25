@@ -37,70 +37,30 @@ export function useEpisodes(
   const [loadedAnimeId, setLoadedAnimeId] = useState<number | null>(null);
   const [loadedSeasonNumber, setLoadedSeasonNumber] = useState<number | null>(null);
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isCurrentSeasonLoaded =
     loadedAnimeId === animeId && loadedSeasonNumber === seasonNumber;
 
+  const currentAnime = loadedAnimeId === animeId ? anime : null;
+  const currentSeasons = loadedAnimeId === animeId ? seasons : [];
   const currentEpisodes = isCurrentSeasonLoaded ? episodes : [];
   const currentSelectedEpisode = isCurrentSeasonLoaded ? selectedEpisode : null;
   const currentIsLoading = isLoading || !isCurrentSeasonLoaded;
 
-  const fetchEpisodes = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const data = await getSeasonEpisodes(
-        animeId,
-        seasonNumber
-      );
-
-      setAnime(data.anime);
-      setSeasons(data.seasons);
-      setEpisodes(data.season.episodes);
-      setLoadedAnimeId(animeId);
-      setLoadedSeasonNumber(seasonNumber);
-
-      setSelectedEpisode((current) => {
-        if (current) {
-          return (
-            data.season.episodes.find(
-              (episode) => episode.id === current.id
-            ) ?? data.season.episodes[0] ?? null
-          );
-        }
-
-        return data.season.episodes[0] ?? null;
-      });
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to load episodes";
-
-      setError(message);
-      setAnime(null);
-      setSeasons([]);
-      setEpisodes([]);
-      setSelectedEpisode(null);
-      setLoadedAnimeId(null);
-      setLoadedSeasonNumber(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [animeId, seasonNumber]);
-
   useEffect(() => {
     let cancelled = false;
+
+    setIsLoading(true);
+    setError(null);
 
     getSeasonEpisodes(animeId, seasonNumber)
       .then((data) => {
         if (cancelled) return;
 
         setAnime(data.anime);
-        setSeasons(data.seasons);
+        setSeasons((prev) => (prev.length > 0 ? prev : data.seasons));
         setEpisodes(data.season.episodes);
         setLoadedAnimeId(animeId);
         setLoadedSeasonNumber(seasonNumber);
@@ -118,20 +78,21 @@ export function useEpisodes(
           return data.season.episodes[0] ?? null;
         });
       })
-      .catch((error) => {
+      .catch((err) => {
         if (cancelled) return;
 
         const message =
-          error instanceof Error
-            ? error.message
+          err instanceof Error
+            ? err.message
             : "Failed to load episodes";
 
         setError(message);
-        setAnime(null);
-        setSeasons([]);
+        if (loadedAnimeId !== animeId) {
+          setAnime(null);
+          setSeasons([]);
+        }
         setEpisodes([]);
         setSelectedEpisode(null);
-        setLoadedAnimeId(null);
         setLoadedSeasonNumber(null);
       })
       .finally(() => {
@@ -143,7 +104,7 @@ export function useEpisodes(
     return () => {
       cancelled = true;
     };
-  }, [animeId, seasonNumber]);
+  }, [animeId, seasonNumber, loadedAnimeId]);
 
   const selectEpisode = useCallback(
     (episode: Episode) => {
@@ -152,14 +113,35 @@ export function useEpisodes(
     []
   );
 
+  const refetch = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const data = await getSeasonEpisodes(animeId, seasonNumber);
+
+      setAnime(data.anime);
+      setSeasons(data.seasons);
+      setEpisodes(data.season.episodes);
+      setLoadedAnimeId(animeId);
+      setLoadedSeasonNumber(seasonNumber);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to load episodes";
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [animeId, seasonNumber]);
+
   return {
-    anime,
-    seasons,
+    anime: currentAnime,
+    seasons: currentSeasons,
     episodes: currentEpisodes,
     selectedEpisode: currentSelectedEpisode,
     isLoading: currentIsLoading,
     error,
     selectEpisode,
-    refetch: fetchEpisodes,
+    refetch,
   };
 }

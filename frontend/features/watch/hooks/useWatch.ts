@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useEpisodes } from "./useEpisodes";
 import { useStream } from "./useStream";
+import type { Episode } from "../api/services/episode.service";
 
 interface UseWatchResult {
   anime: ReturnType<typeof useEpisodes>["anime"];
   seasons: ReturnType<typeof useEpisodes>["seasons"];
   episodes: ReturnType<typeof useEpisodes>["episodes"];
 
-  selectedEpisode: ReturnType<
-    typeof useEpisodes
-  >["selectedEpisode"];
+  selectedEpisode: Episode | null;
+  seasonNumber: number;
 
   stream: ReturnType<typeof useStream>["data"];
 
@@ -29,8 +29,20 @@ interface UseWatchResult {
     seasonNumber: number
   ) => void;
 
- previousEpisode: () => number | undefined;
-nextEpisode: () => number | undefined;
+  previousEpisode: () => number | undefined;
+  nextEpisode: () => number | undefined;
+}
+
+function updateWatchUrl(
+  animeId: number | string,
+  seasonNumber: number,
+  episodeNumber: number
+) {
+  if (typeof window === "undefined") return;
+  const newUrl = `/watch/${animeId}/${seasonNumber}/${episodeNumber}`;
+  if (window.location.pathname !== newUrl) {
+    window.history.replaceState(null, "", newUrl);
+  }
 }
 
 export function useWatch(
@@ -38,55 +50,49 @@ export function useWatch(
   initialSeasonNumber: number,
   initialEpisodeNumber: number
 ): UseWatchResult {
-  const [seasonNumber, setSeasonNumber] =
-    useState(initialSeasonNumber);
-  const [prevInitialSeasonNumber, setPrevInitialSeasonNumber] =
-    useState(initialSeasonNumber);
+  const [seasonNumber, setSeasonNumber] = useState(initialSeasonNumber);
+  const [selectedEpisode, setSelectedEpisode] = useState<Episode | null>(null);
+  const [episodeId, setEpisodeId] = useState<number | null>(null);
 
-  const [episodeId, setEpisodeId] =
-    useState<number | null>(null);
-
-  if (initialSeasonNumber !== prevInitialSeasonNumber) {
-    setPrevInitialSeasonNumber(initialSeasonNumber);
-    setSeasonNumber(initialSeasonNumber);
-    setEpisodeId(null);
-  }
+  // Target episode number to select once the season's episodes arrive
+  const targetEpisodeNumberRef = useRef<number>(initialEpisodeNumber);
 
   const {
     anime,
     seasons,
     episodes,
-    selectedEpisode,
     isLoading: isEpisodesLoading,
     error: episodesError,
     selectEpisode: selectEpisodeFromEpisodes,
   } = useEpisodes(animeId, seasonNumber);
 
   /*
-   * Set the initial/current episode when
-   * the episode list becomes available.
+   * When episodes arrive for the current season, select the target episode
    */
- useEffect(() => {
-  if (episodes.length === 0) {
-    setEpisodeId(null);
-    return;
-  }
+  useEffect(() => {
+    if (episodes.length === 0) {
+      return;
+    }
 
-  const episodeFromUrl = episodes.find(
-    (episode) =>
-      episode.number === initialEpisodeNumber
-  );
+    const targetNumber = targetEpisodeNumberRef.current;
+    const target =
+      episodes.find((ep) => ep.number === targetNumber) ?? episodes[0];
 
-  const episode =
-    episodeFromUrl ?? episodes[0];
+    if (!target) return;
 
-  setEpisodeId(episode.id);
-  selectEpisodeFromEpisodes(episode);
-}, [
-  episodes,
-  initialEpisodeNumber,
-  selectEpisodeFromEpisodes,
-]);
+    setSelectedEpisode((current) => {
+      if (current && current.id === target.id) return current;
+      return target;
+    });
+
+    setEpisodeId((currentId) => {
+      if (currentId === target.id) return currentId;
+      return target.id;
+    });
+
+    selectEpisodeFromEpisodes(target);
+    updateWatchUrl(animeId, seasonNumber, target.number);
+  }, [episodes, animeId, seasonNumber, selectEpisodeFromEpisodes]);
 
   /*
    * Fetch stream for the currently selected episode.
@@ -97,53 +103,99 @@ export function useWatch(
     error: streamError,
   } = useStream(episodeId);
 
-  const selectEpisode = (id: number) => {
-    const episode = episodes.find(
-      (item) => item.id === id
-    );
+  const selectEpisode = useCallback(
+    (id: number) => {
+      const ep = episodes.find((item) => item.id === id);
+      if (!ep) return;
 
-    if (!episode) return;
+      targetEpisodeNumberRef.current = ep.number;
+      setSelectedEpisode(ep);
+      setEpisodeId(ep.id);
+      selectEpisodeFromEpisodes(ep);
+      updateWatchUrl(animeId, seasonNumber, ep.number);
+    },
+    [episodes, animeId, seasonNumber, selectEpisodeFromEpisodes]
+  );
 
-    setEpisodeId(episode.id);
-    selectEpisodeFromEpisodes(episode);
-  };
+  const selectSeason = useCallback(
+    (newSeason: number) => {
+      if (newSeason === seasonNumber) return;
 
-  const selectSeason = (number: number) => {
-    setSeasonNumber(number);
-    setEpisodeId(null);
-  };
+      targetEpisodeNumberRef.current = 1;
+      setSeasonNumber(newSeason);
+      setSelectedEpisode(null);
+      setEpisodeId(null);
+      updateWatchUrl(animeId, newSeason, 1);
+    },
+    [animeId, seasonNumber]
+  );
 
   const currentIndex = useMemo(() => {
     if (!selectedEpisode) return -1;
 
     return episodes.findIndex(
-      (episode) =>
-        episode.id === selectedEpisode.id
+      (episode) => episode.id === selectedEpisode.id
     );
   }, [episodes, selectedEpisode]);
 
-const previousEpisode = () => {
-  if (currentIndex <= 0) return;
+  const previousEpisode = useCallback(() => {
+    if (currentIndex <= 0) return undefined;
 
-  return episodes[currentIndex - 1].number;
-};
+    const prevEp = episodes[currentIndex - 1];
+    selectEpisode(prevEp.id);
+    return prevEp.number;
+  }, [currentIndex, episodes, selectEpisode]);
 
-const nextEpisode = () => {
-  if (
-    currentIndex === -1 ||
-    currentIndex >= episodes.length - 1
-  ) {
-    return;
-  }
+  const nextEpisode = useCallback(() => {
+    if (
+      currentIndex === -1 ||
+      currentIndex >= episodes.length - 1
+    ) {
+      return undefined;
+    }
 
-  return episodes[currentIndex + 1].number;
-};
+    const nextEp = episodes[currentIndex + 1];
+    selectEpisode(nextEp.id);
+    return nextEp.number;
+  }, [currentIndex, episodes, selectEpisode]);
+
+  /*
+   * Support browser Back/Forward navigation in-place
+   */
+  useEffect(() => {
+    const handlePopState = () => {
+      const parts = window.location.pathname.split("/").filter(Boolean);
+      if (parts[0] === "watch" && parts.length >= 4) {
+        const urlSeason = Number(parts[2]);
+        const urlEpisode = Number(parts[3]);
+
+        if (Number.isFinite(urlSeason) && urlSeason !== seasonNumber) {
+          targetEpisodeNumberRef.current = Number.isFinite(urlEpisode) ? urlEpisode : 1;
+          setSeasonNumber(urlSeason);
+          setSelectedEpisode(null);
+          setEpisodeId(null);
+        } else if (Number.isFinite(urlEpisode)) {
+          targetEpisodeNumberRef.current = urlEpisode;
+          const ep = episodes.find((item) => item.number === urlEpisode);
+          if (ep) {
+            setSelectedEpisode(ep);
+            setEpisodeId(ep.id);
+            selectEpisodeFromEpisodes(ep);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [seasonNumber, episodes, selectEpisodeFromEpisodes]);
 
   return {
     anime,
     seasons,
     episodes,
     selectedEpisode,
+    seasonNumber,
 
     stream,
 

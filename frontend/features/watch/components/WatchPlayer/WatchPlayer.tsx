@@ -60,6 +60,35 @@ function destroyHlsInstance(instance: Hls | null) {
   }
 }
 
+/**
+ * Detects whether a subtitle language or label represents English.
+ */
+function findEnglishSubtitleIndex(subtitles: Subtitle[]): number | null {
+  if (!subtitles || subtitles.length === 0) return null;
+
+  const isEnglish = (val?: string | null): boolean => {
+    if (!val) return false;
+    const clean = val.trim().toLowerCase();
+    if (
+      clean === "en" ||
+      clean === "eng" ||
+      clean === "english" ||
+      clean.startsWith("en-") ||
+      clean.startsWith("en_") ||
+      clean.startsWith("english")
+    ) {
+      return true;
+    }
+    return /\b(en|eng|english)\b/i.test(val);
+  };
+
+  const idx = subtitles.findIndex(
+    (sub) => isEnglish(sub.language) || isEnglish(sub.label)
+  );
+
+  return idx !== -1 ? idx : null;
+}
+
 export function WatchPlayer({
   posterImage,
   stream,
@@ -95,6 +124,9 @@ export function WatchPlayer({
     useState(false);
 
   const [quality, setQuality] = useState("Auto");
+  const [availableQualities, setAvailableQualities] = useState<string[]>([]);
+  const qualityLevelsRef = useRef<Map<string, number>>(new Map());
+
   const [playbackRate, setPlaybackRate] =
     useState(1);
 
@@ -196,7 +228,13 @@ export function WatchPlayer({
     setCurrentTime(0);
     setDuration(0);
     setCenterAction(null);
-    setActiveSubtitleIndex(null);
+
+    qualityLevelsRef.current.clear();
+    setAvailableQualities([]);
+    setQuality("Auto");
+
+    const defaultSubIndex = findEnglishSubtitleIndex(subtitles);
+    setActiveSubtitleIndex(defaultSubIndex);
 
     clearCenterAction();
 
@@ -207,6 +245,7 @@ export function WatchPlayer({
       video.removeAttribute("src");
       video.load();
       setIsVideoLoading(false);
+      setActiveSubtitleIndex(null);
       return;
     }
 
@@ -263,25 +302,75 @@ export function WatchPlayer({
       hls.attachMedia(video);
       hls.loadSource(source);
 
-      hls.on(
-        Hls.Events.MANIFEST_PARSED,
-        () => {
-          if (
-            requestId !==
-            playRequestRef.current
-          ) {
-            return;
-          }
-
-          /*
-           * Do not consider the video ready
-           * merely because the manifest loaded.
-           *
-           * The video events decide when
-           * playback is actually possible.
-           */
+      const applyQualityLevels = () => {
+        if (requestId !== playRequestRef.current) {
+          return;
         }
-      );
+
+        const levels = hls.levels;
+        if (!levels || levels.length === 0) {
+          return;
+        }
+
+        const qualityMap = new Map<string, number>();
+        const heightMap = new Map<number, { index: number; bitrate: number }>();
+
+        levels.forEach((level, index) => {
+          if (!level.height || level.height <= 0) return;
+          const existing = heightMap.get(level.height);
+          if (!existing || (level.bitrate && level.bitrate > existing.bitrate)) {
+            heightMap.set(level.height, {
+              index,
+              bitrate: level.bitrate || 0,
+            });
+          }
+        });
+
+        const sortedHeights = Array.from(heightMap.keys()).sort((a, b) => b - a);
+        const options: string[] = [];
+
+        sortedHeights.forEach((h) => {
+          const label = `${h}p`;
+          options.push(label);
+          qualityMap.set(label, heightMap.get(h)!.index);
+        });
+
+        options.push("Auto");
+        qualityMap.set("Auto", -1);
+
+        qualityLevelsRef.current = qualityMap;
+        setAvailableQualities(options);
+
+        // Determine default quality: 1080p if available, else highest <= 1080p, else lowest above
+        let defaultLabel = "Auto";
+        let defaultLevelIndex = -1;
+
+        if (sortedHeights.length > 0) {
+          if (sortedHeights.includes(1080)) {
+            defaultLabel = "1080p";
+            defaultLevelIndex = qualityMap.get("1080p") ?? -1;
+          } else {
+            const below1080 = sortedHeights.filter((h) => h < 1080);
+            if (below1080.length > 0) {
+              defaultLabel = `${below1080[0]}p`;
+              defaultLevelIndex = qualityMap.get(defaultLabel) ?? -1;
+            } else {
+              defaultLabel = `${sortedHeights[sortedHeights.length - 1]}p`;
+              defaultLevelIndex = qualityMap.get(defaultLabel) ?? -1;
+            }
+          }
+        }
+
+        setQuality(defaultLabel);
+        if (defaultLevelIndex !== -1) {
+          hls.currentLevel = defaultLevelIndex;
+        } else {
+          hls.currentLevel = -1;
+        }
+      };
+
+      hls.on(Hls.Events.MANIFEST_PARSED, applyQualityLevels);
+      hls.on(Hls.Events.LEVELS_UPDATED, applyQualityLevels);
 
       hls.on(
         Hls.Events.ERROR,
@@ -847,6 +936,29 @@ export function WatchPlayer({
 
   /*
    * --------------------------------------------------
+   * Quality
+   * --------------------------------------------------
+   */
+
+  const handleQualityChange = useCallback((newQuality: string) => {
+    setQuality(newQuality);
+
+    const hls = hlsRef.current;
+    if (!hls) return;
+
+    if (newQuality === "Auto") {
+      hls.currentLevel = -1;
+      return;
+    }
+
+    const levelIndex = qualityLevelsRef.current.get(newQuality);
+    if (levelIndex !== undefined && levelIndex >= 0) {
+      hls.currentLevel = levelIndex;
+    }
+  }, []);
+
+  /*
+   * --------------------------------------------------
    * Fullscreen
    * --------------------------------------------------
    */
@@ -1023,10 +1135,26 @@ export function WatchPlayer({
       "change",
       syncTracks
     );
+    video.textTracks.addEventListener(
+      "addtrack",
+      syncTracks
+    );
+    video.addEventListener(
+      "loadedmetadata",
+      syncTracks
+    );
 
     return () => {
       video.textTracks.removeEventListener(
         "change",
+        syncTracks
+      );
+      video.textTracks.removeEventListener(
+        "addtrack",
+        syncTracks
+      );
+      video.removeEventListener(
+        "loadedmetadata",
         syncTracks
       );
     };
@@ -1228,6 +1356,7 @@ export function WatchPlayer({
           muted={muted}
           isFullscreen={isFullscreen}
           quality={quality}
+          availableQualities={availableQualities}
           playbackRate={playbackRate}
           subtitles={subtitles}
           activeSubtitleIndex={activeSubtitleIndex}
@@ -1256,7 +1385,7 @@ export function WatchPlayer({
             handlePiPToggle
           }
           onQualityChange={
-            setQuality
+            handleQualityChange
           }
           onPlaybackRateChange={
             handlePlaybackRateChange

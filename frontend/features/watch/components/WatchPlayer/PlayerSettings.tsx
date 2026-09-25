@@ -5,6 +5,7 @@ import { Settings, Check } from "lucide-react";
 
 interface PlayerSettingsProps {
   quality: string;
+  availableQualities?: string[];
   playbackRate: number;
   onQualityChange: (quality: string) => void;
   onPlaybackRateChange: (rate: number) => void;
@@ -12,11 +13,12 @@ interface PlayerSettingsProps {
   grouped?: boolean;
 }
 
-const QUALITIES = ["1080p", "720p", "480p", "360p"];
+const QUALITIES = ["1080p", "720p", "480p", "360p", "Auto"];
 const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 export function PlayerSettings({
   quality,
+  availableQualities,
   playbackRate,
   onQualityChange,
   onPlaybackRateChange,
@@ -25,6 +27,11 @@ export function PlayerSettings({
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"main" | "quality" | "speed">("main");
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const qualitiesList =
+    availableQualities && availableQualities.length > 0
+      ? availableQualities
+      : QUALITIES;
 
   const handleClickOutside = useCallback((e: MouseEvent) => {
     if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -83,7 +90,7 @@ export function PlayerSettings({
               >
                 ← Quality
               </button>
-              {QUALITIES.map((q) => (
+              {qualitiesList.map((q) => (
                 <button
                   key={q}
                   onClick={() => {

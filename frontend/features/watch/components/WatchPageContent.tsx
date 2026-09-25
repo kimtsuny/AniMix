@@ -1,8 +1,6 @@
 "use client";
 
 import { useCallback } from "react";
-import { useRouter } from "next/navigation";
-
 import { WatchPlayer } from "./WatchPlayer";
 import { EpisodeSelector } from "./EpisodeSelector";
 import { YouMightLike } from "./YouMightLike";
@@ -19,8 +17,6 @@ export function WatchPageContent({
   season,
   episode,
 }: WatchPageContentProps) {
-  const router = useRouter();
-
   const animeIdNumber = Number(animeId);
   const seasonNumber = Number(season) || 1;
   const episodeNumber = Number(episode) || 1;
@@ -30,6 +26,7 @@ export function WatchPageContent({
     seasons,
     episodes,
     selectedEpisode,
+    seasonNumber: activeSeasonNumber,
     stream,
     isEpisodesLoading,
     isStreamLoading,
@@ -46,85 +43,40 @@ export function WatchPageContent({
   );
 
   /*
-   * Episode card selection
-   *
-   * Change the URL so the URL remains
-   * the source of truth for the current episode.
+   * Episode card selection (in-place)
    */
   const handleEpisodeSelect = useCallback(
     (ep: { id: number }) => {
-      const selected = episodes.find(
-        (episode) => episode.id === ep.id
-      );
-
-      if (!selected) return;
-
-      router.push(
-        `/watch/${animeId}/${season}/${selected.number}`
-      );
+      selectEpisode(ep.id);
     },
-    [
-      episodes,
-      router,
-      animeId,
-      season,
-    ]
+    [selectEpisode]
   );
 
   /*
-   * Season selection
-   *
-   * For now, when changing season we go
-   * to episode 1 of that season.
+   * Season selection (in-place)
    */
   const handleSeasonChange = useCallback(
     (value: string) => {
       const newSeason = Number(value);
-
       if (!Number.isFinite(newSeason)) return;
-
-      router.push(
-        `/watch/${animeId}/${newSeason}/1`
-      );
+      selectSeason(newSeason);
     },
-    [router, animeId]
+    [selectSeason]
   );
 
   /*
-   * Previous episode
+   * Previous episode (in-place)
    */
   const handlePreviousEpisode = useCallback(() => {
-    const previous = previousEpisode();
-
-    if (previous === undefined) return;
-
-    router.push(
-      `/watch/${animeId}/${season}/${previous}`
-    );
-  }, [
-    previousEpisode,
-    router,
-    animeId,
-    season,
-  ]);
+    previousEpisode();
+  }, [previousEpisode]);
 
   /*
-   * Next episode
+   * Next episode (in-place)
    */
   const handleNextEpisode = useCallback(() => {
-    const next = nextEpisode();
-
-    if (next === undefined) return;
-
-    router.push(
-      `/watch/${animeId}/${season}/${next}`
-    );
-  }, [
-    nextEpisode,
-    router,
-    animeId,
-    season,
-  ]);
+    nextEpisode();
+  }, [nextEpisode]);
 
   if (episodesError) {
     return (
@@ -164,7 +116,7 @@ export function WatchPageContent({
             selectedEpisode?.number ??
             episodeNumber
           }
-          selectedSeason={String(seasonNumber)}
+          selectedSeason={String(activeSeasonNumber)}
           totalEpisodes={episodes.length}
           isLoading={isEpisodesLoading}
           onEpisodeSelect={
