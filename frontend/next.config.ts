@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 
+const backendUrl = (
+  process.env.BACKEND_URL || "https://animix-6nh7.onrender.com"
+).replace(/\/+$/, "");
+
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["192.168.0.114"],
 
@@ -22,6 +26,15 @@ const nextConfig: NextConfig = {
         hostname: "image.tmdb.org",
       },
     ],
+  },
+
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${backendUrl}/api/:path*`,
+      },
+    ];
   },
 };
 
