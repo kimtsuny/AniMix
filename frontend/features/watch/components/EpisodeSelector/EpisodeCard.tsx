@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Play } from "lucide-react";
 import type { Episode } from "@/features/watch/api/services/episode.service";
+import { cn } from "@/shared/lib/utils";
 
 interface EpisodeCardProps {
   episode: Episode;
@@ -15,74 +16,52 @@ export function EpisodeCard({
   isSelected,
   onSelect,
 }: EpisodeCardProps) {
+  const title = episode.title || `Episode ${episode.number}`;
+
   return (
     <button
+      type="button"
       onClick={() => onSelect(episode)}
-      className={`group relative flex-shrink-0 w-[160px] md:w-[180px] lg:w-[185px] text-left transition-all duration-200 ${
-        isSelected ? "scale-[1.02]" : ""
-      }`}
-      aria-label={`Play ${episode.title ?? `Episode ${episode.number}`}`}
+      className={cn(
+        "group relative aspect-video w-full rounded-xl overflow-hidden text-left outline-none select-none cursor-pointer bg-neutral-900 transition-all duration-200",
+        isSelected
+          ? "border border-white shadow-[0_0_14px_rgba(255,255,255,0.18)]"
+          : "border border-white/10 hover:border-white/25 hover:brightness-105"
+      )}
+      aria-label={`Play ${title}`}
       aria-current={isSelected ? "true" : undefined}
     >
-      <div
-        className={`relative aspect-[16/10] rounded-lg overflow-hidden mb-2 transition-all duration-200 ${
-          isSelected
-            ? "ring-2 ring-[#e63946] shadow-lg shadow-[#e63946]/20"
-            : "ring-1 ring-white/10 hover:ring-white/25"
-        }`}
-      >
-        {episode.thumbnail ? (
-          <Image
-            src={episode.thumbnail}
-            alt={
-              episode.title ??
-              `Episode ${episode.number}`
-            }
-            fill
-            sizes="(max-width: 768px) 160px, 185px"
-            className="object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-white/5" />
-        )}
-
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-
-        <span className="absolute bottom-2 left-2.5 text-white font-bold text-lg leading-none drop-shadow-lg">
-          {episode.number}
-        </span>
-
-        {isSelected && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-8 h-8 rounded-full bg-[#e63946]/90 flex items-center justify-center shadow-lg">
-              <Play className="size-4 fill-white text-white ml-0.5" />
-            </div>
-          </div>
-        )}
-
-        {!isSelected && (
-          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20">
-              <Play className="size-4 fill-white text-white ml-0.5" />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {isSelected && (
-        <div className="w-full h-[2px] bg-[#e63946] rounded-full -mt-1 mb-1" />
+      {/* Thumbnail image */}
+      {episode.thumbnail ? (
+        <Image
+          src={episode.thumbnail}
+          alt={title}
+          fill
+          sizes="(max-width: 640px) 60vw, (max-width: 768px) 38vw, (max-width: 1024px) 28vw, 20vw"
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-neutral-900 flex items-center justify-center">
+          <Play className="size-6 text-white/20" />
+        </div>
       )}
 
-      <p
-        className={`text-xs font-medium truncate transition-colors ${
-          isSelected
-            ? "text-[#e63946]"
-            : "text-white/70 group-hover:text-white/90"
-        }`}
-      >
-        {episode.title ??
-          `Episode ${episode.number}`}
-      </p>
+      {/* Cinematic dark gradient at the bottom for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent pointer-events-none" />
+
+      {/* Title (bottom-left) and Episode number (bottom-right) inside thumbnail */}
+      <div className="absolute inset-x-0 bottom-0 z-10 flex items-baseline justify-between gap-3 px-3.5 pb-2.5 pt-6 pointer-events-none">
+        <span
+          className="text-xs sm:text-sm font-medium text-white truncate drop-shadow-sm tracking-tight"
+          title={title}
+        >
+          {title}
+        </span>
+
+        <span className="text-xs sm:text-sm font-semibold text-white/80 shrink-0 tabular-nums drop-shadow-sm">
+          {episode.number}
+        </span>
+      </div>
     </button>
   );
 }

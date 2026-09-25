@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useEffect } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import { EpisodeCard } from "./EpisodeCard";
-import { EpisodeNavigation } from "./EpisodeNavigation";
 import type { Episode } from "@/features/watch/api/services/episode.service";
 
 interface EpisodeListProps {
@@ -16,101 +16,51 @@ export function EpisodeList({
   selectedEpisodeNumber,
   onEpisodeSelect,
 }: EpisodeListProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollPrev, setCanScrollPrev] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(false);
-
-  const updateScrollState = useCallback(() => {
-    const el = scrollRef.current;
-
-    if (!el) return;
-
-    setCanScrollPrev(el.scrollLeft > 10);
-
-    setCanScrollNext(
-      el.scrollLeft <
-        el.scrollWidth - el.clientWidth - 10
-    );
-  }, []);
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "start",
+    containScroll: "trimSnaps",
+    dragFree: true,
+  });
 
   useEffect(() => {
-    const el = scrollRef.current;
-
-    if (!el) return;
-
-    updateScrollState();
-
-    el.addEventListener(
-      "scroll",
-      updateScrollState,
-      { passive: true }
+    if (!emblaApi || episodes.length === 0) return;
+    const index = episodes.findIndex(
+      (ep) => ep.number === selectedEpisodeNumber
     );
+    if (index !== -1) {
+      emblaApi.scrollTo(index);
+    }
+  }, [emblaApi, selectedEpisodeNumber, episodes]);
 
-    window.addEventListener(
-      "resize",
-      updateScrollState
+  if (!episodes || episodes.length === 0) {
+    return (
+      <div className="py-8 text-center text-white/40 text-sm">
+        No episodes found.
+      </div>
     );
-
-    return () => {
-      el.removeEventListener(
-        "scroll",
-        updateScrollState
-      );
-
-      window.removeEventListener(
-        "resize",
-        updateScrollState
-      );
-    };
-  }, [updateScrollState]);
-
-  const scroll = useCallback(
-    (direction: "prev" | "next") => {
-      const el = scrollRef.current;
-
-      if (!el) return;
-
-      const scrollAmount = el.clientWidth * 0.7;
-
-      el.scrollBy({
-        left:
-          direction === "next"
-            ? scrollAmount
-            : -scrollAmount,
-        behavior: "smooth",
-      });
-    },
-    []
-  );
+  }
 
   return (
-    <div className="relative">
-      <EpisodeNavigation
-        canScrollPrev={canScrollPrev}
-        canScrollNext={canScrollNext}
-        onScrollPrev={() => scroll("prev")}
-        onScrollNext={() => scroll("next")}
-      />
-
+    <div className="relative w-full">
+      {/* Embla Carousel Viewport */}
       <div
-        ref={scrollRef}
-        className="flex gap-3 md:gap-4 overflow-x-auto scrollbar-hide pb-2"
-        style={{
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-          WebkitOverflowScrolling: "touch",
-        }}
+        ref={emblaRef}
+        className="overflow-hidden w-full -mx-1.5 px-1.5 py-1.5 -my-1.5"
       >
-        {episodes.map((episode) => (
-          <EpisodeCard
-            key={episode.id}
-            episode={episode}
-            isSelected={
-              episode.number === selectedEpisodeNumber
-            }
-            onSelect={onEpisodeSelect}
-          />
-        ))}
+        <div className="flex gap-3 md:gap-3.5">
+          {episodes.map((episode) => (
+            <div
+              key={episode.id}
+              className="shrink-0 min-w-0 basis-[58%] sm:basis-[38%] md:basis-[28%] lg:basis-[calc((100%-3.5rem)/5)]"
+            >
+              <EpisodeCard
+                episode={episode}
+                isSelected={episode.number === selectedEpisodeNumber}
+                onSelect={onEpisodeSelect}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

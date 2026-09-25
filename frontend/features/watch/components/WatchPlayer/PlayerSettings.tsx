@@ -8,6 +8,8 @@ interface PlayerSettingsProps {
   playbackRate: number;
   onQualityChange: (quality: string) => void;
   onPlaybackRateChange: (rate: number) => void;
+  /** When true, renders without its own border (used inside a shared container) */
+  grouped?: boolean;
 }
 
 const QUALITIES = ["1080p", "720p", "480p", "360p"];
@@ -18,6 +20,7 @@ export function PlayerSettings({
   playbackRate,
   onQualityChange,
   onPlaybackRateChange,
+  grouped = false,
 }: PlayerSettingsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"main" | "quality" | "speed">("main");
@@ -44,11 +47,11 @@ export function PlayerSettings({
           setIsOpen(!isOpen);
           setActiveTab("main");
         }}
-        className="p-1.5 rounded-md hover:bg-white/10 transition-colors text-white"
+        className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white flex items-center justify-center"
         aria-label="Settings"
         title="Settings"
       >
-        <Settings className="size-5" />
+        <Settings className="size-5 text-white" />
       </button>
 
       {isOpen && (

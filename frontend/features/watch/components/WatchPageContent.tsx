@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { WatchPlayer } from "./WatchPlayer";
 import { EpisodeSelector } from "./EpisodeSelector";
@@ -20,6 +19,8 @@ export function WatchPageContent({
   season,
   episode,
 }: WatchPageContentProps) {
+  const router = useRouter();
+
   const animeIdNumber = Number(animeId);
   const seasonNumber = Number(season) || 1;
   const episodeNumber = Number(episode) || 1;
@@ -44,19 +45,86 @@ export function WatchPageContent({
     episodeNumber
   );
 
+  /*
+   * Episode card selection
+   *
+   * Change the URL so the URL remains
+   * the source of truth for the current episode.
+   */
   const handleEpisodeSelect = useCallback(
     (ep: { id: number }) => {
-      selectEpisode(ep.id);
+      const selected = episodes.find(
+        (episode) => episode.id === ep.id
+      );
+
+      if (!selected) return;
+
+      router.push(
+        `/watch/${animeId}/${season}/${selected.number}`
+      );
     },
-    [selectEpisode]
+    [
+      episodes,
+      router,
+      animeId,
+      season,
+    ]
   );
 
+  /*
+   * Season selection
+   *
+   * For now, when changing season we go
+   * to episode 1 of that season.
+   */
   const handleSeasonChange = useCallback(
     (value: string) => {
-      selectSeason(Number(value));
+      const newSeason = Number(value);
+
+      if (!Number.isFinite(newSeason)) return;
+
+      router.push(
+        `/watch/${animeId}/${newSeason}/1`
+      );
     },
-    [selectSeason]
+    [router, animeId]
   );
+
+  /*
+   * Previous episode
+   */
+  const handlePreviousEpisode = useCallback(() => {
+    const previous = previousEpisode();
+
+    if (previous === undefined) return;
+
+    router.push(
+      `/watch/${animeId}/${season}/${previous}`
+    );
+  }, [
+    previousEpisode,
+    router,
+    animeId,
+    season,
+  ]);
+
+  /*
+   * Next episode
+   */
+  const handleNextEpisode = useCallback(() => {
+    const next = nextEpisode();
+
+    if (next === undefined) return;
+
+    router.push(
+      `/watch/${animeId}/${season}/${next}`
+    );
+  }, [
+    nextEpisode,
+    router,
+    animeId,
+    season,
+  ]);
 
   if (isEpisodesLoading) {
     return (
@@ -80,88 +148,46 @@ export function WatchPageContent({
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Breadcrumb */}
-      <nav
-        className="px-4 md:px-8 lg:px-12 pt-20 md:pt-22 pb-3"
-        aria-label="Breadcrumb"
-      >
-        <ol className="flex items-center gap-1 md:gap-1.5 text-xs md:text-[13px] flex-wrap">
-          <li>
-            <Link
-              href="/"
-              className="text-white/50 hover:text-white/80 transition-colors"
-            >
-              Home
-            </Link>
-          </li>
-
-          <li className="flex items-center gap-1 md:gap-1.5">
-            <ChevronRight className="size-3 text-white/30" />
-
-            <Link
-              href="/"
-              className="text-white/50 hover:text-white/80 transition-colors"
-            >
-              Anime
-            </Link>
-          </li>
-
-          <li className="flex items-center gap-1 md:gap-1.5">
-            <ChevronRight className="size-3 text-white/30" />
-
-            <Link
-              href={`/anime/${animeId}`}
-              className="text-white/50 hover:text-white/80 transition-colors"
-            >
-              {anime?.title ?? "Anime"}
-            </Link>
-          </li>
-
-          <li className="flex items-center gap-1 md:gap-1.5">
-            <ChevronRight className="size-3 text-white/30" />
-
-            <span className="text-white/50">
-              Season {seasonNumber}
-            </span>
-          </li>
-
-          <li className="flex items-center gap-1 md:gap-1.5">
-            <ChevronRight className="size-3 text-white/30" />
-
-            <span className="text-[#e63946] font-medium">
-              Episode {selectedEpisode?.number ?? episodeNumber}
-            </span>
-          </li>
-        </ol>
-      </nav>
-
       {/* Video Player */}
       <WatchPlayer
-        posterImage={anime?.bannerImage ?? undefined}
+        posterImage={
+          anime?.bannerImage ?? undefined
+        }
         stream={stream}
         isLoading={isStreamLoading}
         error={streamError}
-        onPreviousEpisode={previousEpisode}
-        onNextEpisode={nextEpisode}
+        onPreviousEpisode={
+          handlePreviousEpisode
+        }
+        onNextEpisode={
+          handleNextEpisode
+        }
       />
 
-      {/* Episodes */}
+      {/* Episodes + You Might Like */}
       <div className="px-4 md:px-8 lg:px-12">
         <EpisodeSelector
           episodes={episodes}
           seasons={seasons}
           selectedEpisodeNumber={
-            selectedEpisode?.number ?? episodeNumber
+            selectedEpisode?.number ??
+            episodeNumber
           }
           selectedSeason={String(seasonNumber)}
           totalEpisodes={episodes.length}
-          onEpisodeSelect={handleEpisodeSelect}
-          onSeasonChange={handleSeasonChange}
+          onEpisodeSelect={
+            handleEpisodeSelect
+          }
+          onSeasonChange={
+            handleSeasonChange
+          }
         />
 
         <div className="border-t border-white/5" />
 
-        <YouMightLike recommendations={[]} />
+        <YouMightLike
+          recommendations={[]}
+        />
       </div>
     </div>
   );

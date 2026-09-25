@@ -28,25 +28,19 @@ export function EpisodeSelector({
   onSeasonChange,
 }: EpisodeSelectorProps) {
   return (
-    <section className="py-5 md:py-6">
-      <div className="flex items-start md:items-center justify-between mb-4 gap-3">
-        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-          <h2 className="text-white text-base md:text-lg font-semibold">
-            Episodes
-          </h2>
-
+    <section className="py-5 md:py-6" aria-label="Episodes section">
+      {/* 1. Season / Anime-Part Selector */}
+      {seasons && seasons.length > 0 && (
+        <div className="mb-4">
           <SeasonSelector
             seasons={seasons}
             selectedSeason={selectedSeason}
             onSeasonChange={onSeasonChange}
           />
         </div>
+      )}
 
-        <span className="text-white/40 text-xs md:text-sm whitespace-nowrap">
-          {totalEpisodes} Episodes
-        </span>
-      </div>
-
+      {/* 2. Episode Carousel */}
       <EpisodeList
         episodes={episodes}
         selectedEpisodeNumber={selectedEpisodeNumber}

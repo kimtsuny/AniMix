@@ -47,6 +47,17 @@ export function PlayerProgress({
     []
   );
 
+  /* Touch handlers for mobile */
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+      setIsDragging(true);
+      onSeek(getTimeFromPosition(touch.clientX));
+    },
+    [getTimeFromPosition, onSeek]
+  );
+
   useEffect(() => {
     if (!isDragging) return;
 
@@ -55,11 +66,23 @@ export function PlayerProgress({
     };
     const handleUp = () => setIsDragging(false);
 
+    const handleTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+      onSeek(getTimeFromPosition(touch.clientX));
+    };
+    const handleTouchEnd = () => setIsDragging(false);
+
     window.addEventListener("mousemove", handleMove);
     window.addEventListener("mouseup", handleUp);
+    window.addEventListener("touchmove", handleTouchMove);
+    window.addEventListener("touchend", handleTouchEnd);
+
     return () => {
       window.removeEventListener("mousemove", handleMove);
       window.removeEventListener("mouseup", handleUp);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [isDragging, getTimeFromPosition, onSeek]);
 
@@ -79,6 +102,7 @@ export function PlayerProgress({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => setHoverPosition(null)}
+        onTouchStart={handleTouchStart}
       >
         {/* Track background */}
         <div className="absolute w-full h-[3px] group-hover/progress:h-[5px] rounded-full bg-white/20 transition-all duration-150" />
@@ -91,13 +115,13 @@ export function PlayerProgress({
           />
         )}
 
-        {/* Played portion */}
+        {/* Played portion — red */}
         <div
           className="absolute h-[3px] group-hover/progress:h-[5px] rounded-full bg-[#e63946] transition-all duration-150"
           style={{ width: `${progress}%` }}
         />
 
-        {/* Thumb */}
+        {/* Thumb — red dot */}
         <div
           className="absolute w-3 h-3 rounded-full bg-[#e63946] shadow-lg shadow-[#e63946]/30 opacity-0 group-hover/progress:opacity-100 transition-opacity duration-150 -translate-x-1/2"
           style={{ left: `${progress}%` }}

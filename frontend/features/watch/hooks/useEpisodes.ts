@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+
 import {
   getSeasonEpisodes,
   type Episode,
@@ -77,9 +82,12 @@ export function useEpisodes(
     fetchEpisodes();
   }, [animeId, seasonNumber]);
 
-  const selectEpisode = (episode: Episode) => {
-    setSelectedEpisode(episode);
-  };
+  const selectEpisode = useCallback(
+    (episode: Episode) => {
+      setSelectedEpisode(episode);
+    },
+    []
+  );
 
   return {
     anime,

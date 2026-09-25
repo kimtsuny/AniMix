@@ -29,8 +29,8 @@ interface UseWatchResult {
     seasonNumber: number
   ) => void;
 
-  previousEpisode: () => void;
-  nextEpisode: () => void;
+ previousEpisode: () => number | undefined;
+nextEpisode: () => number | undefined;
 }
 
 export function useWatch(
@@ -58,27 +58,27 @@ export function useWatch(
    * Set the initial/current episode when
    * the episode list becomes available.
    */
-  useEffect(() => {
-    if (episodes.length === 0) {
-      setEpisodeId(null);
-      return;
-    }
+ useEffect(() => {
+  if (episodes.length === 0) {
+    setEpisodeId(null);
+    return;
+  }
 
-    const episodeFromUrl = episodes.find(
-      (episode) =>
-        episode.number === initialEpisodeNumber
-    );
+  const episodeFromUrl = episodes.find(
+    (episode) =>
+      episode.number === initialEpisodeNumber
+  );
 
-    const episode =
-      episodeFromUrl ?? episodes[0];
+  const episode =
+    episodeFromUrl ?? episodes[0];
 
-    setEpisodeId(episode.id);
-    selectEpisodeFromEpisodes(episode);
-  }, [
-    episodes,
-    initialEpisodeNumber,
-    selectEpisodeFromEpisodes,
-  ]);
+  setEpisodeId(episode.id);
+  selectEpisodeFromEpisodes(episode);
+}, [
+  episodes,
+  initialEpisodeNumber,
+  selectEpisodeFromEpisodes,
+]);
 
   /*
    * Fetch stream for the currently selected episode.
@@ -114,28 +114,22 @@ export function useWatch(
     );
   }, [episodes, selectedEpisode]);
 
-  const previousEpisode = () => {
-    if (currentIndex <= 0) return;
+const previousEpisode = () => {
+  if (currentIndex <= 0) return;
 
-    const previous =
-      episodes[currentIndex - 1];
+  return episodes[currentIndex - 1].number;
+};
 
-    selectEpisode(previous.id);
-  };
+const nextEpisode = () => {
+  if (
+    currentIndex === -1 ||
+    currentIndex >= episodes.length - 1
+  ) {
+    return;
+  }
 
-  const nextEpisode = () => {
-    if (
-      currentIndex === -1 ||
-      currentIndex >= episodes.length - 1
-    ) {
-      return;
-    }
-
-    const next =
-      episodes[currentIndex + 1];
-
-    selectEpisode(next.id);
-  };
+  return episodes[currentIndex + 1].number;
+};
 
   return {
     anime,

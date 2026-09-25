@@ -30,7 +30,7 @@ export function Hero({ anime, seasonNumber = 1 }: HeroProps) {
 
         const exists = data.favorites.some(
           (favorite) =>
-            favorite.anime.anilistId === anime.id
+            favorite.anime.anilistId === anime?.id
         );
 
         setIsFavorite(exists);

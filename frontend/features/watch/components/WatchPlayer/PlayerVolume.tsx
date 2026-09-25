@@ -44,7 +44,7 @@ export function PlayerVolume({
 
   return (
     <div
-      className="flex items-center gap-1"
+      className="flex items-center"
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => {
         if (!isDragging) setIsExpanded(false);
@@ -52,11 +52,11 @@ export function PlayerVolume({
     >
       <button
         onClick={onMuteToggle}
-        className="p-1.5 rounded-md hover:bg-white/10 transition-colors text-white"
+        className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white flex items-center justify-center"
         aria-label={muted ? "Unmute" : "Mute"}
         title={muted ? "Unmute" : "Mute"}
       >
-        <VolumeIcon className="size-5" />
+        <VolumeIcon className="size-5 text-white" />
       </button>
 
       <div
@@ -65,7 +65,7 @@ export function PlayerVolume({
       >
         <div
           ref={sliderRef}
-          className="relative w-[80px] h-5 flex items-center cursor-pointer"
+          className="relative w-[80px] h-5 flex items-center cursor-pointer mr-1"
           onMouseDown={(e) => {
             setIsDragging(true);
             onVolumeChange(getVolumeFromPosition(e.clientX));

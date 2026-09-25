@@ -1,5 +1,6 @@
 import prisma from "../../config/prisma.js";
 import { animeParadiseProvider } from "../streaming/providers/animeparadise.provider.js";
+import type { AnimeParadiseEpisode } from "../streaming/providers/animeparadise.provider.js";
 
 export async function syncSeasonEpisodes(
   seasonId: number
@@ -35,7 +36,7 @@ export async function syncSeasonEpisodes(
   const episodes =
     await animeParadiseProvider.getEpisodes(
       season.providerId
-    );
+    ) as AnimeParadiseEpisode[];
 
   if (episodes.length === 0) {
     throw new Error(
@@ -49,6 +50,8 @@ export async function syncSeasonEpisodes(
 
   // 5. Save episodes
   for (const episode of episodes) {
+    const thumbnail = episode.thumbnail ?? null;
+
     const dbEpisode = await prisma.episode.upsert({
       where: {
         seasonId_number: {
@@ -59,14 +62,17 @@ export async function syncSeasonEpisodes(
 
       update: {
         title: episode.title,
+        thumbnail,
       },
 
       create: {
         seasonId,
         number: episode.number,
         title: episode.title,
+        thumbnail,
       },
     });
+
 
     // 6. Save provider mapping
     await prisma.episodeProviderMapping.upsert({

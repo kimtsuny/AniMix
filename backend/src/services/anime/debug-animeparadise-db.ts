@@ -45,23 +45,60 @@ async function main() {
       `\n--- Season ${season.number}: ${season.title} ---`
     );
 
+    // ----------------------------------------------------------
+    // Get RAW episodes directly from AnimeParadise
+    // ----------------------------------------------------------
+
+    console.log(
+      "\nFetching RAW episodes from AnimeParadise..."
+    );
+
+    const rawEpisodes =
+      await animeParadiseProvider.getEpisodes(
+        season.providerId
+      );
+
+    console.log(
+      `RAW episodes count: ${rawEpisodes.length}`
+    );
+
+    console.log(
+      "\nRAW ANIMEPARADISE EPISODES (first 3):"
+    );
+
+    console.dir(
+      rawEpisodes.slice(0, 3),
+      {
+        depth: null,
+      }
+    );
+
+    // ----------------------------------------------------------
+    // Sync episodes into database
+    // ----------------------------------------------------------
+
     const episodes =
-      await syncSeasonEpisodes(season.id);
+      await syncSeasonEpisodes(
+        season.id
+      );
 
     console.log(
-      `Saved episodes: ${episodes.length}`
+      `\nSaved episodes: ${episodes.length}`
     );
 
     console.log(
-      "First episode:"
+      "\nFirst episode from database:"
     );
 
-    console.dir(episodes[0], {
-      depth: null,
-    });
+    console.dir(
+      episodes[0],
+      {
+        depth: null,
+      }
+    );
 
     console.log(
-      "Last episode:"
+      "\nLast episode from database:"
     );
 
     console.dir(
@@ -119,13 +156,16 @@ async function main() {
   console.log("=== 4. TEST STREAM ===");
   console.log("========================================");
 
-  const season1 = anime?.seasons.find(
-    (season) => season.number === 1
-  );
+  const season1 =
+    anime?.seasons.find(
+      (season) =>
+        season.number === 1
+    );
 
   const episode1 =
     season1?.episodes.find(
-      (episode) => episode.number === 1
+      (episode) =>
+        episode.number === 1
     );
 
   if (!episode1) {
@@ -137,7 +177,8 @@ async function main() {
   const providerMapping =
     episode1.providerMappings.find(
       (mapping) =>
-        mapping.provider === "animeparadise"
+        mapping.provider ===
+        "animeparadise"
     );
 
   if (!providerMapping) {
@@ -147,11 +188,16 @@ async function main() {
   }
 
   console.log("\nEpisode:");
-  console.dir(episode1, {
-    depth: null,
-  });
+  console.dir(
+    episode1,
+    {
+      depth: null,
+    }
+  );
 
-  console.log("\nResolving stream...");
+  console.log(
+    "\nResolving stream..."
+  );
 
   const stream =
     await animeParadiseProvider.getStream(
@@ -159,9 +205,12 @@ async function main() {
     );
 
   console.log("\nStream:");
-  console.dir(stream, {
-    depth: null,
-  });
+  console.dir(
+    stream,
+    {
+      depth: null,
+    }
+  );
 
   // ============================================================
   // 5. Summary
@@ -176,10 +225,15 @@ async function main() {
   );
 
   console.log(
-    `Seasons: ${anime?.seasons.length ?? 0}`
+    `Seasons: ${
+      anime?.seasons.length ?? 0
+    }`
   );
 
-  for (const season of anime?.seasons ?? []) {
+  for (
+    const season of
+    anime?.seasons ?? []
+  ) {
     console.log(
       `Season ${season.number}: ${season.episodes.length} episodes`
     );
@@ -190,7 +244,11 @@ async function main() {
   );
 
   console.log(
-    `Streams: ${stream.type === "video" ? stream.streams.length : 0}`
+    `Streams: ${
+      stream.type === "video"
+        ? stream.streams.length
+        : 0
+    }`
   );
 
   console.log("\n========================================");
@@ -200,8 +258,12 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error("\n❌ TEST FAILED\n");
+    console.error(
+      "\n❌ TEST FAILED\n"
+    );
+
     console.error(error);
+
     process.exit(1);
   })
   .finally(async () => {
