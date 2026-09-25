@@ -46,7 +46,9 @@ export async function getFavoriteAnime(): Promise<FavoriteAnime[]> {
           "Unknown",
 
         coverImage:
-          anime.coverImage?.large || "",
+          anime.coverImage?.extraLarge ||
+          anime.coverImage?.large ||
+          "",
 
         year: anime.seasonYear || 0,
 

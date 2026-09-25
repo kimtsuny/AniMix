@@ -10,6 +10,7 @@ export const FAVORITES_ANIME_QUERY = `
         }
 
         coverImage {
+          extraLarge
           large
         }
 

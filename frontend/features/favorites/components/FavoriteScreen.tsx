@@ -1,8 +1,8 @@
 "use client";
 import { useEffect } from "react";
-import { getFavoriteAnime } from "../api/services/favorites.service";import { AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
+import { getFavoriteAnime } from "../api/services/favorites.service";
 import { useFavoritesStore } from "../store/favorites.store";
-import { FavoriteHeader } from "./FavoriteHeader";
 import { FavoriteSearch } from "./FavoriteSearch";
 import { FavoriteFilters } from "./FavoriteFilters";
 import { FavoriteGrid } from "./FavoriteGrid";
@@ -12,7 +12,6 @@ export function FavoriteScreen() {
   const {
     setFavorites,
     filteredFavorites,
-    totalCount,
     search,
     setSearch,
     selectedFilter,
@@ -23,23 +22,23 @@ export function FavoriteScreen() {
   } = useFavoritesStore();
   
   useEffect(() => {
-  async function loadFavorites() {
-    try {
-      const favorites = await getFavoriteAnime();
+    async function loadFavorites() {
+      try {
+        const favorites = await getFavoriteAnime();
 
-      console.log("Favorite anime:", favorites);
+        console.log("Favorite anime:", favorites);
 
-      setFavorites(favorites);
-    } catch (error) {
-      console.error("Failed to load favorites:", error);
+        setFavorites(favorites);
+      } catch (error) {
+        console.error("Failed to load favorites:", error);
+      }
     }
-  }
 
-  loadFavorites();
-}, [setFavorites]);
+    loadFavorites();
+  }, [setFavorites]);
+
   return (
-<div className="w-full mx-auto px-6 md:px-12 xl:px-20 pt-24 md:pt-28 space-y-6 md:space-y-8">      <FavoriteHeader totalCount={totalCount} />
-
+    <div className="w-full mx-auto px-6 md:px-12 xl:px-20 pt-20 md:pt-24 space-y-6 md:space-y-8">
       <FavoriteSearch search={search} onSearchChange={setSearch} />
 
       <FavoriteFilters
