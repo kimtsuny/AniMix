@@ -1122,15 +1122,6 @@ export function WatchPlayer({
           ))}
         </video>
 
-        {!hasStream && posterImage && (
-          <img
-            src={posterImage}
-            alt="Video poster"
-            className="relative z-10 max-w-full max-h-full object-contain"
-            draggable={false}
-          />
-        )}
-
         {!hasStream && !posterImage && (
           <div className="relative z-10 w-full h-full bg-black" />
         )}
