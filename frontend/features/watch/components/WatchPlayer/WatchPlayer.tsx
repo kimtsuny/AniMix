@@ -15,6 +15,7 @@ interface WatchPlayerProps {
   posterImage?: string;
   stream: StreamResponse | null;
   isLoading?: boolean;
+  isEpisodesLoading?: boolean;
   error?: string | null;
   onPreviousEpisode?: () => void;
   onNextEpisode?: () => void;
@@ -63,6 +64,7 @@ export function WatchPlayer({
   posterImage,
   stream,
   isLoading = false,
+  isEpisodesLoading = false,
   error = null,
   onPreviousEpisode,
   onNextEpisode,
@@ -1208,6 +1210,7 @@ export function WatchPlayer({
 
       {/* No stream */}
       {!isLoading &&
+        !isEpisodesLoading &&
         !error &&
         !hasStream && (
           <div className="absolute inset-0 z-20 flex items-center justify-center">

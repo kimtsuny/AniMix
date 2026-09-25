@@ -126,16 +126,6 @@ export function WatchPageContent({
     season,
   ]);
 
-  if (isEpisodesLoading) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-white/50">
-          Loading episodes...
-        </p>
-      </div>
-    );
-  }
-
   if (episodesError) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -155,6 +145,7 @@ export function WatchPageContent({
         }
         stream={stream}
         isLoading={isStreamLoading}
+        isEpisodesLoading={isEpisodesLoading}
         error={streamError}
         onPreviousEpisode={
           handlePreviousEpisode
@@ -175,6 +166,7 @@ export function WatchPageContent({
           }
           selectedSeason={String(seasonNumber)}
           totalEpisodes={episodes.length}
+          isLoading={isEpisodesLoading}
           onEpisodeSelect={
             handleEpisodeSelect
           }

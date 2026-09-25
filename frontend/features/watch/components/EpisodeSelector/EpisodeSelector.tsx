@@ -14,6 +14,7 @@ interface EpisodeSelectorProps {
   selectedEpisodeNumber: number;
   selectedSeason: string;
   totalEpisodes: number;
+  isLoading?: boolean;
   onEpisodeSelect: (episode: Episode) => void;
   onSeasonChange: (season: string) => void;
 }
@@ -24,6 +25,7 @@ export function EpisodeSelector({
   selectedEpisodeNumber,
   selectedSeason,
   totalEpisodes,
+  isLoading = false,
   onEpisodeSelect,
   onSeasonChange,
 }: EpisodeSelectorProps) {
@@ -44,6 +46,7 @@ export function EpisodeSelector({
       <EpisodeList
         episodes={episodes}
         selectedEpisodeNumber={selectedEpisodeNumber}
+        isLoading={isLoading}
         onEpisodeSelect={onEpisodeSelect}
       />
     </section>

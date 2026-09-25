@@ -34,10 +34,20 @@ export function useEpisodes(
   const [selectedEpisode, setSelectedEpisode] =
     useState<Episode | null>(null);
 
+  const [loadedAnimeId, setLoadedAnimeId] = useState<number | null>(null);
+  const [loadedSeasonNumber, setLoadedSeasonNumber] = useState<number | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchEpisodes = async () => {
+  const isCurrentSeasonLoaded =
+    loadedAnimeId === animeId && loadedSeasonNumber === seasonNumber;
+
+  const currentEpisodes = isCurrentSeasonLoaded ? episodes : [];
+  const currentSelectedEpisode = isCurrentSeasonLoaded ? selectedEpisode : null;
+  const currentIsLoading = isLoading || !isCurrentSeasonLoaded;
+
+  const fetchEpisodes = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -50,6 +60,8 @@ export function useEpisodes(
       setAnime(data.anime);
       setSeasons(data.seasons);
       setEpisodes(data.season.episodes);
+      setLoadedAnimeId(animeId);
+      setLoadedSeasonNumber(seasonNumber);
 
       setSelectedEpisode((current) => {
         if (current) {
@@ -73,13 +85,64 @@ export function useEpisodes(
       setSeasons([]);
       setEpisodes([]);
       setSelectedEpisode(null);
+      setLoadedAnimeId(null);
+      setLoadedSeasonNumber(null);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [animeId, seasonNumber]);
 
   useEffect(() => {
-    fetchEpisodes();
+    let cancelled = false;
+
+    getSeasonEpisodes(animeId, seasonNumber)
+      .then((data) => {
+        if (cancelled) return;
+
+        setAnime(data.anime);
+        setSeasons(data.seasons);
+        setEpisodes(data.season.episodes);
+        setLoadedAnimeId(animeId);
+        setLoadedSeasonNumber(seasonNumber);
+        setError(null);
+
+        setSelectedEpisode((current) => {
+          if (current) {
+            return (
+              data.season.episodes.find(
+                (episode) => episode.id === current.id
+              ) ?? data.season.episodes[0] ?? null
+            );
+          }
+
+          return data.season.episodes[0] ?? null;
+        });
+      })
+      .catch((error) => {
+        if (cancelled) return;
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to load episodes";
+
+        setError(message);
+        setAnime(null);
+        setSeasons([]);
+        setEpisodes([]);
+        setSelectedEpisode(null);
+        setLoadedAnimeId(null);
+        setLoadedSeasonNumber(null);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [animeId, seasonNumber]);
 
   const selectEpisode = useCallback(
@@ -92,9 +155,9 @@ export function useEpisodes(
   return {
     anime,
     seasons,
-    episodes,
-    selectedEpisode,
-    isLoading,
+    episodes: currentEpisodes,
+    selectedEpisode: currentSelectedEpisode,
+    isLoading: currentIsLoading,
     error,
     selectEpisode,
     refetch: fetchEpisodes,

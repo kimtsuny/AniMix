@@ -40,9 +40,17 @@ export function useWatch(
 ): UseWatchResult {
   const [seasonNumber, setSeasonNumber] =
     useState(initialSeasonNumber);
+  const [prevInitialSeasonNumber, setPrevInitialSeasonNumber] =
+    useState(initialSeasonNumber);
 
   const [episodeId, setEpisodeId] =
     useState<number | null>(null);
+
+  if (initialSeasonNumber !== prevInitialSeasonNumber) {
+    setPrevInitialSeasonNumber(initialSeasonNumber);
+    setSeasonNumber(initialSeasonNumber);
+    setEpisodeId(null);
+  }
 
   const {
     anime,
