@@ -182,13 +182,13 @@ async function main() {
 
   console.log(
     "✅ Season 1 Episode 1 Stream:",
-    season1Stream.streams?.length ?? 0,
+    "streams" in season1Stream ? season1Stream.streams?.length ?? 0 : 0,
     "stream(s)"
   );
 
   console.log(
     "✅ Season 2 Episode 1 Stream:",
-    season2Stream.streams?.length ?? 0,
+    "streams" in season2Stream ? season2Stream.streams?.length ?? 0 : 0,
     "stream(s)"
   );
 

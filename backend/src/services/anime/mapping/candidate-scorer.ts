@@ -238,10 +238,20 @@ export function scoreCandidate(
       reasons.push(seasonReason);
     }
   } else {
-    // Neither specifies season -> both implied Season 1 / Base
-    seasonScore = 1.0;
-    seasonReason = "Both target and candidate represent root season";
-    reasons.push(seasonReason);
+    // Neither specifies a numeric season: evaluate title alignment for named arcs vs base seasons
+    if (maxTitleSim >= 0.80) {
+      seasonScore = 1.0;
+      seasonReason = "Exact title or named arc match";
+      reasons.push(seasonReason);
+    } else if (candidatePartNumber !== null && candidatePartNumber > 1 && baseTitleSim >= 0.85) {
+      seasonScore = 0.9;
+      seasonReason = `Candidate represents Part/Cour ${candidatePartNumber} of this season`;
+      reasons.push(seasonReason);
+    } else {
+      seasonScore = 0.0;
+      seasonReason = `Distinct named arcs or subtitles (title similarity ${(maxTitleSim * 100).toFixed(1)}% < 80%)`;
+      conflicts.push(seasonReason);
+    }
   }
 
   breakdown.seasonMatch = {
@@ -376,6 +386,14 @@ export function scoreCandidate(
     } else if (diff <= 2) {
       epScore = 0.8;
       epReason = `Episode count close (Target: ${exp}, Candidate: ${actual})`;
+    } else if (exp >= 3 && (Math.abs(actual - exp * 2) <= 2 || Math.abs(actual - exp * 3) <= 2)) {
+      epScore = 0.9;
+      epReason = `Episode count compatible with multi-audio / sub-dub catalog format (${actual} units for ${exp} episodes)`;
+      reasons.push(epReason);
+    } else if (actual > exp * 1.5 && actual - exp >= 5) {
+      epScore = 0.1;
+      epReason = `Candidate has far more episodes than target season (Target: ${exp}, Candidate: ${actual})`;
+      conflicts.push(epReason);
     } else {
       epScore = 0.4;
       epReason = `Episode count difference (Target: ${exp}, Candidate: ${actual})`;

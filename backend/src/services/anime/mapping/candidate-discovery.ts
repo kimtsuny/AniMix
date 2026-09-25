@@ -48,14 +48,19 @@ export interface CandidateDiscoveryResult {
   candidates: DiscoveredCandidate[];
 }
 
+// In-memory search cache to prevent duplicate queries during a mapping execution
+const searchCache = new Map<string, RawAnimeParadiseSearchItem[]>();
+
 /**
  * Generates deduplicated candidate search queries based on AniList metadata.
+ * Includes canonical titles, base titles, arc/subtitle segments, synonyms, and relation titles.
  */
 export function buildSearchQueries(anime: AniListAnime): string[] {
   const rawList: string[] = [];
 
   if (anime.title.english) rawList.push(anime.title.english);
   if (anime.title.romaji) rawList.push(anime.title.romaji);
+  if (anime.title.native) rawList.push(anime.title.native);
 
   // Add parsed base titles (e.g. "Attack on Titan Season 3" -> "Attack on Titan")
   if (anime.title.english) {
@@ -72,17 +77,35 @@ export function buildSearchQueries(anime: AniListAnime): string[] {
     }
   }
 
-  // Include AniList synonyms
-  if (anime.synonyms && anime.synonyms.length > 0) {
-    for (const syn of anime.synonyms.slice(0, 5)) {
-      if (syn && syn.length > 2) {
-        rawList.push(syn);
+  // Extract arc / subtitle segments (e.g. "Kimetsu no Yaiba: Yuukaku-hen" -> "Kimetsu no Yaiba", "Yuukaku-hen")
+  const titlesToSplit = [anime.title.english, anime.title.romaji].filter(Boolean) as string[];
+  for (const t of titlesToSplit) {
+    const segments = t.split(/[:\-–—]/).map((s) => s.trim()).filter((s) => s.length >= 3);
+    for (const seg of segments) {
+      rawList.push(seg);
+    }
+  }
+
+  // Include direct relation titles (PREQUEL, SEQUEL, PARENT)
+  if (anime.relations?.edges?.length) {
+    for (const edge of anime.relations.edges) {
+      if (
+        (edge.relationType === "PREQUEL" || edge.relationType === "SEQUEL" || edge.relationType === "PARENT") &&
+        edge.node?.title
+      ) {
+        if (edge.node.title.english) rawList.push(edge.node.title.english);
+        if (edge.node.title.romaji) rawList.push(edge.node.title.romaji);
       }
     }
   }
 
-  if (anime.title.native) {
-    rawList.push(anime.title.native);
+  // Include AniList synonyms
+  if (anime.synonyms && anime.synonyms.length > 0) {
+    for (const syn of anime.synonyms.slice(0, 8)) {
+      if (syn && syn.length > 2) {
+        rawList.push(syn);
+      }
+    }
   }
 
   // Deduplicate case-insensitively using normalized keys
@@ -91,7 +114,7 @@ export function buildSearchQueries(anime: AniListAnime): string[] {
 
   for (const q of rawList) {
     const trimmed = q.trim();
-    if (!trimmed) continue;
+    if (!trimmed || trimmed.length < 2) continue;
     const key = normalizeTitle(trimmed);
     if (!key || seen.has(key)) continue;
     seen.add(key);
@@ -103,11 +126,17 @@ export function buildSearchQueries(anime: AniListAnime): string[] {
 
 /**
  * Queries AnimeParadise API directly for a query string with limit=50.
+ * Results are cached in-memory during the execution.
  */
 async function fetchAnimeParadiseSearch(
   query: string,
-  timeoutMs = 15000
+  timeoutMs = 10000
 ): Promise<RawAnimeParadiseSearchItem[]> {
+  const cacheKey = normalizeTitle(query);
+  if (searchCache.has(cacheKey)) {
+    return searchCache.get(cacheKey)!;
+  }
+
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -124,13 +153,17 @@ async function fetchAnimeParadiseSearch(
 
     if (!res.ok) {
       console.warn(`[Candidate Discovery] AnimeParadise search failed (${res.status}) for "${query}"`);
+      searchCache.set(cacheKey, []);
       return [];
     }
 
     const json = (await res.json()) as { data?: RawAnimeParadiseSearchItem[] };
-    return json?.data ?? [];
+    const items = json?.data ?? [];
+    searchCache.set(cacheKey, items);
+    return items;
   } catch (error) {
     console.warn(`[Candidate Discovery] Error searching AnimeParadise for "${query}":`, error);
+    searchCache.set(cacheKey, []);
     return [];
   }
 }

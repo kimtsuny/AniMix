@@ -51,22 +51,41 @@ export async function getSeasonEpisodes(
 
     // ============================================================
     // 2. Anime does not exist
-    //    → Create Anime + Seasons + Provider mappings
+    //    → Run franchise candidate matching & persistence
     // ============================================================
 
     if (!anime) {
       console.log(
-        `[Anime Controller] Anime ${anilistId} not found. Mapping anime...`
+        `[Anime Controller] Anime #${anilistId} not found in database. Running franchise mapping...`
       );
 
-      const mapped = await mapAnimeToAnimeParadise(anilistId);
+      await mapAnimeToAnimeParadise(anilistId);
 
-      anime = mapped.anime;
+      // Re-query from database (never use stale in-memory objects)
+      anime = await prisma.anime.findUnique({
+        where: {
+          anilistId,
+        },
+      });
+
+      if (!anime) {
+        seasonByAnilistId = await prisma.animeSeason.findFirst({
+          where: {
+            anilistId,
+          },
+          include: {
+            anime: true,
+          },
+        });
+        if (seasonByAnilistId) {
+          anime = seasonByAnilistId.anime;
+        }
+      }
     }
 
     if (!anime) {
-      res.status(404).json({
-        message: `Anime ${anilistId} could not be resolved`,
+      res.status(500).json({
+        message: `[Anime Controller] Anime #${anilistId} could not be resolved or persisted`,
       });
       return;
     }
@@ -84,22 +103,23 @@ export async function getSeasonEpisodes(
       },
     });
 
-    if (!season && seasonByAnilistId) {
+    if (!season && seasonByAnilistId && seasonByAnilistId.animeId === anime.id) {
       season = seasonByAnilistId;
     }
 
     // ============================================================
     // 4. Season does not exist
-    //    → Re-run mapping to make sure seasons are available
+    //    → Run franchise mapping reconciliation
     // ============================================================
 
     if (!season) {
       console.log(
-        `[Anime Controller] Season ${seasonNumber} not found. Mapping anime...`
+        `[Anime Controller] Season ${seasonNumber} for Anime #${anilistId} not found. Running reconciliation...`
       );
 
-      await mapAnimeToAnimeParadise(anilistId);
+      await mapAnimeToAnimeParadise(anime.anilistId);
 
+      // Re-query AnimeSeason from database
       season = await prisma.animeSeason.findUnique({
         where: {
           animeId_number: {
@@ -108,11 +128,20 @@ export async function getSeasonEpisodes(
           },
         },
       });
+
+      if (!season) {
+        season = await prisma.animeSeason.findFirst({
+          where: {
+            animeId: anime.id,
+            anilistId,
+          },
+        });
+      }
     }
 
     if (!season) {
       res.status(404).json({
-        message: `Season ${seasonNumber} not found`,
+        message: `[Anime Controller] Season ${seasonNumber} for Anime #${anilistId} could not be resolved after mapping.`,
       });
       return;
     }

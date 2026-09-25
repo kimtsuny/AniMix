@@ -217,6 +217,12 @@ export function groupIntoLogicalSeasons(
 /**
  * Plans franchise mapping and multi-part episode offsets without touching the DB.
  */
+// In-memory episode cache to avoid repeated network calls for the same provider entry
+const episodeUnitsCache = new Map<
+  string,
+  Array<{ number: number; title: string; id: string }>
+>();
+
 export async function planFranchiseMapping(
   anilistId: number
 ): Promise<FranchisePlan> {
@@ -227,20 +233,18 @@ export async function planFranchiseMapping(
   const franchiseEntries = await collectFranchiseSeasons(rootAnime);
   const logicalGroups = groupIntoLogicalSeasons(franchiseEntries);
 
-  // Harvest candidates from root + requested
-  const rootDiscovery = await discoverCandidatesForAnime(rootAnime);
+  // Harvest candidates from all franchise entries
   const candidateMap = new Map<string, DiscoveredCandidate>();
-
-  for (const c of rootDiscovery.candidates) {
-    candidateMap.set(c.providerId, c);
-  }
-
-  if (requestedAnime.id !== rootAnime.id) {
-    const reqDiscovery = await discoverCandidatesForAnime(requestedAnime);
-    for (const c of reqDiscovery.candidates) {
-      if (!candidateMap.has(c.providerId)) {
-        candidateMap.set(c.providerId, c);
+  for (const entry of franchiseEntries) {
+    try {
+      const disc = await discoverCandidatesForAnime(entry);
+      for (const c of disc.candidates) {
+        if (!candidateMap.has(c.providerId)) {
+          candidateMap.set(c.providerId, c);
+        }
       }
+    } catch (err: any) {
+      console.warn(`[Planner] Candidate discovery failed for entry #${entry.id}: ${err.message}`);
     }
   }
 
@@ -276,9 +280,20 @@ export async function planFranchiseMapping(
 
     for (const match of matched) {
       try {
-        const units = await animeParadiseProvider.getEpisodes(
-          match.candidate.providerId
-        );
+        let units = episodeUnitsCache.get(match.candidate.providerId);
+        if (!units) {
+          const rawUnits = await animeParadiseProvider.getEpisodes(
+            match.candidate.providerId
+          );
+          if (rawUnits) {
+            units = rawUnits.map((u) => ({
+              number: u.number,
+              title: u.title,
+              id: u.id,
+            }));
+            episodeUnitsCache.set(match.candidate.providerId, units);
+          }
+        }
 
         if (!units || units.length === 0) {
           skippedCandidates.push({
@@ -312,22 +327,34 @@ export async function planFranchiseMapping(
       }
     }
 
-    // Sort parts deterministically by partNumber ASC
-    validParts.sort((a, b) => {
-      if (a.partNumber !== b.partNumber) return a.partNumber - b.partNumber;
-      return (a.candidate.year ?? 0) - (b.candidate.year ?? 0);
-    });
+    // Deduplicate parts by partNumber:
+    // If multiple candidates have the same partNumber (e.g. part 1), pick the best candidate (highest score)
+    const bestByPartNumber = new Map<number, (typeof validParts)[0]>();
+    for (const vp of validParts) {
+      const existing = bestByPartNumber.get(vp.partNumber);
+      if (!existing) {
+        bestByPartNumber.set(vp.partNumber, vp);
+      } else {
+        const existingScore =
+          scoredList.find((s) => s.candidate.providerId === existing.candidate.providerId)?.score ?? 0;
+        const newScore =
+          scoredList.find((s) => s.candidate.providerId === vp.candidate.providerId)?.score ?? 0;
+        if (newScore > existingScore) {
+          bestByPartNumber.set(vp.partNumber, vp);
+        }
+      }
+    }
 
-    // Assign unique partNumbers (1, 2...) if they collide
+    const uniqueParts = Array.from(bestByPartNumber.values()).sort(
+      (a, b) => a.partNumber - b.partNumber
+    );
+
     const partsWithOffsets: PlannedPart[] = [];
     let currentOffset = 0;
-    let assignedPartNum = 1;
 
-    for (const vp of validParts) {
-      const partNum = vp.partNumber >= assignedPartNum ? vp.partNumber : assignedPartNum;
-      assignedPartNum = partNum + 1;
-
-      const partEpCount = vp.actualUnits.length;
+    for (const vp of uniqueParts) {
+      const uniqueEpNumbers = new Set(vp.actualUnits.map((u) => u.providerNumber));
+      const partEpCount = uniqueEpNumbers.size > 0 ? uniqueEpNumbers.size : vp.actualUnits.length;
       const plannedEps = vp.actualUnits.map((u) => ({
         providerNumber: u.providerNumber,
         logicalNumber: u.providerNumber + currentOffset,
@@ -336,7 +363,7 @@ export async function planFranchiseMapping(
       }));
 
       partsWithOffsets.push({
-        partNumber: partNum,
+        partNumber: vp.partNumber,
         provider: "animeparadise",
         providerId: vp.candidate.providerId,
         title: vp.candidate.title,

@@ -364,4 +364,271 @@ describe("Candidate Scoring & Decision Logic", () => {
     assert.ok(res2.score > 0);
     assert.notStrictEqual(res1.candidate.providerId, res2.candidate.providerId);
   });
+
+  it("1. Attack on Titan: separates Season 3 (Part 1 & 2) from Final Season", () => {
+    const s3Target = makeMockAniList({
+      id: 99147,
+      title: { english: "Attack on Titan Season 3", romaji: "Shingeki no Kyojin Season 3" },
+      episodes: 22,
+      seasonYear: 2018,
+    });
+
+    const s3Part1Cand = makeMockCandidate({
+      id: "aot-s3-p1",
+      title: "Attack on Titan Season 3",
+      year: 2018,
+      episodes: 12,
+    });
+    const s3Part2Cand = makeMockCandidate({
+      id: "aot-s3-p2",
+      title: "Attack on Titan Season 3 Part 2",
+      year: 2019,
+      episodes: 10,
+    });
+    const finalCand = makeMockCandidate({
+      id: "aot-final",
+      title: "Attack on Titan The Final Season",
+      year: 2020,
+      episodes: 16,
+    });
+
+    assert.strictEqual(scoreCandidate(s3Target, s3Part1Cand).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(s3Target, s3Part2Cand).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(s3Target, finalCand).decision, "UNMAPPED");
+  });
+
+  it("2. SPY x FAMILY: matches Part 1 and Part 2, rejects Season 2", () => {
+    const s1Target = makeMockAniList({
+      id: 140960,
+      title: { english: "SPY x FAMILY", romaji: "SPY×FAMILY" },
+      episodes: 12,
+      seasonYear: 2022,
+    });
+
+    const part1 = makeMockCandidate({
+      id: "sxf-p1",
+      title: "SPY×FAMILY",
+      year: 2022,
+      episodes: 12,
+    });
+    const part2 = makeMockCandidate({
+      id: "sxf-p2",
+      title: "SPY x FAMILY Part 2",
+      year: 2022,
+      episodes: 13,
+    });
+    const season2 = makeMockCandidate({
+      id: "sxf-s2",
+      title: "SPY×FAMILY Season 2",
+      year: 2023,
+      episodes: 12,
+    });
+
+    assert.strictEqual(scoreCandidate(s1Target, part1).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(s1Target, part2).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(s1Target, season2).decision, "UNMAPPED");
+  });
+
+  it("3. Demon Slayer: distinguishes Season 1 from named sequel arcs and movie", () => {
+    const s1Target = makeMockAniList({
+      id: 101922,
+      title: {
+        english: "Demon Slayer: Kimetsu no Yaiba",
+        romaji: "Kimetsu no Yaiba",
+        native: "鬼滅の刃",
+      },
+      episodes: 26,
+      seasonYear: 2019,
+    });
+
+    const s1Cand = makeMockCandidate({
+      id: "ds-s1",
+      title: "Demon Slayer: Kimetsu no Yaiba",
+      altEnglish: "Demon Slayer: Kimetsu no Yaiba",
+      year: 2019,
+      episodes: 26,
+    });
+    const entertainmentCand = makeMockCandidate({
+      id: "ds-entertainment",
+      title: "Demon Slayer: Kimetsu no Yaiba Entertainment District Arc",
+      year: 2021,
+      episodes: 11,
+    });
+    const swordsmithCand = makeMockCandidate({
+      id: "ds-swordsmith",
+      title: "Demon Slayer: Kimetsu no Yaiba Swordsmith Village Arc",
+      year: 2023,
+      episodes: 11,
+    });
+    const hashiraCand = makeMockCandidate({
+      id: "ds-hashira",
+      title: "Demon Slayer: Kimetsu no Yaiba Hashira Training Arc",
+      year: 2024,
+      episodes: 8,
+    });
+    const movieCand = makeMockCandidate({
+      id: "ds-mugen-movie",
+      title: "Demon Slayer: Kimetsu no Yaiba - The Movie: Mugen Train",
+      year: 2020,
+      episodes: 1,
+    });
+
+    // S1 target must only match S1 candidate
+    assert.strictEqual(scoreCandidate(s1Target, s1Cand).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(s1Target, entertainmentCand).decision, "UNMAPPED");
+    assert.strictEqual(scoreCandidate(s1Target, swordsmithCand).decision, "UNMAPPED");
+    assert.strictEqual(scoreCandidate(s1Target, hashiraCand).decision, "UNMAPPED");
+    assert.strictEqual(scoreCandidate(s1Target, movieCand).decision, "UNMAPPED");
+
+    // Named Arc Target: Entertainment District Arc
+    const entertainmentTarget = makeMockAniList({
+      id: 129874,
+      title: {
+        english: "Demon Slayer: Kimetsu no Yaiba Entertainment District Arc",
+        romaji: "Kimetsu no Yaiba: Yuukaku-hen",
+      },
+      episodes: 11,
+      seasonYear: 2021,
+    });
+
+    assert.strictEqual(scoreCandidate(entertainmentTarget, entertainmentCand).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(entertainmentTarget, s1Cand).decision, "UNMAPPED");
+    assert.strictEqual(scoreCandidate(entertainmentTarget, swordsmithCand).decision, "UNMAPPED");
+  });
+
+  it("4. Jujutsu Kaisen: distinguishes Season 1, Season 2, and Movie", () => {
+    const s1Target = makeMockAniList({
+      id: 113415,
+      title: { english: "Jujutsu Kaisen", romaji: "Jujutsu Kaisen" },
+      episodes: 24,
+      seasonYear: 2020,
+    });
+
+    const s1Cand = makeMockCandidate({
+      id: "jjk-s1",
+      title: "Jujutsu Kaisen",
+      year: 2020,
+      episodes: 24,
+    });
+    const s2Cand = makeMockCandidate({
+      id: "jjk-s2",
+      title: "Jujutsu Kaisen 2nd Season",
+      year: 2023,
+      episodes: 23,
+    });
+    const movieCand = makeMockCandidate({
+      id: "jjk-movie",
+      title: "Jujutsu Kaisen 0 the Movie",
+      year: 2021,
+      episodes: 1,
+    });
+
+    assert.strictEqual(scoreCandidate(s1Target, s1Cand).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(s1Target, s2Cand).decision, "UNMAPPED");
+    assert.strictEqual(scoreCandidate(s1Target, movieCand).decision, "UNMAPPED");
+
+    const s2Target = makeMockAniList({
+      id: 145064,
+      title: { english: "Jujutsu Kaisen Season 2", romaji: "Jujutsu Kaisen 2nd Season" },
+      episodes: 23,
+      seasonYear: 2023,
+    });
+
+    assert.strictEqual(scoreCandidate(s2Target, s2Cand).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(s2Target, s1Cand).decision, "UNMAPPED");
+  });
+
+  it("5. Fruits Basket: distinguishes 2001 and 2019 versions cleanly", () => {
+    const fb2001Target = makeMockAniList({
+      id: 120,
+      title: { english: "Fruits Basket (2001)", romaji: "Fruits Basket" },
+      episodes: 26,
+      seasonYear: 2001,
+    });
+    const fb2019Cand = makeMockCandidate({
+      id: "fb-2019",
+      title: "Fruits Basket (2019)",
+      year: 2019,
+      episodes: 25,
+    });
+    const fb2001Cand = makeMockCandidate({
+      id: "fb-2001",
+      title: "Fruits Basket",
+      year: 2001,
+      episodes: 26,
+    });
+
+    assert.strictEqual(scoreCandidate(fb2001Target, fb2001Cand).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(fb2001Target, fb2019Cand).decision, "UNMAPPED");
+  });
+
+  it("6. Bleach: distinguishes original series from Thousand-Year Blood War", () => {
+    const originalTarget = makeMockAniList({
+      id: 269,
+      title: { english: "Bleach", romaji: "Bleach" },
+      episodes: 366,
+      seasonYear: 2004,
+    });
+    const tybwTarget = makeMockAniList({
+      id: 114446,
+      title: {
+        english: "Bleach: Thousand-Year Blood War",
+        romaji: "Bleach: Sennen Kessen-hen",
+      },
+      episodes: 13,
+      seasonYear: 2022,
+    });
+
+    const originalCand = makeMockCandidate({
+      id: "bleach-orig",
+      title: "Bleach",
+      year: 2004,
+      episodes: 366,
+    });
+    const tybwCand = makeMockCandidate({
+      id: "bleach-tybw",
+      title: "Bleach: Thousand-Year Blood War",
+      year: 2022,
+      episodes: 13,
+    });
+
+    assert.strictEqual(scoreCandidate(originalTarget, originalCand).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(originalTarget, tybwCand).decision, "UNMAPPED");
+
+    assert.strictEqual(scoreCandidate(tybwTarget, tybwCand).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(tybwTarget, originalCand).decision, "UNMAPPED");
+  });
+
+  it("7. Naruto: separates original from Shippuden and prevents movies from becoming TV seasons", () => {
+    const narutoTarget = makeMockAniList({
+      id: 20,
+      title: { english: "Naruto", romaji: "Naruto" },
+      episodes: 220,
+      seasonYear: 2002,
+    });
+
+    const narutoCand = makeMockCandidate({
+      id: "naruto-orig",
+      title: "Naruto",
+      year: 2002,
+      episodes: 220,
+    });
+    const shippudenCand = makeMockCandidate({
+      id: "naruto-shippuden",
+      title: "Naruto: Shippuden",
+      year: 2007,
+      episodes: 500,
+    });
+    const movieCand = makeMockCandidate({
+      id: "naruto-movie",
+      title: "Naruto the Movie: Ninja Clash in the Land of Snow",
+      year: 2004,
+      episodes: 1,
+    });
+
+    assert.strictEqual(scoreCandidate(narutoTarget, narutoCand).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(narutoTarget, shippudenCand).decision, "UNMAPPED");
+    assert.strictEqual(scoreCandidate(narutoTarget, movieCand).decision, "UNMAPPED");
+  });
 });
+

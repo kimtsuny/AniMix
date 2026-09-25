@@ -16,22 +16,29 @@ export interface PersistResult {
 }
 
 /**
- * Persists a fully planned franchise mapping to the database idempotently.
+ * Persists a fully planned franchise mapping to the database idempotently and self-consistently.
  *
- * Rules:
- * 1. Preserves existing Anime and AnimeSeason records (no destructive resets).
- * 2. Populates AnimeSeason.anilistId with specific season AniList IDs.
- * 3. Creates/updates AnimeSeasonProviderMapping for every matched part.
- * 4. Preserves legacy AnimeSeason.provider/providerId fields pointing to Part 1.
- * 5. Synchronizes multi-part episodes with correct episode offsets.
+ * Invariants guaranteed:
+ * 1. Root Anime is persisted.
+ * 2. Every planned logical season exists as an AnimeSeason record in the DB (even if provider has 0 parts).
+ * 3. Specific AniList IDs are stored on AnimeSeason.anilistId.
+ * 4. Stale provider mappings from previous runs are removed/re-parented.
+ * 5. Episodes are synchronized with correct offsets and orphan episodes pruned.
+ * 6. Post-persistence state is verified before returning.
  */
 export async function persistFranchiseMapping(
   anilistId: number
 ): Promise<PersistResult> {
+  console.log(`[Anime Mapping] START anilistId=${anilistId}`);
+
   const plan = await planFranchiseMapping(anilistId);
 
   const rootAnime = plan.rootAnime;
   const requestedAnime = plan.requestedAnime;
+
+  console.log(
+    `[Anime Mapping] Planned seasons=${plan.seasons.length} for root anime #${rootAnime.id} ("${rootAnime.title.english || rootAnime.title.romaji}")`
+  );
 
   // 1. Upsert Root Anime
   const rootTitle =
@@ -66,16 +73,14 @@ export async function persistFranchiseMapping(
 
   // 2. Persist Planned Logical Seasons & Parts
   for (const plannedSeason of plan.seasons) {
-    if (plannedSeason.parts.length === 0) {
-      conflicts.push(
-        `Season ${plannedSeason.seasonNumber} ("${plannedSeason.title}") has 0 matched provider parts.`
-      );
-      continue;
-    }
+    console.log(
+      `[Anime Mapping] Persisting season: anilistId=${plannedSeason.anilistId} number=${plannedSeason.seasonNumber} title="${plannedSeason.title}"`
+    );
 
-    const primaryPart = plannedSeason.parts[0];
+    const primaryPart =
+      plannedSeason.parts.length > 0 ? plannedSeason.parts[0] : null;
 
-    // Upsert AnimeSeason
+    // Upsert AnimeSeason - guarantee every logical season exists in DB
     const dbSeason = await prisma.animeSeason.upsert({
       where: {
         animeId_number: {
@@ -86,32 +91,48 @@ export async function persistFranchiseMapping(
       update: {
         title: plannedSeason.title,
         anilistId: plannedSeason.anilistId,
-        // Preserve legacy fields pointing to primary part
-        provider: primaryPart.provider,
-        providerId: primaryPart.providerId,
+        provider: primaryPart?.provider ?? null,
+        providerId: primaryPart?.providerId ?? null,
       },
       create: {
         animeId: dbAnime.id,
         number: plannedSeason.seasonNumber,
         title: plannedSeason.title,
         anilistId: plannedSeason.anilistId,
-        provider: primaryPart.provider,
-        providerId: primaryPart.providerId,
+        provider: primaryPart?.provider ?? null,
+        providerId: primaryPart?.providerId ?? null,
       },
     });
 
+    if (plannedSeason.parts.length === 0) {
+      conflicts.push(
+        `Season ${plannedSeason.seasonNumber} ("${plannedSeason.title}") has 0 matched provider parts.`
+      );
+      // Clean up any stale mappings for this season
+      await prisma.animeSeasonProviderMapping.deleteMany({
+        where: { seasonId: dbSeason.id },
+      });
+      console.log(`[Anime Mapping] Provider mappings=0 (no provider content)`);
+      savedSeasons.push(dbSeason);
+      continue;
+    }
+
+    const activePartNumbers = plannedSeason.parts.map((p) => p.partNumber);
+
     // Upsert each Provider Part mapping
     for (const part of plannedSeason.parts) {
-      const existingByProviderId = await prisma.animeSeasonProviderMapping.findUnique({
-        where: {
-          provider_providerId: {
-            provider: part.provider,
-            providerId: part.providerId,
+      const existingByProviderId =
+        await prisma.animeSeasonProviderMapping.findUnique({
+          where: {
+            provider_providerId: {
+              provider: part.provider,
+              providerId: part.providerId,
+            },
           },
-        },
-      });
+        });
 
       if (existingByProviderId) {
+        // Re-parent or update existing mapping
         await prisma.animeSeasonProviderMapping.update({
           where: {
             id: existingByProviderId.id,
@@ -151,17 +172,61 @@ export async function persistFranchiseMapping(
       mappingsCount++;
     }
 
+    // Clean up any stale provider mappings on this season from an earlier incorrect mapping
+    await prisma.animeSeasonProviderMapping.deleteMany({
+      where: {
+        seasonId: dbSeason.id,
+        partNumber: { notIn: activePartNumbers },
+      },
+    });
+
+    console.log(
+      `[Anime Mapping] Provider mappings=${plannedSeason.parts.length} (parts: ${activePartNumbers.join(", ")})`
+    );
+
     // 3. Synchronize episodes using the multi-part mappings
     const syncedEpisodes = await syncSeasonEpisodes(dbSeason.id);
     totalEpisodesSynced += syncedEpisodes.length;
+    console.log(
+      `[Anime Mapping] Episodes synchronized=${syncedEpisodes.length} for season ${plannedSeason.seasonNumber}`
+    );
 
     savedSeasons.push(dbSeason);
   }
 
+  // 4. Post-persistence Verification
+  const allDbSeasons = await prisma.animeSeason.findMany({
+    where: { animeId: dbAnime.id },
+    orderBy: { number: "asc" },
+  });
+
+  const animeExists = !!dbAnime.id;
+  const allPlannedSeasonsExist = plan.seasons.every((ps) =>
+    allDbSeasons.some((dbs) => dbs.number === ps.seasonNumber)
+  );
+  const requestedSeasonExists = allDbSeasons.some(
+    (s) => s.anilistId === requestedAnime.id || s.number === 1
+  );
+
+  console.log(
+    `[Anime Mapping] VERIFY: animeExists=${animeExists} seasons=${allDbSeasons.length}/${plan.seasons.length} requested season exists=${requestedSeasonExists}`
+  );
+
+  if (!animeExists || !allPlannedSeasonsExist) {
+    console.error(
+      `[Anime Mapping] INCONSISTENT STATE: Expected ${plan.seasons.length} seasons for anime #${anilistId}, but found ${allDbSeasons.length} in DB.`
+    );
+    throw new Error(
+      `[Anime Mapping] INCONSISTENT STATE: Franchise mapping failed to establish all planned seasons for anime #${anilistId}`
+    );
+  }
+
+  console.log(`[Anime Mapping] COMPLETE anilistId=${anilistId}`);
+
   // Determine which season was requested by the user
-  const matchingSeason = savedSeasons.find(
-    (s) => s.anilistId === requestedAnime.id
-  ) ?? savedSeasons[0];
+  const matchingSeason =
+    allDbSeasons.find((s) => s.anilistId === requestedAnime.id) ??
+    allDbSeasons[0];
 
   return {
     anime: dbAnime,
@@ -173,7 +238,7 @@ export async function persistFranchiseMapping(
         requestedAnime.title.native,
       season: matchingSeason?.number ?? 1,
     },
-    seasons: savedSeasons,
+    seasons: allDbSeasons,
     mappingsCreatedOrUpdated: mappingsCount,
     episodesSynced: totalEpisodesSynced,
     conflicts,

@@ -128,6 +128,25 @@ export async function syncSeasonEpisodes(
       }
     }
 
+    // Clean up any obsolete episodes for this season that exceed the total episode count of active parts
+    const maxLogicalNumber = Math.max(
+      ...seasonProviderMappings.map((p) => p.episodeOffset + p.episodeCount),
+      0
+    );
+    if (maxLogicalNumber > 0) {
+      const pruned = await prisma.episode.deleteMany({
+        where: {
+          seasonId,
+          number: { gt: maxLogicalNumber },
+        },
+      });
+      if (pruned.count > 0) {
+        console.log(
+          `[Episodes] Pruned ${pruned.count} obsolete episode(s) exceeding logical max ${maxLogicalNumber} for season ${seasonId}`
+        );
+      }
+    }
+
     return prisma.episode.findMany({
       where: {
         seasonId,

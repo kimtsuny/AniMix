@@ -1,7 +1,7 @@
-import { syncAnimeEpisodes } from "./episode.service.js";
+import { syncSeasonEpisodes } from "./episode.service.js";
 
 async function main() {
-  const episodes = await syncAnimeEpisodes(1);
+  const episodes = await syncSeasonEpisodes(1);
 
   console.log(`Saved episodes: ${episodes.length}`);
 

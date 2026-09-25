@@ -55,26 +55,34 @@ async function run() {
     const parsedDesc = parts.length > 0 ? parts.join(" | ") : "Base / S1";
 
     const badge =
-      sc.decision === "MATCHED"
+      cand.parsedMain.isMovie || cand.parsedEnglish?.isMovie
+        ? (sc.decision === "MATCHED" ? "🎬 MOVIE (MATCHED)" : "🎬 MOVIE (UNMAPPED)")
+        : sc.decision === "MATCHED"
         ? "✅ MATCHED"
         : sc.decision === "AMBIGUOUS"
         ? "⚠️ AMBIGUOUS"
         : "❌ UNMAPPED";
 
     console.log(`\n[${i + 1}] ${badge}  (Score: ${(sc.score * 100).toFixed(1)}%)`);
-    console.log(`    Title:        "${cand.title}"`);
+    console.log(`    Provider ID:       ${cand.providerId}`);
+    console.log(`    Provider Title:    "${cand.title}"`);
     if (cand.alternativeTitle?.english) {
-      console.log(`    Alt Title:    "${cand.alternativeTitle.english}"`);
+      console.log(`    Alt Title (EN):    "${cand.alternativeTitle.english}"`);
     }
-    console.log(`    Provider ID:  ${cand.providerId}`);
-    console.log(`    Year:         ${cand.year ?? "Unknown"} | Episodes: ${cand.episodeCount}`);
-    console.log(`    Parsed Tags:  ${parsedDesc} (Base: "${parsed.baseTitle}")`);
+    console.log(`    Provider Year:     ${cand.year ?? "Unknown"}`);
+    console.log(`    Episode Count:     ${cand.episodeCount}`);
+    console.log(`    Detected Season:   ${parsed.explicitSeasonNumber ?? parsed.ordinalSeasonNumber ?? "None (Base/Arc)"}`);
+    console.log(`    Detected Part:     ${parsed.partNumber ?? "None"}`);
+    console.log(`    Detected Cour:     ${parsed.courNumber ?? "None"}`);
+    console.log(`    Movie Flag:        ${parsed.isMovie ? "YES (Movie)" : "NO"}`);
+    console.log(`    Final Season Flag: ${parsed.isFinalSeason ? "YES (Final Season)" : "NO"}`);
+    console.log(`    Decision:          ${sc.decision}`);
 
     if (sc.reasons.length > 0) {
-      console.log(`    Reasons:      ${sc.reasons.join(" • ")}`);
+      console.log(`    Reasons:           ${sc.reasons.join(" • ")}`);
     }
     if (sc.conflicts.length > 0) {
-      console.log(`    Conflicts:    ${sc.conflicts.join(" • ")}`);
+      console.log(`    Conflicts:         ${sc.conflicts.join(" • ")}`);
     }
   }
 

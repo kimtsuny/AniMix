@@ -128,13 +128,29 @@ async function resolveRootAnime(
   return current;
 }
 
-import { persistFranchiseMapping } from "./mapping/phase3-persistence.js";
+import { persistFranchiseMapping, type PersistResult } from "./mapping/phase3-persistence.js";
+
+const inFlightMappings = new Map<number, Promise<PersistResult>>();
 
 export async function mapAnimeToAnimeParadise(
   anilistId: number
-) {
-  console.log(`[Anime Mapping] Executing Phase 3 candidate matching & persistence for #${anilistId}...`);
-  return persistFranchiseMapping(anilistId);
+): Promise<PersistResult> {
+  const existing = inFlightMappings.get(anilistId);
+  if (existing) {
+    console.log(`[Anime Mapping] Awaiting in-flight mapping promise for #${anilistId}...`);
+    return existing;
+  }
+
+  const promise = (async () => {
+    try {
+      return await persistFranchiseMapping(anilistId);
+    } finally {
+      inFlightMappings.delete(anilistId);
+    }
+  })();
+
+  inFlightMappings.set(anilistId, promise);
+  return promise;
 }
 
 export async function legacyMapAnimeToAnimeParadise(
