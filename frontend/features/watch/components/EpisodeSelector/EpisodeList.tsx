@@ -36,7 +36,7 @@ export function EpisodeList({
 
   if (isLoading) {
     return (
-      <div className="relative w-full">
+      <div className="relative w-full min-h-[120px] sm:min-h-[140px] md:min-h-[160px] lg:min-h-[180px]">
         <div className="overflow-hidden w-full -mx-1.5 px-1.5 py-1.5 -my-1.5">
           <div className="flex gap-3 md:gap-3.5">
             {[1, 2, 3, 4, 5].map((i) => (
@@ -55,14 +55,14 @@ export function EpisodeList({
 
   if (!episodes || episodes.length === 0) {
     return (
-      <div className="py-8 text-center text-white/40 text-sm">
+      <div className="relative w-full min-h-[120px] sm:min-h-[140px] md:min-h-[160px] lg:min-h-[180px] flex items-center justify-center py-8 text-center text-white/40 text-sm">
         No episodes found.
       </div>
     );
   }
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full min-h-[120px] sm:min-h-[140px] md:min-h-[160px] lg:min-h-[180px]">
       {/* Embla Carousel Viewport */}
       <div
         ref={emblaRef}

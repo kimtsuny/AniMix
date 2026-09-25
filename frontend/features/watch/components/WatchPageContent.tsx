@@ -26,6 +26,7 @@ export function WatchPageContent({
     seasons,
     episodes,
     selectedEpisode,
+    selectedEpisodeNumber,
     seasonNumber: activeSeasonNumber,
     stream,
     isEpisodesLoading,
@@ -112,10 +113,7 @@ export function WatchPageContent({
         <EpisodeSelector
           episodes={episodes}
           seasons={seasons}
-          selectedEpisodeNumber={
-            selectedEpisode?.number ??
-            episodeNumber
-          }
+          selectedEpisodeNumber={selectedEpisodeNumber}
           selectedSeason={String(activeSeasonNumber)}
           totalEpisodes={episodes.length}
           isLoading={isEpisodesLoading}

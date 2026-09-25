@@ -11,6 +11,7 @@ interface UseWatchResult {
   episodes: ReturnType<typeof useEpisodes>["episodes"];
 
   selectedEpisode: Episode | null;
+  selectedEpisodeNumber: number;
   seasonNumber: number;
 
   stream: ReturnType<typeof useStream>["data"];
@@ -195,6 +196,8 @@ export function useWatch(
     seasons,
     episodes,
     selectedEpisode,
+    selectedEpisodeNumber:
+      selectedEpisode?.number ?? targetEpisodeNumberRef.current,
     seasonNumber,
 
     stream,

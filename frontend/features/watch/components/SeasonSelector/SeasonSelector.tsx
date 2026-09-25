@@ -34,14 +34,15 @@ export function SeasonSelector({
           return (
             <button
               key={season.id}
+              type="button"
               role="tab"
               aria-selected={isSelected}
               onClick={() => onSeasonChange(String(season.number))}
               className={cn(
-                "rounded-lg text-xs md:text-sm font-medium whitespace-nowrap transition-all duration-200 shrink-0 cursor-pointer flex items-center justify-center",
+                "rounded-lg text-xs md:text-sm font-medium whitespace-nowrap transition-all duration-200 shrink-0 cursor-pointer flex items-center justify-center py-2 md:py-2.5",
                 isSelected
-                  ? "px-5 py-2 md:py-2.5 bg-white/[0.08] text-white border border-white/80 shadow-[0_0_12px_rgba(255,255,255,0.12)]"
-                  : "px-3.5 py-1.5 md:py-2 bg-white/[0.03] text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.06] border border-white/[0.06]"
+                  ? "px-5 bg-white/[0.08] text-white border border-white/80 shadow-[0_0_12px_rgba(255,255,255,0.12)]"
+                  : "px-3.5 bg-white/[0.03] text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.06] border border-white/[0.06]"
               )}
             >
               {label}
