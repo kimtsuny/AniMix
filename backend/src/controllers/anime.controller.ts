@@ -33,6 +33,22 @@ export async function getSeasonEpisodes(
       },
     });
 
+    let seasonByAnilistId = null;
+    if (!anime) {
+      seasonByAnilistId = await prisma.animeSeason.findFirst({
+        where: {
+          anilistId,
+        },
+        include: {
+          anime: true,
+        },
+      });
+
+      if (seasonByAnilistId) {
+        anime = seasonByAnilistId.anime;
+      }
+    }
+
     // ============================================================
     // 2. Anime does not exist
     //    → Create Anime + Seasons + Provider mappings
@@ -48,6 +64,13 @@ export async function getSeasonEpisodes(
       anime = mapped.anime;
     }
 
+    if (!anime) {
+      res.status(404).json({
+        message: `Anime ${anilistId} could not be resolved`,
+      });
+      return;
+    }
+
     // ============================================================
     // 3. Find requested season
     // ============================================================
@@ -60,6 +83,10 @@ export async function getSeasonEpisodes(
         },
       },
     });
+
+    if (!season && seasonByAnilistId) {
+      season = seasonByAnilistId;
+    }
 
     // ============================================================
     // 4. Season does not exist

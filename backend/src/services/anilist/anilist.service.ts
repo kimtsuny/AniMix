@@ -26,6 +26,12 @@ const ANIME_BY_ID_QUERY = `
       status
       season
       seasonYear
+      startDate {
+        year
+        month
+        day
+      }
+      synonyms
       genres
 
       relations {
@@ -87,6 +93,12 @@ export interface AniListAnime {
   status: string | null;
   season: string | null;
   seasonYear: number | null;
+  startDate?: {
+    year: number | null;
+    month: number | null;
+    day: number | null;
+  } | null;
+  synonyms?: string[];
   genres: string[];
 
   relations: {

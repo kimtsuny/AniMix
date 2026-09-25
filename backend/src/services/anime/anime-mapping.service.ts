@@ -128,12 +128,18 @@ async function resolveRootAnime(
   return current;
 }
 
+import { persistFranchiseMapping } from "./mapping/phase3-persistence.js";
+
 export async function mapAnimeToAnimeParadise(
   anilistId: number
 ) {
-  // ============================================================
-  // 1. Get requested anime from AniList
-  // ============================================================
+  console.log(`[Anime Mapping] Executing Phase 3 candidate matching & persistence for #${anilistId}...`);
+  return persistFranchiseMapping(anilistId);
+}
+
+export async function legacyMapAnimeToAnimeParadise(
+  anilistId: number
+) {
 
   const requestedAnime = await getAnimeById(anilistId);
 

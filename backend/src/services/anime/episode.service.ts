@@ -13,30 +13,150 @@ export async function syncSeasonEpisodes(
   });
 
   if (!season) {
-    throw new Error(
-      `Anime season ${seasonId} not found`
-    );
+    throw new Error(`Anime season ${seasonId} not found`);
   }
 
-  // 2. Make sure the season has a provider mapping
+  // 2. Check for multi-part provider mappings (Phase 3 architecture)
+  const seasonProviderMappings = await prisma.animeSeasonProviderMapping.findMany({
+    where: {
+      seasonId,
+    },
+    orderBy: {
+      partNumber: "asc",
+    },
+  });
+
+  if (seasonProviderMappings.length > 0) {
+    console.log(
+      `[Episodes] Found ${seasonProviderMappings.length} provider parts for season ${seasonId}`
+    );
+
+    for (const partMapping of seasonProviderMappings) {
+      if (partMapping.provider !== "animeparadise") {
+        console.warn(
+          `[Episodes] Unsupported provider "${partMapping.provider}" for season ${seasonId}, skipping`
+        );
+        continue;
+      }
+
+      let episodes: AnimeParadiseEpisode[] = [];
+      try {
+        episodes = (await animeParadiseProvider.getEpisodes(
+          partMapping.providerId
+        )) as AnimeParadiseEpisode[];
+      } catch (err: any) {
+        console.error(
+          `[Episodes] Failed to fetch episodes for part ${partMapping.partNumber} (${partMapping.providerId}):`,
+          err.message
+        );
+        continue;
+      }
+
+      if (episodes.length === 0) {
+        console.warn(
+          `[Episodes] Provider returned 0 episodes for part ${partMapping.partNumber} (${partMapping.providerId})`
+        );
+        continue;
+      }
+
+      console.log(
+        `[Episodes] Syncing ${episodes.length} episodes for part ${partMapping.partNumber} (offset: ${partMapping.episodeOffset})`
+      );
+
+      for (const ep of episodes) {
+        const logicalEpisodeNumber = ep.number + partMapping.episodeOffset;
+        const thumbnail = ep.thumbnail ?? null;
+
+        // Upsert logical Episode using seasonId + logicalEpisodeNumber
+        const dbEpisode = await prisma.episode.upsert({
+          where: {
+            seasonId_number: {
+              seasonId,
+              number: logicalEpisodeNumber,
+            },
+          },
+          update: {
+            title: ep.title,
+            thumbnail: thumbnail ?? undefined,
+          },
+          create: {
+            seasonId,
+            number: logicalEpisodeNumber,
+            title: ep.title,
+            thumbnail,
+          },
+        });
+
+        // Upsert EpisodeProviderMapping with exact providerSeasonMappingId
+        const existingEpMapping = await prisma.episodeProviderMapping.findUnique({
+          where: {
+            provider_providerId: {
+              provider: partMapping.provider,
+              providerId: ep.id,
+            },
+          },
+        });
+
+        if (existingEpMapping) {
+          await prisma.episodeProviderMapping.update({
+            where: { id: existingEpMapping.id },
+            data: {
+              episodeId: dbEpisode.id,
+              providerSeasonMappingId: partMapping.id,
+            },
+          });
+        } else {
+          await prisma.episodeProviderMapping.upsert({
+            where: {
+              episodeId_provider: {
+                episodeId: dbEpisode.id,
+                provider: partMapping.provider,
+              },
+            },
+            update: {
+              providerId: ep.id,
+              providerSeasonMappingId: partMapping.id,
+            },
+            create: {
+              episodeId: dbEpisode.id,
+              provider: partMapping.provider,
+              providerId: ep.id,
+              providerSeasonMappingId: partMapping.id,
+            },
+          });
+        }
+      }
+    }
+
+    return prisma.episode.findMany({
+      where: {
+        seasonId,
+      },
+      include: {
+        providerMappings: true,
+      },
+      orderBy: {
+        number: "asc",
+      },
+    });
+  }
+
+  // 3. Fallback to legacy single-provider season mapping
   if (!season.provider || !season.providerId) {
     throw new Error(
       `No provider mapping found for season ${seasonId}`
     );
   }
 
-  // 3. Currently AnimeParadise is our provider
   if (season.provider !== "animeparadise") {
     throw new Error(
       `Unsupported episode provider: ${season.provider}`
     );
   }
 
-  // 4. Fetch episodes from AnimeParadise
-  const episodes =
-    await animeParadiseProvider.getEpisodes(
-      season.providerId
-    ) as AnimeParadiseEpisode[];
+  const episodes = (await animeParadiseProvider.getEpisodes(
+    season.providerId
+  )) as AnimeParadiseEpisode[];
 
   if (episodes.length === 0) {
     throw new Error(
@@ -45,10 +165,9 @@ export async function syncSeasonEpisodes(
   }
 
   console.log(
-    `[Episodes] Found ${episodes.length} episodes for season ${seasonId}`
+    `[Episodes] Fallback legacy: Found ${episodes.length} episodes for season ${seasonId}`
   );
 
-  // 5. Save episodes
   for (const episode of episodes) {
     const thumbnail = episode.thumbnail ?? null;
 
@@ -59,12 +178,10 @@ export async function syncSeasonEpisodes(
           number: episode.number,
         },
       },
-
       update: {
         title: episode.title,
         thumbnail,
       },
-
       create: {
         seasonId,
         number: episode.number,
@@ -73,8 +190,6 @@ export async function syncSeasonEpisodes(
       },
     });
 
-
-    // 6. Save provider mapping
     await prisma.episodeProviderMapping.upsert({
       where: {
         episodeId_provider: {
@@ -82,11 +197,9 @@ export async function syncSeasonEpisodes(
           provider: "animeparadise",
         },
       },
-
       update: {
         providerId: episode.id,
       },
-
       create: {
         episodeId: dbEpisode.id,
         provider: "animeparadise",
@@ -95,16 +208,13 @@ export async function syncSeasonEpisodes(
     });
   }
 
-  // 7. Return saved episodes
   return prisma.episode.findMany({
     where: {
       seasonId,
     },
-
     include: {
       providerMappings: true,
     },
-
     orderBy: {
       number: "asc",
     },

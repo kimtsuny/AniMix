@@ -45,7 +45,11 @@ export async function getStream(
     },
 
     include: {
-      providerMappings: true,
+      providerMappings: {
+        include: {
+          providerSeasonMapping: true,
+        },
+      },
     },
   });
 
@@ -59,7 +63,14 @@ export async function getStream(
     );
   }
 
-  for (const mapping of episode.providerMappings) {
+  // Prioritize mappings with an active providerSeasonMapping from Phase 3
+  const sortedMappings = [...episode.providerMappings].sort((a, b) => {
+    if (a.providerSeasonMappingId && !b.providerSeasonMappingId) return -1;
+    if (!a.providerSeasonMappingId && b.providerSeasonMappingId) return 1;
+    return 0;
+  });
+
+  for (const mapping of sortedMappings) {
     const provider = providers.find(
       (item) => item.name === mapping.provider
     );
@@ -82,7 +93,7 @@ export async function getStream(
       );
 
       const normalizedResult =
-        normalizeStreamResult(rawResult);
+        normalizeStreamResult(rawResult as any);
 
       if (
         normalizedResult.type === "video" &&

@@ -31,19 +31,22 @@ model Anime {
 }
 
 model AnimeSeason {
-  id         Int       @id @default(autoincrement())
-  animeId    Int
-  number     Int
-  title      String?
-  provider   String?
-  providerId String?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  anime      Anime     @relation(fields: [animeId], references: [id], onDelete: Cascade)
-  episodes   Episode[]
+  id               Int                          @id @default(autoincrement())
+  animeId          Int
+  anilistId        Int?
+  number           Int
+  title            String?
+  provider         String?
+  providerId       String?
+  createdAt        DateTime                     @default(now())
+  updatedAt        DateTime                     @updatedAt
+  anime            Anime                        @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  episodes         Episode[]
+  providerMappings AnimeSeasonProviderMapping[]
 
   @@unique([animeId, number])
   @@unique([provider, providerId])
+  @@index([anilistId])
 }
 
 model Favorite {
@@ -68,6 +71,24 @@ model AnimeProviderMapping {
   @@unique([provider, providerId])
 }
 
+model AnimeSeasonProviderMapping {
+  id                      Int                      @id @default(autoincrement())
+  seasonId                Int
+  provider                String
+  providerId              String
+  partNumber              Int                      @default(1)
+  episodeOffset           Int                      @default(0)
+  episodeCount            Int                      @default(0)
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  season                  AnimeSeason              @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  episodeProviderMappings EpisodeProviderMapping[]
+
+  @@unique([seasonId, provider, partNumber])
+  @@unique([provider, providerId])
+  @@index([seasonId])
+}
+
 model Episode {
   id               Int                      @id @default(autoincrement())
   number           Int
@@ -83,12 +104,16 @@ model Episode {
 }
 
 model EpisodeProviderMapping {
-  id         Int     @id @default(autoincrement())
-  episodeId  Int
-  provider   String
-  providerId String
-  episode    Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  id                      Int                         @id @default(autoincrement())
+  episodeId               Int
+  provider                String
+  providerId              String
+  providerSeasonMappingId Int?
+  episode                 Episode                     @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  providerSeasonMapping   AnimeSeasonProviderMapping? @relation(fields: [providerSeasonMappingId], references: [id], onDelete: SetNull)
 
   @@unique([episodeId, provider])
   @@unique([provider, providerId])
+  @@index([providerSeasonMappingId])
 }
+
