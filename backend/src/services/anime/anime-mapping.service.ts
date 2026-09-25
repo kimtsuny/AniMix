@@ -128,9 +128,42 @@ async function resolveRootAnime(
   return current;
 }
 
-import { persistFranchiseMapping, type PersistResult } from "./mapping/phase3-persistence.js";
+import {
+  persistFranchiseMapping,
+  persistRequestedSeason,
+  type PersistResult,
+} from "./mapping/phase3-persistence.js";
 
 const inFlightMappings = new Map<number, Promise<PersistResult>>();
+const inFlightSeasonMappings = new Map<
+  string,
+  Promise<Awaited<ReturnType<typeof persistRequestedSeason>>>
+>();
+
+export async function mapRequestedSeason(
+  anilistId: number,
+  seasonNumber: number
+): Promise<Awaited<ReturnType<typeof persistRequestedSeason>>> {
+  const key = `${anilistId}:${seasonNumber}`;
+  const existing = inFlightSeasonMappings.get(key);
+  if (existing) {
+    console.log(
+      `[Anime Mapping] Awaiting in-flight requested-season promise for #${key}...`
+    );
+    return existing;
+  }
+
+  const promise = (async () => {
+    try {
+      return await persistRequestedSeason(anilistId, seasonNumber);
+    } finally {
+      inFlightSeasonMappings.delete(key);
+    }
+  })();
+
+  inFlightSeasonMappings.set(key, promise);
+  return promise;
+}
 
 export async function mapAnimeToAnimeParadise(
   anilistId: number

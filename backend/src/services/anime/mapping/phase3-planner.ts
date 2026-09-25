@@ -223,15 +223,238 @@ const episodeUnitsCache = new Map<
   Array<{ number: number; title: string; id: string }>
 >();
 
+export interface FranchiseStructure {
+  rootAnime: AniListAnime;
+  requestedAnime: AniListAnime;
+  franchiseEntries: AniListAnime[];
+  logicalGroups: LogicalSeasonDefinition[];
+}
+
+/**
+ * Lightweight franchise metadata discovery using AniList GraphQL only.
+ * Fast: does not query AnimeParadise or fetch episodes.
+ */
+export async function discoverFranchiseStructure(
+  anilistId: number
+): Promise<FranchiseStructure> {
+  const requestedAnime = await getAnimeById(anilistId);
+  const rootAnime = await resolveRootTvAnime(requestedAnime);
+  const franchiseEntries = await collectFranchiseSeasons(rootAnime);
+  const logicalGroups = groupIntoLogicalSeasons(franchiseEntries);
+
+  return {
+    rootAnime,
+    requestedAnime,
+    franchiseEntries,
+    logicalGroups,
+  };
+}
+
+/**
+ * Harvests candidates specifically for one logical season (plus root anime for context).
+ */
+export async function discoverCandidatesForSeason(
+  targetGroup: LogicalSeasonDefinition,
+  rootAnime: AniListAnime
+): Promise<DiscoveredCandidate[]> {
+  const candidateMap = new Map<string, DiscoveredCandidate>();
+  const toHarvest: AniListAnime[] = [targetGroup.primaryAnilistAnime];
+
+  if (targetGroup.primaryAnilistAnime.id !== rootAnime.id) {
+    toHarvest.push(rootAnime);
+  }
+
+  for (const rel of targetGroup.relatedAnilistEntries) {
+    if (!toHarvest.some((e) => e.id === rel.id)) {
+      toHarvest.push(rel);
+    }
+  }
+
+  for (const entry of toHarvest) {
+    try {
+      const disc = await discoverCandidatesForAnime(entry);
+      for (const c of disc.candidates) {
+        if (!candidateMap.has(c.providerId)) {
+          candidateMap.set(c.providerId, c);
+        }
+      }
+    } catch (err: any) {
+      console.warn(
+        `[Planner] Candidate discovery failed for entry #${entry.id}: ${err.message}`
+      );
+    }
+  }
+
+  return Array.from(candidateMap.values());
+}
+
+/**
+ * Scores candidates, validates episode units, deduplicates parts, and computes offsets for a single season group.
+ */
+export async function planSeasonFromCandidates(
+  group: LogicalSeasonDefinition,
+  allCandidates: DiscoveredCandidate[]
+): Promise<PlannedSeason> {
+  const target = group.primaryAnilistAnime;
+  const scoredList = allCandidates.map((cand) =>
+    scoreCandidate(target, cand)
+  );
+
+  scoredList.sort((a, b) => b.score - a.score);
+
+  // Keep MATCHED candidates
+  const matched = scoredList.filter((c) => c.decision === "MATCHED");
+  const skippedCandidates: Array<{
+    providerId: string;
+    title: string;
+    reason: string;
+  }> = [];
+
+  // Filter and validate candidates with actual episode endpoint
+  const validParts: Array<{
+    candidate: DiscoveredCandidate;
+    partNumber: number;
+    actualUnits: Array<{
+      providerNumber: number;
+      title: string;
+      id: string;
+    }>;
+  }> = [];
+
+  for (const match of matched) {
+    try {
+      let units = episodeUnitsCache.get(match.candidate.providerId);
+      if (!units) {
+        const rawUnits = await animeParadiseProvider.getEpisodes(
+          match.candidate.providerId
+        );
+        if (rawUnits) {
+          units = rawUnits.map((u) => ({
+            number: u.number,
+            title: u.title,
+            id: u.id,
+          }));
+          episodeUnitsCache.set(match.candidate.providerId, units);
+        }
+      }
+
+      if (!units || units.length === 0) {
+        skippedCandidates.push({
+          providerId: match.candidate.providerId,
+          title: match.candidate.title,
+          reason: "Provider episode endpoint returned 0 episodes",
+        });
+        continue;
+      }
+
+      // Determine part number
+      const pMain = match.candidate.parsedMain;
+      const pEn = match.candidate.parsedEnglish;
+      const rawPart =
+        pMain.partNumber ??
+        pEn?.partNumber ??
+        pMain.courNumber ??
+        pEn?.courNumber ??
+        1;
+
+      validParts.push({
+        candidate: match.candidate,
+        partNumber: rawPart,
+        actualUnits: units.map((u) => ({
+          providerNumber: u.number,
+          title: u.title,
+          id: u.id,
+        })),
+      });
+    } catch (err: any) {
+      skippedCandidates.push({
+        providerId: match.candidate.providerId,
+        title: match.candidate.title,
+        reason: `Failed to fetch episodes: ${err.message}`,
+      });
+    }
+  }
+
+  // Deduplicate parts by partNumber:
+  // If multiple candidates have the same partNumber (e.g. part 1), pick the best candidate (highest score)
+  const bestByPartNumber = new Map<number, (typeof validParts)[0]>();
+  for (const vp of validParts) {
+    const existing = bestByPartNumber.get(vp.partNumber);
+    if (!existing) {
+      bestByPartNumber.set(vp.partNumber, vp);
+    } else {
+      const existingScore =
+        scoredList.find((s) => s.candidate.providerId === existing.candidate.providerId)?.score ?? 0;
+      const newScore =
+        scoredList.find((s) => s.candidate.providerId === vp.candidate.providerId)?.score ?? 0;
+      if (newScore > existingScore) {
+        bestByPartNumber.set(vp.partNumber, vp);
+      }
+    }
+  }
+
+  const uniqueParts = Array.from(bestByPartNumber.values()).sort(
+    (a, b) => a.partNumber - b.partNumber
+  );
+
+  const partsWithOffsets: PlannedPart[] = [];
+  let currentOffset = 0;
+
+  for (const vp of uniqueParts) {
+    const uniqueEpNumbers = new Set(vp.actualUnits.map((u) => u.providerNumber));
+    const partEpCount = uniqueEpNumbers.size > 0 ? uniqueEpNumbers.size : vp.actualUnits.length;
+    const plannedEps = vp.actualUnits.map((u) => ({
+      providerNumber: u.providerNumber,
+      logicalNumber: u.providerNumber + currentOffset,
+      title: u.title,
+      id: u.id,
+    }));
+
+    partsWithOffsets.push({
+      partNumber: vp.partNumber,
+      provider: "animeparadise",
+      providerId: vp.candidate.providerId,
+      title: vp.candidate.title,
+      episodeOffset: currentOffset,
+      episodeCount: partEpCount,
+      episodes: plannedEps,
+    });
+
+    currentOffset += partEpCount;
+  }
+
+  return {
+    seasonNumber: group.logicalSeasonNumber,
+    anilistId: target.id,
+    title: group.displayTitle,
+    parts: partsWithOffsets,
+    totalEpisodes: currentOffset,
+    candidatesScored: scoredList,
+    skippedCandidates,
+  };
+}
+
+/**
+ * Plans mapping for ONLY one requested season.
+ */
+export async function planSingleSeason(
+  targetGroup: LogicalSeasonDefinition,
+  rootAnime: AniListAnime,
+  candidates?: DiscoveredCandidate[]
+): Promise<PlannedSeason> {
+  const allCandidates =
+    candidates ?? (await discoverCandidatesForSeason(targetGroup, rootAnime));
+  return planSeasonFromCandidates(targetGroup, allCandidates);
+}
+
+/**
+ * Full franchise planning across all seasons (preserved for complete mapping workflows).
+ */
 export async function planFranchiseMapping(
   anilistId: number
 ): Promise<FranchisePlan> {
-  const requestedAnime = await getAnimeById(anilistId);
-  const rootAnime = await resolveRootTvAnime(requestedAnime);
-
-  // Collect franchise chain
-  const franchiseEntries = await collectFranchiseSeasons(rootAnime);
-  const logicalGroups = groupIntoLogicalSeasons(franchiseEntries);
+  const structure = await discoverFranchiseStructure(anilistId);
+  const { rootAnime, requestedAnime, franchiseEntries, logicalGroups } = structure;
 
   // Harvest candidates from all franchise entries
   const candidateMap = new Map<string, DiscoveredCandidate>();
@@ -252,138 +475,8 @@ export async function planFranchiseMapping(
   const plannedSeasons: PlannedSeason[] = [];
 
   for (const group of logicalGroups) {
-    const target = group.primaryAnilistAnime;
-    const scoredList = allCandidates.map((cand) =>
-      scoreCandidate(target, cand)
-    );
-
-    scoredList.sort((a, b) => b.score - a.score);
-
-    // Keep MATCHED candidates
-    const matched = scoredList.filter((c) => c.decision === "MATCHED");
-    const skippedCandidates: Array<{
-      providerId: string;
-      title: string;
-      reason: string;
-    }> = [];
-
-    // Filter and validate candidates with actual episode endpoint
-    const validParts: Array<{
-      candidate: DiscoveredCandidate;
-      partNumber: number;
-      actualUnits: Array<{
-        providerNumber: number;
-        title: string;
-        id: string;
-      }>;
-    }> = [];
-
-    for (const match of matched) {
-      try {
-        let units = episodeUnitsCache.get(match.candidate.providerId);
-        if (!units) {
-          const rawUnits = await animeParadiseProvider.getEpisodes(
-            match.candidate.providerId
-          );
-          if (rawUnits) {
-            units = rawUnits.map((u) => ({
-              number: u.number,
-              title: u.title,
-              id: u.id,
-            }));
-            episodeUnitsCache.set(match.candidate.providerId, units);
-          }
-        }
-
-        if (!units || units.length === 0) {
-          skippedCandidates.push({
-            providerId: match.candidate.providerId,
-            title: match.candidate.title,
-            reason: "Provider episode endpoint returned 0 episodes",
-          });
-          continue;
-        }
-
-        // Determine part number
-        const pMain = match.candidate.parsedMain;
-        const pEn = match.candidate.parsedEnglish;
-        const rawPart = pMain.partNumber ?? pEn?.partNumber ?? pMain.courNumber ?? pEn?.courNumber ?? 1;
-
-        validParts.push({
-          candidate: match.candidate,
-          partNumber: rawPart,
-          actualUnits: units.map((u) => ({
-            providerNumber: u.number,
-            title: u.title,
-            id: u.id,
-          })),
-        });
-      } catch (err: any) {
-        skippedCandidates.push({
-          providerId: match.candidate.providerId,
-          title: match.candidate.title,
-          reason: `Failed to fetch episodes: ${err.message}`,
-        });
-      }
-    }
-
-    // Deduplicate parts by partNumber:
-    // If multiple candidates have the same partNumber (e.g. part 1), pick the best candidate (highest score)
-    const bestByPartNumber = new Map<number, (typeof validParts)[0]>();
-    for (const vp of validParts) {
-      const existing = bestByPartNumber.get(vp.partNumber);
-      if (!existing) {
-        bestByPartNumber.set(vp.partNumber, vp);
-      } else {
-        const existingScore =
-          scoredList.find((s) => s.candidate.providerId === existing.candidate.providerId)?.score ?? 0;
-        const newScore =
-          scoredList.find((s) => s.candidate.providerId === vp.candidate.providerId)?.score ?? 0;
-        if (newScore > existingScore) {
-          bestByPartNumber.set(vp.partNumber, vp);
-        }
-      }
-    }
-
-    const uniqueParts = Array.from(bestByPartNumber.values()).sort(
-      (a, b) => a.partNumber - b.partNumber
-    );
-
-    const partsWithOffsets: PlannedPart[] = [];
-    let currentOffset = 0;
-
-    for (const vp of uniqueParts) {
-      const uniqueEpNumbers = new Set(vp.actualUnits.map((u) => u.providerNumber));
-      const partEpCount = uniqueEpNumbers.size > 0 ? uniqueEpNumbers.size : vp.actualUnits.length;
-      const plannedEps = vp.actualUnits.map((u) => ({
-        providerNumber: u.providerNumber,
-        logicalNumber: u.providerNumber + currentOffset,
-        title: u.title,
-        id: u.id,
-      }));
-
-      partsWithOffsets.push({
-        partNumber: vp.partNumber,
-        provider: "animeparadise",
-        providerId: vp.candidate.providerId,
-        title: vp.candidate.title,
-        episodeOffset: currentOffset,
-        episodeCount: partEpCount,
-        episodes: plannedEps,
-      });
-
-      currentOffset += partEpCount;
-    }
-
-    plannedSeasons.push({
-      seasonNumber: group.logicalSeasonNumber,
-      anilistId: target.id,
-      title: group.displayTitle,
-      parts: partsWithOffsets,
-      totalEpisodes: currentOffset,
-      candidatesScored: scoredList,
-      skippedCandidates,
-    });
+    const plannedSeason = await planSeasonFromCandidates(group, allCandidates);
+    plannedSeasons.push(plannedSeason);
   }
 
   return {
