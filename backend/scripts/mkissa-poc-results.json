@@ -1,0 +1,358 @@
+{
+  "timestamp": "2026-09-27T10:08:15.499Z",
+  "probes": [
+    {
+      "url": "https://mkissa.to",
+      "method": "GET",
+      "status": 200,
+      "cloudflareBlock": false,
+      "captchaRequired": false,
+      "directApiAccess": true,
+      "classification": "DIRECT_API_ACCESS",
+      "latencyMs": 490,
+      "preview": "<!doctype html> <html lang=\"en\"> <head> <script> (function () { try { var k = 'aa' + 'Jp0'; // Prefer iframe-r"
+    },
+    {
+      "url": "https://mkissa.to/anime/6aa5e2b2be0758515ec1ed72/p-1-sub",
+      "method": "GET",
+      "status": 403,
+      "cloudflareBlock": true,
+      "captchaRequired": false,
+      "directApiAccess": false,
+      "classification": "CLOUDFLARE_BLOCK",
+      "latencyMs": 60,
+      "preview": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-e"
+    },
+    {
+      "url": "https://api.mkissa.net/api",
+      "method": "POST",
+      "status": 200,
+      "cloudflareBlock": false,
+      "captchaRequired": false,
+      "directApiAccess": true,
+      "classification": "DIRECT_API_ACCESS",
+      "latencyMs": 232,
+      "preview": "{\"data\":{\"__typename\":\"Query\"}} "
+    },
+    {
+      "url": "https://api.allanime.day/api",
+      "method": "POST",
+      "status": 200,
+      "cloudflareBlock": false,
+      "captchaRequired": false,
+      "directApiAccess": true,
+      "classification": "DIRECT_API_ACCESS",
+      "latencyMs": 609,
+      "preview": "{\"data\":{\"__typename\":\"Query\"}} "
+    },
+    {
+      "url": "https://cdn.mkissa.net/all/mk/_app/immutable/entry/app.DdZ7L58y.js",
+      "method": "GET",
+      "status": 200,
+      "cloudflareBlock": false,
+      "captchaRequired": false,
+      "directApiAccess": true,
+      "classification": "DIRECT_API_ACCESS",
+      "latencyMs": 257,
+      "preview": "const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=[\"../nodes/0.Bsu-xWc4.js\",\"../chunks/DgFeFwm7.js\",\"../chunks/DeSNuev1.js\",\"../chunks/DxxzBZDV."
+    }
+  ],
+  "titleTests": [
+    {
+      "title": "One Piece",
+      "showId": "ReooPAxPMsHM4KPMY",
+      "isMovie": false,
+      "endpoints": {
+        "api.mkissa.net": {
+          "metadataSuccess": true,
+          "metadataLatencyMs": 122,
+          "episodeCount": 1180,
+          "streamSuccess": false,
+          "streamLatencyMs": 107,
+          "errors": [
+            "AA_CRYPTO_MISSING"
+          ],
+          "rawStreamPayload": {
+            "errors": [
+              {
+                "message": "AA_CRYPTO_MISSING",
+                "locations": [
+                  {
+                    "line": 1,
+                    "column": 102
+                  }
+                ],
+                "path": [
+                  "episode"
+                ],
+                "extensions": {
+                  "code": "AA_CRYPTO_MISSING"
+                }
+              }
+            ],
+            "data": {
+              "episode": null
+            }
+          }
+        },
+        "api.allanime.day": {
+          "metadataSuccess": true,
+          "metadataLatencyMs": 103,
+          "episodeCount": 1180,
+          "streamSuccess": false,
+          "streamLatencyMs": 103,
+          "errors": [
+            "AA_CRYPTO_MISSING"
+          ],
+          "rawStreamPayload": {
+            "errors": [
+              {
+                "message": "AA_CRYPTO_MISSING",
+                "locations": [
+                  {
+                    "line": 1,
+                    "column": 102
+                  }
+                ],
+                "path": [
+                  "episode"
+                ],
+                "extensions": {
+                  "code": "AA_CRYPTO_MISSING"
+                }
+              }
+            ],
+            "data": {
+              "episode": null
+            }
+          }
+        }
+      }
+    },
+    {
+      "title": "Death Note",
+      "showId": "RezHft5pjutwWcE3B",
+      "isMovie": false,
+      "endpoints": {
+        "api.mkissa.net": {
+          "metadataSuccess": true,
+          "metadataLatencyMs": 111,
+          "episodeCount": 37,
+          "streamSuccess": false,
+          "streamLatencyMs": 110,
+          "errors": [
+            "AA_CRYPTO_MISSING"
+          ],
+          "rawStreamPayload": {
+            "errors": [
+              {
+                "message": "AA_CRYPTO_MISSING",
+                "locations": [
+                  {
+                    "line": 1,
+                    "column": 102
+                  }
+                ],
+                "path": [
+                  "episode"
+                ],
+                "extensions": {
+                  "code": "AA_CRYPTO_MISSING"
+                }
+              }
+            ],
+            "data": {
+              "episode": null
+            }
+          }
+        },
+        "api.allanime.day": {
+          "metadataSuccess": true,
+          "metadataLatencyMs": 102,
+          "episodeCount": 37,
+          "streamSuccess": false,
+          "streamLatencyMs": 102,
+          "errors": [
+            "AA_CRYPTO_MISSING"
+          ],
+          "rawStreamPayload": {
+            "errors": [
+              {
+                "message": "AA_CRYPTO_MISSING",
+                "locations": [
+                  {
+                    "line": 1,
+                    "column": 102
+                  }
+                ],
+                "path": [
+                  "episode"
+                ],
+                "extensions": {
+                  "code": "AA_CRYPTO_MISSING"
+                }
+              }
+            ],
+            "data": {
+              "episode": null
+            }
+          }
+        }
+      }
+    },
+    {
+      "title": "Ghost Meets Gal!",
+      "showId": "6aa5e2b2be0758515ec1ed72",
+      "isMovie": false,
+      "endpoints": {
+        "api.mkissa.net": {
+          "metadataSuccess": true,
+          "metadataLatencyMs": 110,
+          "episodeCount": 4,
+          "streamSuccess": false,
+          "streamLatencyMs": 109,
+          "errors": [
+            "INTERNAL_SERVER_ERROR"
+          ],
+          "rawStreamPayload": {
+            "errors": [
+              {
+                "message": "Too many requests, please try again in 5 seconds.",
+                "locations": [
+                  {
+                    "line": 1,
+                    "column": 102
+                  }
+                ],
+                "path": [
+                  "episode"
+                ],
+                "extensions": {
+                  "code": "INTERNAL_SERVER_ERROR",
+                  "exception": {
+                    "message": "Too many requests, please try again in 5 seconds."
+                  }
+                }
+              }
+            ],
+            "data": {
+              "episode": null
+            }
+          }
+        },
+        "api.allanime.day": {
+          "metadataSuccess": true,
+          "metadataLatencyMs": 109,
+          "episodeCount": 4,
+          "streamSuccess": false,
+          "streamLatencyMs": 99,
+          "errors": [
+            "INTERNAL_SERVER_ERROR"
+          ],
+          "rawStreamPayload": {
+            "errors": [
+              {
+                "message": "Too many requests, please try again in 5 seconds.",
+                "locations": [
+                  {
+                    "line": 1,
+                    "column": 102
+                  }
+                ],
+                "path": [
+                  "episode"
+                ],
+                "extensions": {
+                  "code": "INTERNAL_SERVER_ERROR",
+                  "exception": {
+                    "message": "Too many requests, please try again in 5 seconds."
+                  }
+                }
+              }
+            ],
+            "data": {
+              "episode": null
+            }
+          }
+        }
+      }
+    },
+    {
+      "title": "Spirited Away",
+      "showId": "CSi9oF8YudfHuKvod",
+      "isMovie": true,
+      "endpoints": {
+        "api.mkissa.net": {
+          "metadataSuccess": true,
+          "metadataLatencyMs": 132,
+          "episodeCount": 1,
+          "streamSuccess": false,
+          "streamLatencyMs": 109,
+          "errors": [
+            "INTERNAL_SERVER_ERROR"
+          ],
+          "rawStreamPayload": {
+            "errors": [
+              {
+                "message": "Too many requests, please try again in 4 seconds.",
+                "locations": [
+                  {
+                    "line": 1,
+                    "column": 102
+                  }
+                ],
+                "path": [
+                  "episode"
+                ],
+                "extensions": {
+                  "code": "INTERNAL_SERVER_ERROR",
+                  "exception": {
+                    "message": "Too many requests, please try again in 4 seconds."
+                  }
+                }
+              }
+            ],
+            "data": {
+              "episode": null
+            }
+          }
+        },
+        "api.allanime.day": {
+          "metadataSuccess": true,
+          "metadataLatencyMs": 124,
+          "episodeCount": 1,
+          "streamSuccess": false,
+          "streamLatencyMs": 109,
+          "errors": [
+            "INTERNAL_SERVER_ERROR"
+          ],
+          "rawStreamPayload": {
+            "errors": [
+              {
+                "message": "Too many requests, please try again in 4 seconds.",
+                "locations": [
+                  {
+                    "line": 1,
+                    "column": 102
+                  }
+                ],
+                "path": [
+                  "episode"
+                ],
+                "extensions": {
+                  "code": "INTERNAL_SERVER_ERROR",
+                  "exception": {
+                    "message": "Too many requests, please try again in 4 seconds."
+                  }
+                }
+              }
+            ],
+            "data": {
+              "episode": null
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "timestamp": "2026-09-27T15:03:54.925Z",
+  "testedTitle": {
+    "name": "GTO",
+    "aniListId": 245,
+    "episode": 1
+  },
+  "resolution": {
+    "resolutionDurationMs": 673,
+    "streamUrlRedacted": "https://fetch9.flixcloud.cc/_v7/f5345d79-33f1-4973-afaa-4e3a41c3214b/master.m3u8?token=[REDACTED]",
+    "expirationTimestamp": "2026-09-27T21:03:52.000Z",
+    "ttlSeconds": 21600,
+    "ttlHours": 6,
+    "subtitlesCount": 13,
+    "hasArabicSubtitle": true,
+    "arabicSubtitleFile": "https://vault-95.rundowncdn.top/subtitles/f5345d79-33f1-4973-afaa-4e3a41c3214b/f5345d79-33f1-4973-afaa-4e3a41c3214b_ara_5.srt"
+  },
+  "proxyValidation": {
+    "masterPlaylist": {
+      "httpStatus": 200,
+      "contentType": "application/vnd.apple.mpegurl",
+      "isValidM3u8": true,
+      "isMasterPlaylist": true,
+      "containsProxyRewrittenUrls": true,
+      "latencyMs": 245,
+      "preview": "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID=\"audio\",LANGUAGE=\"jpn\",NAME=\"Native\",DEFAULT=YES,AUTOSELECT=YES,URI=\"http://127.0.0.1:46423/stream/poc-session-gto-ep1/variant?url=https%3A%2F%2Ffetch9.flixcloud.cc%2F_v7%2FA4L2wRcd6XizdUJWwaA23sxxnDEEJXAu_Yw%2Faudio%2Fnative.m3u8\"\n#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID=\"audio\",LANGUAGE=\"eng\",NAME=\"English\",DEFAULT=NO,AUTOSELECT=YES,URI=\"http://127.0.0.1:46423/stream/poc-session-gto-ep1/variant?url=https%3A%2F%2Ffetch9.flixcloud.cc%2F_v7%2FA4L2wRcd6XizdUJWwaA23sxxnDEEJXAu_Yw%2Faudio%2Fenglish.m3u8\"\n#EXT-X-STREAM-INF:BANDWIDTH=3888,RESOLUTION=1440x1080,AUDIO=\"audio\",CODECS=\"avc1.64001f,mp4a.40.2\"\nhttp://127.0.0.1:46423/stream/poc-session-gto-ep1/variant?url=https%3A%2F%2Ffetch9.flixcloud.cc%2F_v7%2FA4L2wRcd6XizdUJWwaA23sxxnDEEJXAu_Yw%2Fvideo.m3u8\n"
+    },
+    "variantPlaylist": {
+      "httpStatus": 200,
+      "contentType": "application/vnd.apple.mpegurl",
+      "isValidM3u8": true,
+      "containsRewrittenKeyUrl": true,
+      "containsRewrittenSegmentUrls": true,
+      "latencyMs": 163,
+      "sampleKeyLine": "#EXT-X-KEY:METHOD=AES-128,URI=\"http://127.0.0.1:46423/stream/poc-session-gto-ep1/key?url=https%3A%2F%2Ffetch9.flixcloud.cc%2F_v7%2FA4L2wRcd6XizdUJWwaA23sxxnDEEJXAu_Yw%2Fkey.bin\",IV=0x8779dd42d9a6da27d4ada7e08b5ef416",
+      "previewExcerpt": "#EXTM3U\n#EXT-X-KEY:METHOD=AES-128,URI=\"http://127.0.0.1:46423/stream/poc-session-gto-ep1/key?url=https%3A%2F%2Ffetch9.flixcloud.cc%2F_v7%2FA4L2wRcd6XizdUJWwaA23sxxnDEEJXAu_Yw%2Fkey.bin\",IV=0x8779dd42d9a6da27d4ada7e08b5ef416\n#EXT-X-VERSION:6\n#EXT-X-TARGETDURATION:6\n#EXT-X-MEDIA-SEQUENCE:0\n#EXT-X-PLAYLIST-TYPE:VOD\n#EXT-X-INDEPENDENT-SEGMENTS\n#EXTINF:6.006000,\nhttp://127.0.0.1:46423/stream/poc-session-gto-ep1/segment?url=https%3A%2F%2Fvault-90.rundowncdn.top%2F_v7%2Ff5345d79-33f1-4973-afaa-4e3a41c3214b%2Fseg-0-f1-v1-a0.webp\n#EXTINF:6.006000,\nhttp://127.0.0.1:46423/stream/poc-session-gto-ep1/segment?url=https%3A%2F%2Fvault-90.rundowncdn.top%2F_v7%2Ff5345d79-33f1-4973-afaa-4e3a41c3214b%2Fseg-1-f1-v1-a0.png\n#EXTINF:6.006000,\nhttp://127.0.0.1:46423/stream/poc-session-gto-ep1/segment?url=https%3A%2F%2Fvault-90.rundowncdn.top%2F_v7%2Ff5345d79-33f1-4973-afaa-4e3a41c3214b%2Fseg-2-f1-v1-a0.webp\n#EXTINF:6.006000,\nhttp://127.0.0.1:46423/stream/poc-session-gto-ep1/segment?url=https%3A%2F%2Fvault-90.rundowncdn.top%2F_v7%2Ff5345d79-33f1-4973-afaa-4e3a41c3214b%2Fseg-3-f1-v1-a0.png"
+    },
+    "encryptionKey": {
+      "httpStatus": 200,
+      "contentType": "application/octet-stream",
+      "keyByteLength": 16,
+      "isStandardAes128Key": true,
+      "latencyMs": 62
+    },
+    "mediaSegment": {
+      "httpStatus": 206,
+      "contentType": "video/mp2t",
+      "contentRange": "bytes 0-1023/3107456",
+      "boundedChunkSizeBytes": 1024,
+      "isMpegTsSyncByteVerified": true,
+      "latencyMs": 218
+    },
+    "subtitle": {
+      "testedTrack": "Arabic (Track 5 (ARA))",
+      "url": "https://vault-95.rundowncdn.top/subtitles/f5345d79-33f1-4973-afaa-4e3a41c3214b/f5345d79-33f1-4973-afaa-4e3a41c3214b_ara_5.srt",
+      "httpStatus": 200,
+      "convertedToWebVtt": true,
+      "previewExcerpt": "WEBVTT\n\n1\n00:00:01.584 --> 00:00:06.673\n‫- هل اشتريت ألبوم صور جديد؟\n‫- لا، لم أفعل.\n\n2\n00:00:06.756 --> 00:00:08.299\n‫أبيض، جميل.\n\n3\n00:00:12.262 --> 00:00:14."
+    },
+    "security": {
+      "blockedArbitraryDomainStatus": 403,
+      "openProxyExploitPrevented": true
+    }
+  },
+  "layerTransformationRequirements": {
+    "masterPlaylist": {
+      "proxyRequired": true,
+      "decryptRequired": true,
+      "refererRequired": true,
+      "classification": "PROXY_REQUIRED & DECRYPT_REQUIRED"
+    },
+    "variantPlaylist": {
+      "proxyRequired": true,
+      "decryptRequired": true,
+      "refererRequired": true,
+      "classification": "PROXY_REQUIRED & DECRYPT_REQUIRED"
+    },
+    "segment": {
+      "proxyRequired": true,
+      "decryptRequired": false,
+      "refererRequired": true,
+      "classification": "PROXY_REQUIRED (Referer injection)"
+    },
+    "encryptionKey": {
+      "proxyRequired": true,
+      "decryptRequired": false,
+      "refererRequired": true,
+      "classification": "PROXY_REQUIRED (Referer injection)"
+    },
+    "subtitleFile": {
+      "proxyRequired": false,
+      "decryptRequired": false,
+      "refererRequired": false,
+      "classification": "DIRECT (Proxy optional for VTT conversion)"
+    }
+  },
+  "finalVerdict": "PLAYBACK_PROXY_FEASIBLE"
+}

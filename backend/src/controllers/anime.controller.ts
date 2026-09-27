@@ -183,17 +183,24 @@ export async function getSeasonEpisodes(
     if (episodes.length === 0) {
       const isMarkedNoContent = season.providerId?.startsWith("na_");
 
-      if (!isMarkedNoContent) {
+      if (!isMarkedNoContent || season.anilistId) {
         const providerMappingCount =
           await prisma.animeSeasonProviderMapping.count({
             where: { seasonId: season.id },
           });
 
-        if (providerMappingCount > 0 || (season.provider && season.providerId)) {
+        if (providerMappingCount > 0 || (season.provider && season.providerId) || season.anilistId) {
           console.log(
             `[Anime Controller] No episodes found for season ${season.id}. Syncing...`
           );
-          await syncSeasonEpisodes(season.id);
+          try {
+            await syncSeasonEpisodes(season.id);
+          } catch (syncErr: any) {
+            console.warn(
+              `[Anime Controller] Syncing episodes failed for season ${season.id}:`,
+              syncErr.message
+            );
+          }
         } else {
           // Season skeleton exists without provider mappings: lazily resolve this season!
           console.log(

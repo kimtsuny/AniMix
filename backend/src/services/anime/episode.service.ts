@@ -1,6 +1,7 @@
 import prisma from "../../config/prisma.js";
 import { animeParadiseProvider } from "../streaming/providers/animeparadise.provider.js";
 import type { AnimeParadiseEpisode } from "../streaming/providers/animeparadise.provider.js";
+import { reanimeProvider } from "../streaming/providers/reanime.provider.js";
 
 export async function syncSeasonEpisodes(
   seasonId: number
@@ -32,18 +33,22 @@ export async function syncSeasonEpisodes(
     );
 
     for (const partMapping of seasonProviderMappings) {
-      if (partMapping.provider !== "animeparadise") {
-        console.warn(
-          `[Episodes] Unsupported provider "${partMapping.provider}" for season ${seasonId}, skipping`
-        );
-        continue;
-      }
-
-      let episodes: AnimeParadiseEpisode[] = [];
+      let episodes: Array<{ id: string; number: number; title?: string; thumbnail?: string }> = [];
       try {
-        episodes = (await animeParadiseProvider.getEpisodes(
-          partMapping.providerId
-        )) as AnimeParadiseEpisode[];
+        if (partMapping.provider === "animeparadise") {
+          episodes = (await animeParadiseProvider.getEpisodes(
+            partMapping.providerId
+          )) as AnimeParadiseEpisode[];
+        } else if (partMapping.provider === "reanime") {
+          episodes = (await reanimeProvider.getEpisodes(
+            partMapping.providerId
+          )) as any[];
+        } else {
+          console.warn(
+            `[Episodes] Unsupported provider "${partMapping.provider}" for season ${seasonId}, skipping`
+          );
+          continue;
+        }
       } catch (err: any) {
         console.error(
           `[Episodes] Failed to fetch episodes for part ${partMapping.partNumber} (${partMapping.providerId}):`,
@@ -160,22 +165,62 @@ export async function syncSeasonEpisodes(
     });
   }
 
-  // 3. Fallback to legacy single-provider season mapping
-  if (!season.provider || !season.providerId) {
-    throw new Error(
-      `No provider mapping found for season ${seasonId}`
-    );
+  // 3. Single-provider or fallback mapping
+  let episodes: Array<{ id: string; number: number; title?: string; thumbnail?: string }> = [];
+  let effectiveProvider: string = season.provider ?? "animeparadise";
+
+  if (season.provider === "animeparadise" && season.providerId && !season.providerId.startsWith("na_")) {
+    try {
+      episodes = (await animeParadiseProvider.getEpisodes(
+        season.providerId
+      )) as AnimeParadiseEpisode[];
+    } catch (err: any) {
+      console.warn(
+        `[Episodes] AnimeParadise getEpisodes failed for season ${seasonId}:`,
+        err.message
+      );
+    }
+  } else if (season.provider === "reanime" && season.providerId) {
+    try {
+      episodes = (await reanimeProvider.getEpisodes(
+        season.providerId
+      )) as any[];
+    } catch (err: any) {
+      console.warn(
+        `[Episodes] ReAnime getEpisodes failed for season ${seasonId}:`,
+        err.message
+      );
+    }
   }
 
-  if (season.provider !== "animeparadise") {
-    throw new Error(
-      `Unsupported episode provider: ${season.provider}`
+  // Fallback to ReAnime if AnimeParadise returned 0 episodes or season is marked "not_available" / "na_"
+  if (episodes.length === 0 && season.anilistId) {
+    console.log(
+      `[Episodes] Primary provider has no episodes for season ${seasonId}. Attempting ReAnime fallback for AniList #${season.anilistId}...`
     );
-  }
+    try {
+      const reanimeEpisodes = await reanimeProvider.getEpisodes(
+        String(season.anilistId)
+      );
+      if (reanimeEpisodes.length > 0) {
+        episodes = reanimeEpisodes as any[];
+        effectiveProvider = "reanime";
 
-  const episodes = (await animeParadiseProvider.getEpisodes(
-    season.providerId
-  )) as AnimeParadiseEpisode[];
+        await prisma.animeSeason.update({
+          where: { id: season.id },
+          data: {
+            provider: "reanime",
+            providerId: `reanime:${season.anilistId}`,
+          },
+        });
+      }
+    } catch (err: any) {
+      console.warn(
+        `[Episodes] ReAnime fallback episode fetch failed:`,
+        err.message
+      );
+    }
+  }
 
   if (episodes.length === 0) {
     throw new Error(
@@ -184,7 +229,7 @@ export async function syncSeasonEpisodes(
   }
 
   console.log(
-    `[Episodes] Fallback legacy: Found ${episodes.length} episodes for season ${seasonId}`
+    `[Episodes] Found ${episodes.length} episodes for season ${seasonId} (provider: ${effectiveProvider})`
   );
 
   for (const episode of episodes) {
@@ -213,7 +258,7 @@ export async function syncSeasonEpisodes(
       where: {
         episodeId_provider: {
           episodeId: dbEpisode.id,
-          provider: "animeparadise",
+          provider: effectiveProvider,
         },
       },
       update: {
@@ -221,7 +266,7 @@ export async function syncSeasonEpisodes(
       },
       create: {
         episodeId: dbEpisode.id,
-        provider: "animeparadise",
+        provider: effectiveProvider,
         providerId: episode.id,
       },
     });

@@ -26,7 +26,7 @@ export async function getAnimeDetailsPage(id: string | number): Promise<AnimeDet
   try {
     const data = await graphqlClient.request(ANIME_DETAILS_PAGE_QUERY, { id: Number(id) });
     
-    if (!data || !data.Media) {
+    if (!data || !data.Media || data.Media.isAdult) {
       return null;
     }
 

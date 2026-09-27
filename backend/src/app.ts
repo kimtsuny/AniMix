@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes.js";
 import favoritesRoutes from "./routes/favorites.routes.js";
 import episodesRoutes from "./routes/episodes.routes.js";
 import animeRoutes from "./routes/anime.routes.js";
+import streamRoutes from "./routes/stream.routes.js";
 
 const app = express();
 
@@ -54,6 +55,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/favorites", favoritesRoutes);
 app.use("/api/episodes", episodesRoutes);
 app.use("/api/anime", animeRoutes);
+app.use("/api/stream", streamRoutes);
 
 // 404 Handler
 app.use((req, res) => {

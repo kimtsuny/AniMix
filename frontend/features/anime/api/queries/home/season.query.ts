@@ -9,6 +9,7 @@ export const SEASON_ANIME_QUERY = gql`
         season: $season
         seasonYear: $seasonYear
         sort: POPULARITY_DESC
+        isAdult: false
       ) {
         ${SECTION_MEDIA_FIELDS}
       }

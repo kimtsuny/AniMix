@@ -4,7 +4,7 @@ import { SECTION_MEDIA_FIELDS } from "./section-media.fragment";
 export const POPULAR_ANIME_QUERY = gql`
   query PopularAnime {
     Page(page: 1, perPage: 20) {
-      media(type: ANIME, sort: POPULARITY_DESC) {
+      media(type: ANIME, sort: POPULARITY_DESC, isAdult: false) {
         ${SECTION_MEDIA_FIELDS}
       }
     }

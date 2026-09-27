@@ -6,6 +6,7 @@ export const HERO_ANIME_QUERY = gql`
       media(
         type: ANIME
         sort: POPULARITY_DESC
+        isAdult: false
       ) {
         id
 

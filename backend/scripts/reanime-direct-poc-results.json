@@ -1,0 +1,1294 @@
+{
+  "timestamp": "2026-09-27T14:57:39.183Z",
+  "benchmarkSummary": {
+    "totalTitlesTested": 11,
+    "titlesMapped": 10,
+    "streamSuccessCount": 10,
+    "successRatePercent": 90.9,
+    "averageLatencyMs": 587
+  },
+  "titles": [
+    {
+      "title": "GTO",
+      "aniListId": 245,
+      "category": "classic",
+      "mappingMethod": "DIRECT_ANILIST",
+      "resolvedAniListId": 245,
+      "serverCount": 4,
+      "servers": [
+        {
+          "name": "HD-1",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/uvojucnn136s?v=1"
+        },
+        {
+          "name": "HD-1",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/uvojucnn136s?v=1"
+        },
+        {
+          "name": "HD-2",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/uvojucnn136s?v=2"
+        },
+        {
+          "name": "HD-2",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/uvojucnn136s?v=2"
+        }
+      ],
+      "streamSuccess": true,
+      "latencies": {
+        "mappingMs": 282,
+        "episodeLookupMs": 88,
+        "serverLookupMs": 282,
+        "resolutionMs": 616,
+        "totalMs": 987
+      },
+      "streamResolution": {
+        "streamUrl": "https://fetch9.flixcloud.cc/_v7/f5345d79-33f1-4973-afaa-4e3a41c3214b/master.m3u8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlb19pZCI6ImY1MzQ1ZDc5LTMzZjEtNDk3My1hZmFhLTRlM2E0MWMzMjE0YiIsImNsaWVudF9pcCI6IjM3LjIzOC41NS4xODUiLCJleHAiOjE3OTA1NDI2NDYsImlhdCI6MTc5MDUyMTA0NiwiaXNzIjoidmlkZW8taG9zdGluZy1wbGF0Zm9ybSJ9.GvTlqlr1H_ERzvKQlbxq0lZ5ZYp3GfIjiFWhUr1LgaQ",
+        "isHLS": true,
+        "rawContentType": "application/vnd.apple.mpegurl",
+        "isValidM3u8": true,
+        "isMasterPlaylist": true,
+        "resolutions": [
+          "1440x1080"
+        ],
+        "has1080p": true,
+        "has720p": false,
+        "has480p": false,
+        "bandwidths": [
+          3888
+        ],
+        "codecs": [
+          "avc1.64001f,mp4a.40.2"
+        ],
+        "audioTracks": [
+          {
+            "language": "jpn",
+            "name": "Native"
+          },
+          {
+            "language": "eng",
+            "name": "English"
+          }
+        ],
+        "subtitles": [
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/f5345d79-33f1-4973-afaa-4e3a41c3214b/f5345d79-33f1-4973-afaa-4e3a41c3214b_ara_5.srt",
+            "language": "Arabic (Track 5 (ARA))",
+            "format": "srt",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/f5345d79-33f1-4973-afaa-4e3a41c3214b/f5345d79-33f1-4973-afaa-4e3a41c3214b_chi_13.srt",
+            "language": "Chinese (Simplified)",
+            "format": "srt",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/f5345d79-33f1-4973-afaa-4e3a41c3214b/f5345d79-33f1-4973-afaa-4e3a41c3214b_chi_14.srt",
+            "language": "Chinese (Traditional)",
+            "format": "srt",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/f5345d79-33f1-4973-afaa-4e3a41c3214b/f5345d79-33f1-4973-afaa-4e3a41c3214b_eng_3.srt",
+            "language": "English (Forced)",
+            "format": "srt",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/f5345d79-33f1-4973-afaa-4e3a41c3214b/f5345d79-33f1-4973-afaa-4e3a41c3214b_eng_4.srt",
+            "language": "English (Track 4 (ENG))",
+            "format": "srt",
+            "default": true
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/f5345d79-33f1-4973-afaa-4e3a41c3214b/f5345d79-33f1-4973-afaa-4e3a41c3214b_fre_8.srt",
+            "language": "French (Forced)",
+            "format": "srt",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/f5345d79-33f1-4973-afaa-4e3a41c3214b/f5345d79-33f1-4973-afaa-4e3a41c3214b_fre_9.srt",
+            "language": "French (Track 9 (FRE))",
+            "format": "srt",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/f5345d79-33f1-4973-afaa-4e3a41c3214b/f5345d79-33f1-4973-afaa-4e3a41c3214b_ger_6.srt",
+            "language": "German (Track 6 (GER))",
+            "format": "srt",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/f5345d79-33f1-4973-afaa-4e3a41c3214b/f5345d79-33f1-4973-afaa-4e3a41c3214b_ind_10.srt",
+            "language": "Indonesian (Track 10 (IND))",
+            "format": "srt",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/f5345d79-33f1-4973-afaa-4e3a41c3214b/f5345d79-33f1-4973-afaa-4e3a41c3214b_por_11.srt",
+            "language": "Portuguese (Brazilian)",
+            "format": "srt",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/f5345d79-33f1-4973-afaa-4e3a41c3214b/f5345d79-33f1-4973-afaa-4e3a41c3214b_spa_7.srt",
+            "language": "Spanish (Latin American)",
+            "format": "srt",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/f5345d79-33f1-4973-afaa-4e3a41c3214b/f5345d79-33f1-4973-afaa-4e3a41c3214b_tha_12.srt",
+            "language": "Thai (Track 12 (THA))",
+            "format": "srt",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/f5345d79-33f1-4973-afaa-4e3a41c3214b/f5345d79-33f1-4973-afaa-4e3a41c3214b.srt",
+            "language": "English (Dubtitle(AI))",
+            "format": "srt",
+            "default": false
+          }
+        ],
+        "hasArabicSub": true,
+        "hasEnglishSub": true,
+        "tokenPayload": {
+          "video_id": "f5345d79-33f1-4973-afaa-4e3a41c3214b",
+          "client_ip": "37.238.55.185",
+          "exp": 1790542646,
+          "iat": 1790521046,
+          "iss": "video-hosting-platform"
+        },
+        "tokenExpiresInSec": 21600,
+        "embedLatencyMs": 232,
+        "tokenApiLatencyMs": 90,
+        "cryptoLatencyMs": 2,
+        "manifestFetchLatencyMs": 275,
+        "totalResolutionLatencyMs": 616
+      }
+    },
+    {
+      "title": "Sonny Boy",
+      "aniListId": 132126,
+      "category": "niche",
+      "mappingMethod": "DIRECT_ANILIST",
+      "resolvedAniListId": 132126,
+      "serverCount": 4,
+      "servers": [
+        {
+          "name": "HD-1",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/u0qxlxded21d?v=1"
+        },
+        {
+          "name": "HD-1",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/u0qxlxded21d?v=1"
+        },
+        {
+          "name": "HD-2",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/u0qxlxded21d?v=2"
+        },
+        {
+          "name": "HD-2",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/u0qxlxded21d?v=2"
+        }
+      ],
+      "streamSuccess": true,
+      "latencies": {
+        "mappingMs": 113,
+        "episodeLookupMs": 92,
+        "serverLookupMs": 113,
+        "resolutionMs": 321,
+        "totalMs": 526
+      },
+      "streamResolution": {
+        "streamUrl": "https://fetch9.flixcloud.cc/_v7/81927385-0b53-466f-ad7d-eab15ebb276e/master.m3u8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlb19pZCI6IjgxOTI3Mzg1LTBiNTMtNDY2Zi1hZDdkLWVhYjE1ZWJiMjc2ZSIsImNsaWVudF9pcCI6IjM3LjIzOC41NS4xODUiLCJleHAiOjE3OTA1NDI2NDcsImlhdCI6MTc5MDUyMTA0NywiaXNzIjoidmlkZW8taG9zdGluZy1wbGF0Zm9ybSJ9.vNehiiDivarbhDg63YDF2dO8hpU296Y6cWpxs8QSboc",
+        "isHLS": true,
+        "rawContentType": "application/vnd.apple.mpegurl",
+        "isValidM3u8": true,
+        "isMasterPlaylist": true,
+        "resolutions": [
+          "1920x1080"
+        ],
+        "has1080p": true,
+        "has720p": false,
+        "has480p": false,
+        "bandwidths": [
+          5184
+        ],
+        "codecs": [
+          "avc1.64001f,mp4a.40.2"
+        ],
+        "audioTracks": [
+          {
+            "language": "jpn",
+            "name": "Native"
+          },
+          {
+            "language": "eng",
+            "name": "English"
+          }
+        ],
+        "subtitles": [
+          {
+            "url": "https://vault-92.rundowncdn.top/subtitles/81927385-0b53-466f-ad7d-eab15ebb276e/81927385-0b53-466f-ad7d-eab15ebb276e_eng_3.ass",
+            "language": "English (S&S)",
+            "format": "ass",
+            "default": true
+          },
+          {
+            "url": "https://vault-92.rundowncdn.top/subtitles/81927385-0b53-466f-ad7d-eab15ebb276e/81927385-0b53-466f-ad7d-eab15ebb276e_eng_4.ass",
+            "language": "English (Dialog - ENG)",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-92.rundowncdn.top/subtitles/81927385-0b53-466f-ad7d-eab15ebb276e/81927385-0b53-466f-ad7d-eab15ebb276e.srt",
+            "language": "English (Dubtitle(AI))",
+            "format": "srt",
+            "default": false
+          }
+        ],
+        "hasArabicSub": false,
+        "hasEnglishSub": true,
+        "tokenPayload": {
+          "video_id": "81927385-0b53-466f-ad7d-eab15ebb276e",
+          "client_ip": "37.238.55.185",
+          "exp": 1790542647,
+          "iat": 1790521047,
+          "iss": "video-hosting-platform"
+        },
+        "tokenExpiresInSec": 21600,
+        "embedLatencyMs": 108,
+        "tokenApiLatencyMs": 93,
+        "cryptoLatencyMs": 2,
+        "manifestFetchLatencyMs": 95,
+        "totalResolutionLatencyMs": 321
+      }
+    },
+    {
+      "title": "Ping Pong the Animation",
+      "aniListId": 20607,
+      "category": "niche",
+      "mappingMethod": "DIRECT_ANILIST",
+      "resolvedAniListId": 20607,
+      "serverCount": 4,
+      "servers": [
+        {
+          "name": "HD-1",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/7p191jdwrkvd?v=1"
+        },
+        {
+          "name": "HD-1",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/7p191jdwrkvd?v=1"
+        },
+        {
+          "name": "HD-2",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/7p191jdwrkvd?v=2"
+        },
+        {
+          "name": "HD-2",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/7p191jdwrkvd?v=2"
+        }
+      ],
+      "streamSuccess": true,
+      "latencies": {
+        "mappingMs": 94,
+        "episodeLookupMs": 93,
+        "serverLookupMs": 94,
+        "resolutionMs": 345,
+        "totalMs": 532
+      },
+      "streamResolution": {
+        "streamUrl": "https://fetch9.flixcloud.cc/_v7/c633fb42-e115-4a4d-8011-e9c117f3526a/master.m3u8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlb19pZCI6ImM2MzNmYjQyLWUxMTUtNGE0ZC04MDExLWU5YzExN2YzNTI2YSIsImNsaWVudF9pcCI6IjM3LjIzOC41NS4xODUiLCJleHAiOjE3OTA1NDI2NDcsImlhdCI6MTc5MDUyMTA0NywiaXNzIjoidmlkZW8taG9zdGluZy1wbGF0Zm9ybSJ9.rl3ZSz8a1p5mtpe9j9kaeJ3gPDIPK-pv9vqnarrsYiM",
+        "isHLS": true,
+        "rawContentType": "application/vnd.apple.mpegurl",
+        "isValidM3u8": true,
+        "isMasterPlaylist": true,
+        "resolutions": [
+          "1920x1080"
+        ],
+        "has1080p": true,
+        "has720p": false,
+        "has480p": false,
+        "bandwidths": [
+          5184
+        ],
+        "codecs": [
+          "avc1.64001f,mp4a.40.2"
+        ],
+        "audioTracks": [
+          {
+            "language": "jpn",
+            "name": "Native"
+          },
+          {
+            "language": "eng",
+            "name": "English"
+          }
+        ],
+        "subtitles": [
+          {
+            "url": "https://vault-91.rundowncdn.top/subtitles/c633fb42-e115-4a4d-8011-e9c117f3526a/c633fb42-e115-4a4d-8011-e9c117f3526a_eng_3.ass",
+            "language": "English (English [SCY/Commie])",
+            "format": "ass",
+            "default": true
+          },
+          {
+            "url": "https://vault-91.rundowncdn.top/subtitles/c633fb42-e115-4a4d-8011-e9c117f3526a/c633fb42-e115-4a4d-8011-e9c117f3526a_eng_4.ass",
+            "language": "English (English (Signs & Songs))",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-91.rundowncdn.top/subtitles/c633fb42-e115-4a4d-8011-e9c117f3526a/c633fb42-e115-4a4d-8011-e9c117f3526a_ger_5.ass",
+            "language": "German (German (Crunchyroll))",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-91.rundowncdn.top/subtitles/c633fb42-e115-4a4d-8011-e9c117f3526a/c633fb42-e115-4a4d-8011-e9c117f3526a.srt",
+            "language": "English (Dubtitle(AI))",
+            "format": "srt",
+            "default": false
+          }
+        ],
+        "hasArabicSub": false,
+        "hasEnglishSub": true,
+        "tokenPayload": {
+          "video_id": "c633fb42-e115-4a4d-8011-e9c117f3526a",
+          "client_ip": "37.238.55.185",
+          "exp": 1790542647,
+          "iat": 1790521047,
+          "iss": "video-hosting-platform"
+        },
+        "tokenExpiresInSec": 21600,
+        "embedLatencyMs": 114,
+        "tokenApiLatencyMs": 95,
+        "cryptoLatencyMs": 1,
+        "manifestFetchLatencyMs": 123,
+        "totalResolutionLatencyMs": 345
+      }
+    },
+    {
+      "title": "Shouwa Genroku Rakugo Shinjuu",
+      "aniListId": 20973,
+      "category": "niche",
+      "mappingMethod": "NOT_FOUND",
+      "resolvedAniListId": 20973,
+      "serverCount": 0,
+      "servers": [],
+      "streamSuccess": false,
+      "latencies": {
+        "mappingMs": 434,
+        "episodeLookupMs": 93,
+        "serverLookupMs": 108,
+        "resolutionMs": 0,
+        "totalMs": 527
+      },
+      "failureReason": "CATALOG_NO_SERVERS (ReAnime has metadata but 0 hosted streams for this anime)"
+    },
+    {
+      "title": "Your Name",
+      "aniListId": 21519,
+      "category": "movie",
+      "mappingMethod": "DIRECT_ANILIST",
+      "resolvedAniListId": 21519,
+      "serverCount": 4,
+      "servers": [
+        {
+          "name": "HD-1",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/m5glzlr95neg?v=1"
+        },
+        {
+          "name": "HD-1",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/m5glzlr95neg?v=1"
+        },
+        {
+          "name": "HD-2",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/m5glzlr95neg?v=2"
+        },
+        {
+          "name": "HD-2",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/m5glzlr95neg?v=2"
+        }
+      ],
+      "streamSuccess": true,
+      "latencies": {
+        "mappingMs": 90,
+        "episodeLookupMs": 87,
+        "serverLookupMs": 90,
+        "resolutionMs": 425,
+        "totalMs": 602
+      },
+      "streamResolution": {
+        "streamUrl": "https://fetch9.flixcloud.cc/_v7/5d7e225c-e72e-48a8-b275-4b1423c1b891/master.m3u8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlb19pZCI6IjVkN2UyMjVjLWU3MmUtNDhhOC1iMjc1LTRiMTQyM2MxYjg5MSIsImNsaWVudF9pcCI6IjM3LjIzOC41NS4xODUiLCJleHAiOjE3OTA1NDI2NDgsImlhdCI6MTc5MDUyMTA0OCwiaXNzIjoidmlkZW8taG9zdGluZy1wbGF0Zm9ybSJ9.zND8MfUYG2Ml5DnNbp54R72V1DXjTocLoeTEbmZu-Ps",
+        "isHLS": true,
+        "rawContentType": "application/vnd.apple.mpegurl",
+        "isValidM3u8": true,
+        "isMasterPlaylist": true,
+        "resolutions": [
+          "1920x1080"
+        ],
+        "has1080p": true,
+        "has720p": false,
+        "has480p": false,
+        "bandwidths": [
+          5184
+        ],
+        "codecs": [
+          "avc1.64001f,mp4a.40.2"
+        ],
+        "audioTracks": [
+          {
+            "language": "jpn",
+            "name": "Native"
+          },
+          {
+            "language": "eng",
+            "name": "English"
+          }
+        ],
+        "subtitles": [
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/5d7e225c-e72e-48a8-b275-4b1423c1b891/eng_3.srt",
+            "language": "English (Signs and Songs(Official Subs))",
+            "format": "srt",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/5d7e225c-e72e-48a8-b275-4b1423c1b891/eng_4.srt",
+            "language": "English (Full Subs (Official Subs))",
+            "format": "srt",
+            "default": true
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/5d7e225c-e72e-48a8-b275-4b1423c1b891/eng_6.ass",
+            "language": "English (Full Subs (hchcsen/Commie))",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/5d7e225c-e72e-48a8-b275-4b1423c1b891/eng_8.ass",
+            "language": "English (Full Subs (hchcsen/kuchikirukia))",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/5d7e225c-e72e-48a8-b275-4b1423c1b891/eng_5.ass",
+            "language": "English (Signs and Songs(hchcsen))",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/5d7e225c-e72e-48a8-b275-4b1423c1b891/eng_7.ass",
+            "language": "English (Full Subs (hchcsen/MTBB))",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/5d7e225c-e72e-48a8-b275-4b1423c1b891/5d7e225c-e72e-48a8-b275-4b1423c1b891.srt",
+            "language": "English (Dubtitle(AI))",
+            "format": "srt",
+            "default": false
+          }
+        ],
+        "hasArabicSub": false,
+        "hasEnglishSub": true,
+        "tokenPayload": {
+          "video_id": "5d7e225c-e72e-48a8-b275-4b1423c1b891",
+          "client_ip": "37.238.55.185",
+          "exp": 1790542648,
+          "iat": 1790521048,
+          "iss": "video-hosting-platform"
+        },
+        "tokenExpiresInSec": 21600,
+        "embedLatencyMs": 111,
+        "tokenApiLatencyMs": 103,
+        "cryptoLatencyMs": 2,
+        "manifestFetchLatencyMs": 194,
+        "totalResolutionLatencyMs": 425
+      }
+    },
+    {
+      "title": "A Silent Voice",
+      "aniListId": 20954,
+      "category": "movie",
+      "mappingMethod": "DIRECT_ANILIST",
+      "resolvedAniListId": 20954,
+      "serverCount": 4,
+      "servers": [
+        {
+          "name": "HD-1",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/htidy7je3eny?v=1"
+        },
+        {
+          "name": "HD-1",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/htidy7je3eny?v=1"
+        },
+        {
+          "name": "HD-2",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/htidy7je3eny?v=2"
+        },
+        {
+          "name": "HD-2",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/htidy7je3eny?v=2"
+        }
+      ],
+      "streamSuccess": true,
+      "latencies": {
+        "mappingMs": 91,
+        "episodeLookupMs": 87,
+        "serverLookupMs": 91,
+        "resolutionMs": 316,
+        "totalMs": 494
+      },
+      "streamResolution": {
+        "streamUrl": "https://fetch9.flixcloud.cc/_v7/11a4c9ec-b540-458b-bcb2-1bd3dfd97e23/master.m3u8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlb19pZCI6IjExYTRjOWVjLWI1NDAtNDU4Yi1iY2IyLTFiZDNkZmQ5N2UyMyIsImNsaWVudF9pcCI6IjM3LjIzOC41NS4xODUiLCJleHAiOjE3OTA1NDI2NDksImlhdCI6MTc5MDUyMTA0OSwiaXNzIjoidmlkZW8taG9zdGluZy1wbGF0Zm9ybSJ9.NtqqTy31AuTXGzpSHnp27dquE1vDNKTjs3K4z4KabGU",
+        "isHLS": true,
+        "rawContentType": "application/vnd.apple.mpegurl",
+        "isValidM3u8": true,
+        "isMasterPlaylist": true,
+        "resolutions": [
+          "1920x1080"
+        ],
+        "has1080p": true,
+        "has720p": false,
+        "has480p": false,
+        "bandwidths": [
+          5184
+        ],
+        "codecs": [
+          "avc1.64001f,mp4a.40.2"
+        ],
+        "audioTracks": [
+          {
+            "language": "jpn",
+            "name": "Native"
+          },
+          {
+            "language": "eng",
+            "name": "English"
+          }
+        ],
+        "subtitles": [
+          {
+            "url": "https://vault-90.rundowncdn.top/subtitles/11a4c9ec-b540-458b-bcb2-1bd3dfd97e23/11a4c9ec-b540-458b-bcb2-1bd3dfd97e23_eng_5.ass",
+            "language": "English (English (No Honorifics) [nedragrevev])",
+            "format": "ass",
+            "default": true
+          },
+          {
+            "url": "https://vault-90.rundowncdn.top/subtitles/11a4c9ec-b540-458b-bcb2-1bd3dfd97e23/11a4c9ec-b540-458b-bcb2-1bd3dfd97e23_eng_6.ass",
+            "language": "English (English (No Honorifics & Western Naming Order) [nedragrevev])",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-90.rundowncdn.top/subtitles/11a4c9ec-b540-458b-bcb2-1bd3dfd97e23/11a4c9ec-b540-458b-bcb2-1bd3dfd97e23_eng_7.ass",
+            "language": "English (English (35mm’s Initial Translation & Kametsu's Older Typesetting) [Kametsu])",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-90.rundowncdn.top/subtitles/11a4c9ec-b540-458b-bcb2-1bd3dfd97e23/11a4c9ec-b540-458b-bcb2-1bd3dfd97e23_eng_8.ass",
+            "language": "English (Commentary (US BD))",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-90.rundowncdn.top/subtitles/11a4c9ec-b540-458b-bcb2-1bd3dfd97e23/11a4c9ec-b540-458b-bcb2-1bd3dfd97e23_jpn_3.ass",
+            "language": "Japanese (Signs and Songs only [nedragrevev])",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-90.rundowncdn.top/subtitles/11a4c9ec-b540-458b-bcb2-1bd3dfd97e23/11a4c9ec-b540-458b-bcb2-1bd3dfd97e23.srt",
+            "language": "English (Dubtitle(AI))",
+            "format": "srt",
+            "default": false
+          },
+          {
+            "url": "https://vault-90.rundowncdn.top/subtitles/11a4c9ec-b540-458b-bcb2-1bd3dfd97e23/11a4c9ec-b540-458b-bcb2-1bd3dfd97e23_eng_4.ass",
+            "language": "English (English (Honorifics) [nedragrevev])",
+            "format": "ass",
+            "default": false
+          }
+        ],
+        "hasArabicSub": false,
+        "hasEnglishSub": true,
+        "tokenPayload": {
+          "video_id": "11a4c9ec-b540-458b-bcb2-1bd3dfd97e23",
+          "client_ip": "37.238.55.185",
+          "exp": 1790542649,
+          "iat": 1790521049,
+          "iss": "video-hosting-platform"
+        },
+        "tokenExpiresInSec": 21600,
+        "embedLatencyMs": 116,
+        "tokenApiLatencyMs": 92,
+        "cryptoLatencyMs": 1,
+        "manifestFetchLatencyMs": 93,
+        "totalResolutionLatencyMs": 316
+      }
+    },
+    {
+      "title": "Princess Mononoke",
+      "aniListId": 164,
+      "category": "movie",
+      "mappingMethod": "DIRECT_ANILIST",
+      "resolvedAniListId": 164,
+      "serverCount": 4,
+      "servers": [
+        {
+          "name": "HD-1",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/krsfnaghzwqd?v=1"
+        },
+        {
+          "name": "HD-1",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/krsfnaghzwqd?v=1"
+        },
+        {
+          "name": "HD-2",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/krsfnaghzwqd?v=2"
+        },
+        {
+          "name": "HD-2",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/krsfnaghzwqd?v=2"
+        }
+      ],
+      "streamSuccess": true,
+      "latencies": {
+        "mappingMs": 88,
+        "episodeLookupMs": 92,
+        "serverLookupMs": 88,
+        "resolutionMs": 310,
+        "totalMs": 490
+      },
+      "streamResolution": {
+        "streamUrl": "https://fetch9.flixcloud.cc/_v7/d8d5957f-f4fa-45ce-8113-e79f9cc7e851/master.m3u8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlb19pZCI6ImQ4ZDU5NTdmLWY0ZmEtNDVjZS04MTEzLWU3OWY5Y2M3ZTg1MSIsImNsaWVudF9pcCI6IjM3LjIzOC41NS4xODUiLCJleHAiOjE3OTA1NDI2NDksImlhdCI6MTc5MDUyMTA0OSwiaXNzIjoidmlkZW8taG9zdGluZy1wbGF0Zm9ybSJ9.ahp5APuGzqXz5IvFkaZl5TxkRE7M1a5McBbPVYw8J1Q",
+        "isHLS": true,
+        "rawContentType": "application/vnd.apple.mpegurl",
+        "isValidM3u8": true,
+        "isMasterPlaylist": true,
+        "resolutions": [
+          "1920x1080"
+        ],
+        "has1080p": true,
+        "has720p": false,
+        "has480p": false,
+        "bandwidths": [
+          5184
+        ],
+        "codecs": [
+          "avc1.64001f,mp4a.40.2"
+        ],
+        "audioTracks": [
+          {
+            "language": "jpn",
+            "name": "Native"
+          },
+          {
+            "language": "eng",
+            "name": "English"
+          }
+        ],
+        "subtitles": [
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/d8d5957f-f4fa-45ce-8113-e79f9cc7e851/d8d5957f-f4fa-45ce-8113-e79f9cc7e851_eng_3.sup",
+            "language": "English (English)",
+            "format": "sup",
+            "default": true
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/d8d5957f-f4fa-45ce-8113-e79f9cc7e851/d8d5957f-f4fa-45ce-8113-e79f9cc7e851.srt",
+            "language": "English (Dubtitle(AI))",
+            "format": "srt",
+            "default": false
+          }
+        ],
+        "hasArabicSub": false,
+        "hasEnglishSub": true,
+        "tokenPayload": {
+          "video_id": "d8d5957f-f4fa-45ce-8113-e79f9cc7e851",
+          "client_ip": "37.238.55.185",
+          "exp": 1790542649,
+          "iat": 1790521049,
+          "iss": "video-hosting-platform"
+        },
+        "tokenExpiresInSec": 21600,
+        "embedLatencyMs": 106,
+        "tokenApiLatencyMs": 88,
+        "cryptoLatencyMs": 2,
+        "manifestFetchLatencyMs": 102,
+        "totalResolutionLatencyMs": 310
+      }
+    },
+    {
+      "title": "Suzume",
+      "aniListId": 142470,
+      "category": "movie",
+      "mappingMethod": "FUZZY_SEARCH",
+      "resolvedAniListId": 142770,
+      "serverCount": 4,
+      "servers": [
+        {
+          "name": "HD-1",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/p753s2mfkyw7?v=1"
+        },
+        {
+          "name": "HD-1",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/p753s2mfkyw7?v=1"
+        },
+        {
+          "name": "HD-2",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/p753s2mfkyw7?v=2"
+        },
+        {
+          "name": "HD-2",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/p753s2mfkyw7?v=2"
+        }
+      ],
+      "streamSuccess": true,
+      "latencies": {
+        "mappingMs": 300,
+        "episodeLookupMs": 102,
+        "serverLookupMs": 94,
+        "resolutionMs": 326,
+        "totalMs": 728
+      },
+      "streamResolution": {
+        "streamUrl": "https://fetch9.flixcloud.cc/_v7/4065ab09-9a52-4cf9-9520-7a9534dd147b/master.m3u8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlb19pZCI6IjQwNjVhYjA5LTlhNTItNGNmOS05NTIwLTdhOTUzNGRkMTQ3YiIsImNsaWVudF9pcCI6IjM3LjIzOC41NS4xODUiLCJleHAiOjE3OTA1NDI2NTAsImlhdCI6MTc5MDUyMTA1MCwiaXNzIjoidmlkZW8taG9zdGluZy1wbGF0Zm9ybSJ9.4t3m-KmIUNbe4YuEVXr892Re7Gdwb3c3xK73gcI15QM",
+        "isHLS": true,
+        "rawContentType": "application/vnd.apple.mpegurl",
+        "isValidM3u8": true,
+        "isMasterPlaylist": true,
+        "resolutions": [
+          "1920x804"
+        ],
+        "has1080p": true,
+        "has720p": false,
+        "has480p": false,
+        "bandwidths": [
+          3859
+        ],
+        "codecs": [
+          "avc1.64001f,mp4a.40.2"
+        ],
+        "audioTracks": [
+          {
+            "language": "jpn",
+            "name": "Native"
+          },
+          {
+            "language": "eng",
+            "name": "English"
+          }
+        ],
+        "subtitles": [
+          {
+            "url": "https://vault-91.rundowncdn.top/subtitles/4065ab09-9a52-4cf9-9520-7a9534dd147b/eng_3.ass",
+            "language": "English (Signs and Songs (WBDP/Lazy))",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-91.rundowncdn.top/subtitles/4065ab09-9a52-4cf9-9520-7a9534dd147b/eng_4.ass",
+            "language": "English (Full Subs (WBDP/Lazy))",
+            "format": "ass",
+            "default": true
+          },
+          {
+            "url": "https://vault-91.rundowncdn.top/subtitles/4065ab09-9a52-4cf9-9520-7a9534dd147b/eng_5.ass",
+            "language": "English (Signs and Songs (neodesu))",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-91.rundowncdn.top/subtitles/4065ab09-9a52-4cf9-9520-7a9534dd147b/eng_6.ass",
+            "language": "English (Full Subs (neodesu))",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-91.rundowncdn.top/subtitles/4065ab09-9a52-4cf9-9520-7a9534dd147b/4065ab09-9a52-4cf9-9520-7a9534dd147b.srt",
+            "language": "English (Dubtitle(AI))",
+            "format": "srt",
+            "default": false
+          }
+        ],
+        "hasArabicSub": false,
+        "hasEnglishSub": true,
+        "tokenPayload": {
+          "video_id": "4065ab09-9a52-4cf9-9520-7a9534dd147b",
+          "client_ip": "37.238.55.185",
+          "exp": 1790542650,
+          "iat": 1790521050,
+          "iss": "video-hosting-platform"
+        },
+        "tokenExpiresInSec": 21600,
+        "embedLatencyMs": 108,
+        "tokenApiLatencyMs": 92,
+        "cryptoLatencyMs": 2,
+        "manifestFetchLatencyMs": 107,
+        "totalResolutionLatencyMs": 326
+      }
+    },
+    {
+      "title": "One Piece",
+      "aniListId": 21,
+      "category": "long_running",
+      "mappingMethod": "DIRECT_ANILIST",
+      "resolvedAniListId": 21,
+      "serverCount": 4,
+      "servers": [
+        {
+          "name": "HD-1",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/rtt4nppua1i6?v=1"
+        },
+        {
+          "name": "HD-1",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/rtt4nppua1i6?v=1"
+        },
+        {
+          "name": "HD-2",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/rtt4nppua1i6?v=2"
+        },
+        {
+          "name": "HD-2",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/rtt4nppua1i6?v=2"
+        }
+      ],
+      "streamSuccess": true,
+      "latencies": {
+        "mappingMs": 104,
+        "episodeLookupMs": 127,
+        "serverLookupMs": 104,
+        "resolutionMs": 321,
+        "totalMs": 552
+      },
+      "streamResolution": {
+        "streamUrl": "https://fetch9.flixcloud.cc/_v7/ad999757-665e-451f-aa37-fa79eb60967b/master.m3u8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlb19pZCI6ImFkOTk5NzU3LTY2NWUtNDUxZi1hYTM3LWZhNzllYjYwOTY3YiIsImNsaWVudF9pcCI6IjM3LjIzOC41NS4xODUiLCJleHAiOjE3OTA1NDI2NTEsImlhdCI6MTc5MDUyMTA1MSwiaXNzIjoidmlkZW8taG9zdGluZy1wbGF0Zm9ybSJ9.kRCZ27-rePT4rLo66oHKwWjCpaxPmm0DPNMhgWy4V1c",
+        "isHLS": true,
+        "rawContentType": "application/vnd.apple.mpegurl",
+        "isValidM3u8": true,
+        "isMasterPlaylist": true,
+        "resolutions": [
+          "1440x1080"
+        ],
+        "has1080p": true,
+        "has720p": false,
+        "has480p": false,
+        "bandwidths": [
+          3888
+        ],
+        "codecs": [
+          "avc1.64001f,mp4a.40.2"
+        ],
+        "audioTracks": [
+          {
+            "language": "jpn",
+            "name": "Native"
+          },
+          {
+            "language": "eng",
+            "name": "English"
+          }
+        ],
+        "subtitles": [
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/ad999757-665e-451f-aa37-fa79eb60967b/ad999757-665e-451f-aa37-fa79eb60967b_eng_3.ass",
+            "language": "English (Episode Name (Restyled By Simmsy))",
+            "format": "ass",
+            "default": true
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/ad999757-665e-451f-aa37-fa79eb60967b/ad999757-665e-451f-aa37-fa79eb60967b_eng_4.ass",
+            "language": "English (Full Subtitles (Restyled By Simmsy))",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/ad999757-665e-451f-aa37-fa79eb60967b/ad999757-665e-451f-aa37-fa79eb60967b_eng_5.ass",
+            "language": "English (Episode Name (Orignal))",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/ad999757-665e-451f-aa37-fa79eb60967b/ad999757-665e-451f-aa37-fa79eb60967b_eng_6.ass",
+            "language": "English (Full Subtitles (Orignal))",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/ad999757-665e-451f-aa37-fa79eb60967b/ad999757-665e-451f-aa37-fa79eb60967b.srt",
+            "language": "English (Dubtitle(AI))",
+            "format": "srt",
+            "default": false
+          }
+        ],
+        "hasArabicSub": false,
+        "hasEnglishSub": true,
+        "tokenPayload": {
+          "video_id": "ad999757-665e-451f-aa37-fa79eb60967b",
+          "client_ip": "37.238.55.185",
+          "exp": 1790542651,
+          "iat": 1790521051,
+          "iss": "video-hosting-platform"
+        },
+        "tokenExpiresInSec": 21600,
+        "embedLatencyMs": 115,
+        "tokenApiLatencyMs": 94,
+        "cryptoLatencyMs": 1,
+        "manifestFetchLatencyMs": 101,
+        "totalResolutionLatencyMs": 321
+      }
+    },
+    {
+      "title": "Death Note",
+      "aniListId": 1535,
+      "category": "classic",
+      "mappingMethod": "DIRECT_ANILIST",
+      "resolvedAniListId": 1535,
+      "serverCount": 4,
+      "servers": [
+        {
+          "name": "HD-1",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/mk7hqhtn7hc6?v=1"
+        },
+        {
+          "name": "HD-1",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/mk7hqhtn7hc6?v=1"
+        },
+        {
+          "name": "HD-2",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/mk7hqhtn7hc6?v=2"
+        },
+        {
+          "name": "HD-2",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/mk7hqhtn7hc6?v=2"
+        }
+      ],
+      "streamSuccess": true,
+      "latencies": {
+        "mappingMs": 88,
+        "episodeLookupMs": 88,
+        "serverLookupMs": 88,
+        "resolutionMs": 351,
+        "totalMs": 527
+      },
+      "streamResolution": {
+        "streamUrl": "https://fetch9.flixcloud.cc/_v7/76e52a9c-a48d-4a4a-ba85-e64450e56509/master.m3u8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlb19pZCI6Ijc2ZTUyYTljLWE0OGQtNGE0YS1iYTg1LWU2NDQ1MGU1NjUwOSIsImNsaWVudF9pcCI6IjM3LjIzOC41NS4xODUiLCJleHAiOjE3OTA1NDI2NTEsImlhdCI6MTc5MDUyMTA1MSwiaXNzIjoidmlkZW8taG9zdGluZy1wbGF0Zm9ybSJ9.2G9gI6It8LdghWewX_EfV5op1v-pHc_7uLtkxbepIbA",
+        "isHLS": true,
+        "rawContentType": "application/vnd.apple.mpegurl",
+        "isValidM3u8": true,
+        "isMasterPlaylist": true,
+        "resolutions": [
+          "1920x1080"
+        ],
+        "has1080p": true,
+        "has720p": false,
+        "has480p": false,
+        "bandwidths": [
+          5184
+        ],
+        "codecs": [
+          "avc1.64001f,mp4a.40.2"
+        ],
+        "audioTracks": [
+          {
+            "language": "jpn",
+            "name": "Native"
+          },
+          {
+            "language": "eng",
+            "name": "English"
+          }
+        ],
+        "subtitles": [
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/76e52a9c-a48d-4a4a-ba85-e64450e56509/eng_4.ass",
+            "language": "English (English [FMA1394/Redc4t])",
+            "format": "ass",
+            "default": true
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/76e52a9c-a48d-4a4a-ba85-e64450e56509/eng_3.ass",
+            "language": "English (Signs and Songs [FMA1394/Redc4t])",
+            "format": "ass",
+            "default": false
+          },
+          {
+            "url": "https://vault-95.rundowncdn.top/subtitles/76e52a9c-a48d-4a4a-ba85-e64450e56509/76e52a9c-a48d-4a4a-ba85-e64450e56509.srt",
+            "language": "English (Dubtitle(AI))",
+            "format": "srt",
+            "default": false
+          }
+        ],
+        "hasArabicSub": false,
+        "hasEnglishSub": true,
+        "tokenPayload": {
+          "video_id": "76e52a9c-a48d-4a4a-ba85-e64450e56509",
+          "client_ip": "37.238.55.185",
+          "exp": 1790542651,
+          "iat": 1790521051,
+          "iss": "video-hosting-platform"
+        },
+        "tokenExpiresInSec": 21600,
+        "embedLatencyMs": 120,
+        "tokenApiLatencyMs": 99,
+        "cryptoLatencyMs": 2,
+        "manifestFetchLatencyMs": 119,
+        "totalResolutionLatencyMs": 351
+      }
+    },
+    {
+      "title": "Spirited Away",
+      "aniListId": 199,
+      "category": "movie",
+      "mappingMethod": "DIRECT_ANILIST",
+      "resolvedAniListId": 199,
+      "serverCount": 4,
+      "servers": [
+        {
+          "name": "HD-1",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/jbbfc4dspqs2?v=1"
+        },
+        {
+          "name": "HD-1",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/jbbfc4dspqs2?v=1"
+        },
+        {
+          "name": "HD-2",
+          "type": "sub",
+          "link": "https://flixcloud.cc/e/jbbfc4dspqs2?v=2"
+        },
+        {
+          "name": "HD-2",
+          "type": "dub",
+          "link": "https://flixcloud.cc/e/jbbfc4dspqs2?v=2"
+        }
+      ],
+      "streamSuccess": true,
+      "latencies": {
+        "mappingMs": 94,
+        "episodeLookupMs": 88,
+        "serverLookupMs": 94,
+        "resolutionMs": 305,
+        "totalMs": 487
+      },
+      "streamResolution": {
+        "streamUrl": "https://fetch9.flixcloud.cc/_v7/2bb3aa96-9f23-47bc-96d3-dc8247867a66/master.m3u8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlb19pZCI6IjJiYjNhYTk2LTlmMjMtNDdiYy05NmQzLWRjODI0Nzg2N2E2NiIsImNsaWVudF9pcCI6IjM3LjIzOC41NS4xODUiLCJleHAiOjE3OTA1NDI2NTIsImlhdCI6MTc5MDUyMTA1MiwiaXNzIjoidmlkZW8taG9zdGluZy1wbGF0Zm9ybSJ9.ClpL5F_k1NW_2p09zpI2J9IMMitkXqSRvM5QXcyXOhw",
+        "isHLS": true,
+        "rawContentType": "application/vnd.apple.mpegurl",
+        "isValidM3u8": true,
+        "isMasterPlaylist": true,
+        "resolutions": [
+          "1920x1080"
+        ],
+        "has1080p": true,
+        "has720p": false,
+        "has480p": false,
+        "bandwidths": [
+          5184
+        ],
+        "codecs": [
+          "avc1.64001f,mp4a.40.2"
+        ],
+        "audioTracks": [
+          {
+            "language": "jpn",
+            "name": "Native"
+          },
+          {
+            "language": "eng",
+            "name": "English"
+          }
+        ],
+        "subtitles": [
+          {
+            "url": "https://vault-90.rundowncdn.top/subtitles/2bb3aa96-9f23-47bc-96d3-dc8247867a66/2bb3aa96-9f23-47bc-96d3-dc8247867a66_eng_3.sup",
+            "language": "English (English)",
+            "format": "sup",
+            "default": true
+          },
+          {
+            "url": "https://vault-90.rundowncdn.top/subtitles/2bb3aa96-9f23-47bc-96d3-dc8247867a66/2bb3aa96-9f23-47bc-96d3-dc8247867a66.srt",
+            "language": "English (Dubtitle(AI))",
+            "format": "srt",
+            "default": false
+          }
+        ],
+        "hasArabicSub": false,
+        "hasEnglishSub": true,
+        "tokenPayload": {
+          "video_id": "2bb3aa96-9f23-47bc-96d3-dc8247867a66",
+          "client_ip": "37.238.55.185",
+          "exp": 1790542652,
+          "iat": 1790521052,
+          "iss": "video-hosting-platform"
+        },
+        "tokenExpiresInSec": 21600,
+        "embedLatencyMs": 106,
+        "tokenApiLatencyMs": 90,
+        "cryptoLatencyMs": 1,
+        "manifestFetchLatencyMs": 97,
+        "totalResolutionLatencyMs": 305
+      }
+    }
+  ],
+  "refererCorsExperiment": {
+    "withoutRefStatus": 403,
+    "withRefStatus": 200,
+    "withRefContentType": "application/vnd.apple.mpegurl",
+    "withRefCorsHeader": "*",
+    "browserOriginStatus": 403,
+    "segmentWithoutRefStatus": 403,
+    "segmentWithRefStatus": 200,
+    "findings": {
+      "backendDirectWithoutReferer": "BLOCKED (HTTP 403 Forbidden)",
+      "backendDirectWithReferer": "SUCCESS (HTTP 200 OK)",
+      "browserDirectFromPlayer": "BLOCKED: Standard browsers cannot set forbidden 'Referer: https://flixcloud.cc/' header. Raw requests receive HTTP 403.",
+      "manifestFormatCompatibility": "INCOMPATIBLE_WITHOUT_PROXY: FlixCloud CDN returns XOR-obfuscated ciphertext. Standard HLS.js or video elements fail syntax parsing without backend proxy unmasking or custom WASM loader.",
+      "segmentRefererRequirement": "ENFORCED: Segment CDN (rundowncdn.top) strictly requires 'Referer: https://flixcloud.cc/'"
+    }
+  },
+  "tokenLifetimeExperiment": {
+    "iteration1StreamUrl": "https://fetch9.flixcloud.cc/_v7/ad999757-665e-451f-aa37-fa79eb60967b/master.m3u8...",
+    "iteration2StreamUrl": "https://fetch9.flixcloud.cc/_v7/ad999757-665e-451f-aa37-fa79eb60967b/master.m3u8...",
+    "areUrlsIdentical": false,
+    "tokenReplayHandshakeStatus": 410,
+    "url1ActiveAfterUrl2Created": true,
+    "url2Active": true,
+    "jwtPayload": {
+      "video_id": "ad999757-665e-451f-aa37-fa79eb60967b",
+      "client_ip": "37.238.55.185",
+      "exp": 1790542653,
+      "iat": 1790521053,
+      "iss": "video-hosting-platform"
+    },
+    "jwtTtlSeconds": 21600,
+    "jwtTtlHours": 6,
+    "findings": {
+      "returnsNewUrls": "YES: Each resolution creates a new session and signed JWT URL.",
+      "isOneTimeUseHandshake": "YES: The initial FlixCloud API token expires after a single call (HTTP 410 Gone).",
+      "previousUrlRemainsValid": "YES: Creating a subsequent stream does NOT invalidate previously generated master playlist URLs.",
+      "expirationTime": "6 hours (21,600 seconds) from creation based on JWT exp claim."
+    }
+  },
+  "coldWarmPerformance": {
+    "cold": {
+      "mappingLatencyMs": 102,
+      "episodeLookupLatencyMs": 102,
+      "serverLookupLatencyMs": 102,
+      "streamResolutionLatencyMs": 313,
+      "manifestFetchLatencyMs": 93,
+      "totalColdLatencyMs": 517
+    },
+    "warm": {
+      "mappingLatencyMs": 98,
+      "episodeLookupLatencyMs": 102,
+      "serverLookupLatencyMs": 98,
+      "streamResolutionLatencyMs": 368,
+      "manifestFetchLatencyMs": 112,
+      "totalWarmLatencyMs": 568
+    }
+  },
+  "rakugoInvestigation": {
+    "directAniList20973Result": {
+      "success": true,
+      "servers": []
+    },
+    "catalogSearchResults": [
+      {
+        "anime_id": "showa-genroku-rakugo-shinju-xddj4b",
+        "anilist_id": 20972,
+        "title": {
+          "english": "Showa Genroku Rakugo Shinju",
+          "native": "昭和元禄落語心中",
+          "romaji": "Shouwa Genroku Rakugo Shinjuu"
+        },
+        "episodes": 13,
+        "subbed": 0,
+        "dubbed": 0,
+        "can_watch": false
+      },
+      {
+        "anime_id": "descending-stories-showa-genroku-rakugo-shinju-rjwwfu",
+        "anilist_id": 21733,
+        "title": {
+          "english": "Descending Stories: Showa Genroku Rakugo Shinju",
+          "native": "昭和元禄落語心中～助六再び篇～",
+          "romaji": "Shouwa Genroku Rakugo Shinjuu: Sukeroku Futatabi-hen"
+        },
+        "episodes": 12,
+        "subbed": 0,
+        "dubbed": 0,
+        "can_watch": false
+      },
+      {
+        "anime_id": "shouwa-genroku-rakugo-shinjuu-yotarou-hourou-hen-sva7yf",
+        "anilist_id": 20970,
+        "title": {
+          "english": "",
+          "native": "昭和元禄落語心中 与太郎放浪篇",
+          "romaji": "Shouwa Genroku Rakugo Shinjuu: Yotarou Hourou-hen"
+        },
+        "episodes": 2,
+        "subbed": 0,
+        "dubbed": 0,
+        "can_watch": false
+      }
+    ],
+    "directAniList20972Result": {
+      "success": true,
+      "servers": []
+    },
+    "animeSlugDetails": {
+      "anime_id": "showa-genroku-rakugo-shinju-xddj4b",
+      "anilist_id": 20972,
+      "themoviedb_id": 66862,
+      "artworksCount": 6
+    },
+    "conclusion": {
+      "classification": "NO_SERVERS_IN_CATALOG",
+      "detail": "ReAnime maintains synced AniList metadata (AniList ID 20972/20973), but explicitly marks 'can_watch: false' and 'subbed: 0'. Both /api/flix/20973/1 and /api/flix/20972/1 return HTTP 200 with an empty servers array (`{\"success\":true,\"servers\":[]}`). This is neither a parser fault nor a temporary outage; the source simply has zero video uploads for this title."
+    }
+  }
+}

@@ -2,6 +2,7 @@ export const ANIME_DETAILS_PAGE_QUERY = `
   query AnimeDetailsPage($id: Int!) {
     Media(id: $id, type: ANIME) {
       id
+      isAdult
       title {
         english
         romaji

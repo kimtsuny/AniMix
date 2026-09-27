@@ -1,0 +1,4661 @@
+[
+  {
+    "testCase": {
+      "id": 21,
+      "name": "One Piece",
+      "category": "long_running"
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 633,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 4252,
+      "episodeCount": 1179,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:2ad276c2-3492-4db4-b5de-1657ed207571:ASa7g4dGZREXdtzA",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 7359,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 50,
+          "unitId": "animeparadise:1217e99f-4aa3-4200-9248-ad11c705db2d:ASa7g4dGZREXdtzA",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 7338,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 590,
+          "unitId": "animeparadise:a70200c8-5381-40d5-b327-9a924508ae05:ASa7g4dGZREXdtzA",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 7389,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AnimeParadise: no streamLink in response",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 1179,
+          "unitId": "animeparadise:70f014c2-b463-4d71-bf2c-5841f1ba1b9c:ASa7g4dGZREXdtzA",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 7426,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:ASa7g4dGZREXdtzA",
+      "matchedTitle": "ONE PIECE"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 661,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 479,
+      "episodeCount": 1185,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:ReooPAxPMsHM4KPMY/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 267,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for ReooPAxPMsHM4KPMY/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 50,
+          "unitId": "allmanga:ReooPAxPMsHM4KPMY/50",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 454,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for ReooPAxPMsHM4KPMY/50 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 593,
+          "unitId": "allmanga:ReooPAxPMsHM4KPMY/593",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 267,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for ReooPAxPMsHM4KPMY/593 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 1179,
+          "unitId": "allmanga:ReooPAxPMsHM4KPMY/1179",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 570,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for ReooPAxPMsHM4KPMY/1179 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:ReooPAxPMsHM4KPMY",
+      "matchedTitle": "ONE PIECE"
+    }
+  },
+  {
+    "testCase": {
+      "id": 20,
+      "name": "Naruto",
+      "category": "long_running",
+      "expectedEpisodes": 220
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 859,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 1348,
+      "episodeCount": 220,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:a9d35391-5437-4b2a-9445-7066f14b15d5:OGCLrfH4Gdr4yGZg",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 1566,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 50,
+          "unitId": "animeparadise:381053c1-9efb-43fc-ad4a-ead442e3979a:OGCLrfH4Gdr4yGZg",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 1905,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 111,
+          "unitId": "animeparadise:fb83f5bb-48e9-4910-aa0e-4a5d53acee63:OGCLrfH4Gdr4yGZg",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 1547,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 220,
+          "unitId": "animeparadise:c5494eb1-f80d-42ae-8386-0d079107b598:OGCLrfH4Gdr4yGZg",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 1538,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:OGCLrfH4Gdr4yGZg",
+      "matchedTitle": "Naruto"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 449,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 121,
+      "episodeCount": 220,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:cstcbG4EquLyDnAwN/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 293,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for cstcbG4EquLyDnAwN/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 50,
+          "unitId": "allmanga:cstcbG4EquLyDnAwN/50",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 324,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for cstcbG4EquLyDnAwN/50 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 111,
+          "unitId": "allmanga:cstcbG4EquLyDnAwN/111",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 358,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for cstcbG4EquLyDnAwN/111 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 220,
+          "unitId": "allmanga:cstcbG4EquLyDnAwN/220",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 286,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for cstcbG4EquLyDnAwN/220 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:cstcbG4EquLyDnAwN",
+      "matchedTitle": "Naruto"
+    }
+  },
+  {
+    "testCase": {
+      "id": 269,
+      "name": "Bleach",
+      "category": "long_running",
+      "expectedEpisodes": 366
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 779,
+      "titleSimilarity": 0.85,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 417,
+      "episodeCount": 13,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:02a50e4b-a9fb-4d2b-bb74-900fc346ee6b:AR1yjV4v9BFv6nCg",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 382,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "animeparadise:996aef86-2eb9-42c3-9dcc-d28953a59f76:AR1yjV4v9BFv6nCg",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 377,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "animeparadise:26b7e1be-1490-4055-81a2-f92526930d84:AR1yjV4v9BFv6nCg",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 376,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:AR1yjV4v9BFv6nCg",
+      "matchedTitle": "BLEACH: Thousand-Year Blood War"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 575,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 113,
+      "episodeCount": 366,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:XqKvkSEty5koms32i/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 1228,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for XqKvkSEty5koms32i/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 50,
+          "unitId": "allmanga:XqKvkSEty5koms32i/50",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 351,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for XqKvkSEty5koms32i/50 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 184,
+          "unitId": "allmanga:XqKvkSEty5koms32i/184",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 274,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for XqKvkSEty5koms32i/184 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 366,
+          "unitId": "allmanga:XqKvkSEty5koms32i/366",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 333,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for XqKvkSEty5koms32i/366 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:XqKvkSEty5koms32i",
+      "matchedTitle": "Bleach"
+    }
+  },
+  {
+    "testCase": {
+      "id": 223,
+      "name": "Dragon Ball",
+      "category": "long_running",
+      "expectedEpisodes": 153
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 488,
+      "titleSimilarity": 0.85,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 202,
+      "episodeCount": 1,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:f1c849d7-f8f6-4ae6-659b-fb5337d6c009:jpdQFSofBfiIkZWq",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 248,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:jpdQFSofBfiIkZWq",
+      "matchedTitle": "Dragon Ball Super: Broly"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 132,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 107,
+      "episodeCount": 153,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:yquCdfW4DjcS533oR/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 506,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for yquCdfW4DjcS533oR/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 50,
+          "unitId": "allmanga:yquCdfW4DjcS533oR/50",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 250,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for yquCdfW4DjcS533oR/50 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 77,
+          "unitId": "allmanga:yquCdfW4DjcS533oR/77",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 779,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for yquCdfW4DjcS533oR/77 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 153,
+          "unitId": "allmanga:yquCdfW4DjcS533oR/153",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 425,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for yquCdfW4DjcS533oR/153 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:yquCdfW4DjcS533oR",
+      "matchedTitle": "Dragon Ball"
+    }
+  },
+  {
+    "testCase": {
+      "id": 235,
+      "name": "Detective Conan",
+      "category": "long_running"
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 558,
+      "titleSimilarity": 0.85,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 201,
+      "episodeCount": 1,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:8132f845-b203-4de6-9423-af3a33f67009:QBP18kzPIwJaFyKX",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 489,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:QBP18kzPIwJaFyKX",
+      "matchedTitle": "Detective Conan: Countdown to Heaven"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 124,
+      "titleSimilarity": 0.85,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 105,
+      "episodeCount": 1,
+      "availableLanguages": [
+        "sub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:w8zWFHmh3F9MQafKB/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 427,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for w8zWFHmh3F9MQafKB/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:w8zWFHmh3F9MQafKB",
+      "matchedTitle": "Detective Conan Movie 27: The Million-Dollar Pentagram"
+    }
+  },
+  {
+    "testCase": {
+      "id": 101922,
+      "name": "Demon Slayer: Kimetsu no Yaiba",
+      "category": "modern",
+      "expectedEpisodes": 26
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 527,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 614,
+      "episodeCount": 26,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:70823867-469a-4389-a2d2-83d56d6d6b0a:a49n4AuZawoJY7Wl",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 925,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 14,
+          "unitId": "animeparadise:6ea4e87e-1c01-4838-ae02-7cd8e9777250:a49n4AuZawoJY7Wl",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 589,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 26,
+          "unitId": "animeparadise:f7e48508-6fb0-47ab-89f8-df1ebe6aa91b:a49n4AuZawoJY7Wl",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 561,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:a49n4AuZawoJY7Wl",
+      "matchedTitle": "Demon Slayer: Kimetsu no Yaiba"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 266,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 104,
+      "episodeCount": 26,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:gvwLtiYciaenJRoFy/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 360,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for gvwLtiYciaenJRoFy/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 14,
+          "unitId": "allmanga:gvwLtiYciaenJRoFy/14",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 263,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for gvwLtiYciaenJRoFy/14 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 26,
+          "unitId": "allmanga:gvwLtiYciaenJRoFy/26",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 210,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for gvwLtiYciaenJRoFy/26 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:gvwLtiYciaenJRoFy",
+      "matchedTitle": "Demon Slayer: Kimetsu no Yaiba"
+    }
+  },
+  {
+    "testCase": {
+      "id": 113415,
+      "name": "Jujutsu Kaisen",
+      "category": "modern",
+      "expectedEpisodes": 24
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 655,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 599,
+      "episodeCount": 35,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:ee7868e7-d280-4126-9bfb-46b137a292c3:IKgbjdf8gZs0u4Fh",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 625,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 10,
+          "unitId": "animeparadise:26b8418c-9aac-4489-8481-cf9f4d0c8e1d:IKgbjdf8gZs0u4Fh",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 619,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 24,
+          "unitId": "animeparadise:a25ef57e-04a1-d23d-2f9b-3f168d9daddc:IKgbjdf8gZs0u4Fh",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 619,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:IKgbjdf8gZs0u4Fh",
+      "matchedTitle": "JUJUTSU KAISEN"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 331,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 297,
+      "episodeCount": 24,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:8Ti9Lnd3gW7TgeCXj/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 282,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for 8Ti9Lnd3gW7TgeCXj/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "allmanga:8Ti9Lnd3gW7TgeCXj/13",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 271,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for 8Ti9Lnd3gW7TgeCXj/13 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 24,
+          "unitId": "allmanga:8Ti9Lnd3gW7TgeCXj/24",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 276,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for 8Ti9Lnd3gW7TgeCXj/24 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:8Ti9Lnd3gW7TgeCXj",
+      "matchedTitle": "Jujutsu Kaisen"
+    }
+  },
+  {
+    "testCase": {
+      "id": 16498,
+      "name": "Attack on Titan",
+      "category": "modern",
+      "expectedEpisodes": 25
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 572,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 296,
+      "episodeCount": 25,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:d15c9139-c303-4d5d-95bc-3f3427c7a24e:1eo7qphaV6XBgerx",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 593,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 3,
+          "subtitleLanguages": [
+            "en",
+            "pt",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "animeparadise:227c22fe-6f48-9c06-8c22-2240ef498acf:1eo7qphaV6XBgerx",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 539,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 3,
+          "subtitleLanguages": [
+            "en",
+            "pt",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 25,
+          "unitId": "animeparadise:744e9c15-522a-13bf-d34d-afcc18788147:1eo7qphaV6XBgerx",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 547,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 3,
+          "subtitleLanguages": [
+            "en",
+            "pt",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:1eo7qphaV6XBgerx",
+      "matchedTitle": "Attack on Titan"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 606,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 113,
+      "episodeCount": 27,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 0,
+          "unitId": "allmanga:wbnpCxPu3fyk9XSaZ/0",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 402,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for wbnpCxPu3fyk9XSaZ/0 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "allmanga:wbnpCxPu3fyk9XSaZ/13",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 226,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for wbnpCxPu3fyk9XSaZ/13 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 25,
+          "unitId": "allmanga:wbnpCxPu3fyk9XSaZ/25",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 375,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for wbnpCxPu3fyk9XSaZ/25 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:wbnpCxPu3fyk9XSaZ",
+      "matchedTitle": "Attack on Titan"
+    }
+  },
+  {
+    "testCase": {
+      "id": 21459,
+      "name": "My Hero Academia",
+      "category": "modern",
+      "expectedEpisodes": 13
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 847,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 350,
+      "episodeCount": 13,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:16b93f55-8f23-468e-b157-127c8c40f245:8CRFGI7GCB8g00d1",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 369,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "animeparadise:80432080-554e-497e-a731-e191abe94d8b:8CRFGI7GCB8g00d1",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 370,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "animeparadise:7d6d30d2-d998-4333-9551-960a82c8a851:8CRFGI7GCB8g00d1",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 416,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:8CRFGI7GCB8g00d1",
+      "matchedTitle": "My Hero Academia"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 276,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 413,
+      "episodeCount": 14,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:gKwRaeqdMMkgmCLZw/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 274,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for gKwRaeqdMMkgmCLZw/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 8,
+          "unitId": "allmanga:gKwRaeqdMMkgmCLZw/8",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 454,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for gKwRaeqdMMkgmCLZw/8 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 13.5,
+          "unitId": "allmanga:gKwRaeqdMMkgmCLZw/13.5",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 456,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for gKwRaeqdMMkgmCLZw/13.5 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:gKwRaeqdMMkgmCLZw",
+      "matchedTitle": "My Hero Academia"
+    }
+  },
+  {
+    "testCase": {
+      "id": 151807,
+      "name": "Solo Leveling",
+      "category": "modern",
+      "expectedEpisodes": 12
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 541,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 398,
+      "episodeCount": 12,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:deffc3d9-1308-498a-82f2-b3635aecbc42:Y45v9Oh6TpXU1EEY",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 355,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 3,
+          "subtitleLanguages": [
+            "en",
+            "it",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "animeparadise:bd422eab-8f20-4689-80cb-ebacb1f0b0b4:Y45v9Oh6TpXU1EEY",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 352,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 3,
+          "subtitleLanguages": [
+            "en",
+            "it",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 12,
+          "unitId": "animeparadise:1d253349-0108-4ac2-95f7-00cf63674099:Y45v9Oh6TpXU1EEY",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 479,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 3,
+          "subtitleLanguages": [
+            "en",
+            "it",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:Y45v9Oh6TpXU1EEY",
+      "matchedTitle": "Solo Leveling"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 240,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 123,
+      "episodeCount": 13,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:B6AMhLy6EQHDgYgBF/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 279,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for B6AMhLy6EQHDgYgBF/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "allmanga:B6AMhLy6EQHDgYgBF/7",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 652,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for B6AMhLy6EQHDgYgBF/7 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 12,
+          "unitId": "allmanga:B6AMhLy6EQHDgYgBF/12",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 280,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for B6AMhLy6EQHDgYgBF/12 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:B6AMhLy6EQHDgYgBF",
+      "matchedTitle": "Solo Leveling"
+    }
+  },
+  {
+    "testCase": {
+      "id": 1535,
+      "name": "Death Note",
+      "category": "older",
+      "expectedEpisodes": 37
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 516,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 678,
+      "episodeCount": 74,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:f4e25238-f14c-579d-19b6-bf3a9fe7a442:Wt3KyfXyy1qKPhNi",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 582,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 19,
+          "unitId": "animeparadise:8f40e416-e3a3-4508-b3f6-6f077c520c34:Wt3KyfXyy1qKPhNi",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 591,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 25,
+          "unitId": "animeparadise:74addf80-a0a5-009c-7cf0-0b2d66f5d1a2:Wt3KyfXyy1qKPhNi",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 597,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 37,
+          "unitId": "animeparadise:a2bf604e-4c43-4646-aa96-1675091ea22c:Wt3KyfXyy1qKPhNi",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 610,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:Wt3KyfXyy1qKPhNi",
+      "matchedTitle": "Death Note"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 435,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 111,
+      "episodeCount": 37,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:RezHft5pjutwWcE3B/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 647,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for RezHft5pjutwWcE3B/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 19,
+          "unitId": "allmanga:RezHft5pjutwWcE3B/19",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 284,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for RezHft5pjutwWcE3B/19 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 37,
+          "unitId": "allmanga:RezHft5pjutwWcE3B/37",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 279,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for RezHft5pjutwWcE3B/37 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:RezHft5pjutwWcE3B",
+      "matchedTitle": "Death Note"
+    }
+  },
+  {
+    "testCase": {
+      "id": 19,
+      "name": "Monster",
+      "category": "older",
+      "expectedEpisodes": 74
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 984,
+      "titleSimilarity": 0.85,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 247,
+      "episodeCount": 12,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:4fc9dcdf-8daf-1284-94f6-df993db4c71d:T0r49YdeX47qc89c",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 408,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "animeparadise:fa8d1a2f-14af-0b58-d6be-564711f92f3e:T0r49YdeX47qc89c",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 438,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 12,
+          "unitId": "animeparadise:659537b0-b3fd-653a-7a6c-5fecfbc7679f:T0r49YdeX47qc89c",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 627,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:T0r49YdeX47qc89c",
+      "matchedTitle": "Monster Girl Doctor"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 234,
+      "titleSimilarity": 0.85,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 128,
+      "episodeCount": 12,
+      "availableLanguages": [
+        "sub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:LsWcR2JMPmzgnGHup/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 225,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for LsWcR2JMPmzgnGHup/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "allmanga:LsWcR2JMPmzgnGHup/7",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 641,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for LsWcR2JMPmzgnGHup/7 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 12,
+          "unitId": "allmanga:LsWcR2JMPmzgnGHup/12",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 388,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for LsWcR2JMPmzgnGHup/12 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:LsWcR2JMPmzgnGHup",
+      "matchedTitle": "Action Monster Big Movie"
+    }
+  },
+  {
+    "testCase": {
+      "id": 245,
+      "name": "Great Teacher Onizuka",
+      "category": "older",
+      "expectedEpisodes": 43
+    },
+    "animeParadise": {
+      "searchSuccess": false,
+      "searchLatencyMs": 462,
+      "titleSimilarity": 0,
+      "mappingClassification": "MAPPING_NOT_FOUND",
+      "episodesSuccess": false,
+      "episodesLatencyMs": 0,
+      "episodeCount": 0,
+      "availableLanguages": [],
+      "testedEpisodes": [],
+      "overallFailureCategory": "NOT_FOUND"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 112,
+      "titleSimilarity": 0.85,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 304,
+      "episodeCount": 43,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:YwqkXrzxMtncJCjeq/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 325,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for YwqkXrzxMtncJCjeq/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 22,
+          "unitId": "allmanga:YwqkXrzxMtncJCjeq/22",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 717,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for YwqkXrzxMtncJCjeq/22 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 43,
+          "unitId": "allmanga:YwqkXrzxMtncJCjeq/43",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 419,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for YwqkXrzxMtncJCjeq/43 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:YwqkXrzxMtncJCjeq",
+      "matchedTitle": "GTO: Great Teacher Onizuka"
+    }
+  },
+  {
+    "testCase": {
+      "id": 1575,
+      "name": "Code Geass: Lelouch of the Rebellion",
+      "category": "older",
+      "expectedEpisodes": 25
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 475,
+      "titleSimilarity": 0.85,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 209,
+      "episodeCount": 1,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:876ead8b-318f-ceea-f44c-b84a1eda9595:AsTetknab2XJHe4h",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 653,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:AsTetknab2XJHe4h",
+      "matchedTitle": "Code Geass: Lelouch of the Rebellion III - Glorification"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 533,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 109,
+      "episodeCount": 25,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:QfmE3AiWqgSfhWkTd/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 268,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for QfmE3AiWqgSfhWkTd/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "allmanga:QfmE3AiWqgSfhWkTd/13",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 559,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for QfmE3AiWqgSfhWkTd/13 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 25,
+          "unitId": "allmanga:QfmE3AiWqgSfhWkTd/25",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 275,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for QfmE3AiWqgSfhWkTd/25 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:QfmE3AiWqgSfhWkTd",
+      "matchedTitle": "Code Geass: Lelouch of the Rebellion"
+    }
+  },
+  {
+    "testCase": {
+      "id": 5114,
+      "name": "Fullmetal Alchemist: Brotherhood",
+      "category": "older",
+      "expectedEpisodes": 64
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 823,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 409,
+      "episodeCount": 64,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:4d664421-af7b-ece9-9d52-995b868efbc4:KtMFJTV6ZeTIS3pw",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 620,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 33,
+          "unitId": "animeparadise:21410567-9b05-4041-0066-2d593fac8acc:KtMFJTV6ZeTIS3pw",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 631,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 50,
+          "unitId": "animeparadise:c3262a68-47b2-3bd3-8ae0-7df48fc90a65:KtMFJTV6ZeTIS3pw",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 983,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 64,
+          "unitId": "animeparadise:5ac04bd2-ef1d-a7a7-7750-b344d2a36cac:KtMFJTV6ZeTIS3pw",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 730,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:KtMFJTV6ZeTIS3pw",
+      "matchedTitle": "Fullmetal Alchemist: Brotherhood"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 236,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 104,
+      "episodeCount": 64,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:yLCKvGbhA6buygXad/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 259,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for yLCKvGbhA6buygXad/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 33,
+          "unitId": "allmanga:yLCKvGbhA6buygXad/33",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 475,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for yLCKvGbhA6buygXad/33 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 50,
+          "unitId": "allmanga:yLCKvGbhA6buygXad/50",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 267,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for yLCKvGbhA6buygXad/50 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 64,
+          "unitId": "allmanga:yLCKvGbhA6buygXad/64",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 477,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for yLCKvGbhA6buygXad/64 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:yLCKvGbhA6buygXad",
+      "matchedTitle": "Fullmetal Alchemist: Brotherhood"
+    }
+  },
+  {
+    "testCase": {
+      "id": 104578,
+      "name": "Attack on Titan Season 3 Part 2",
+      "category": "sequel",
+      "expectedEpisodes": 10
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 463,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 666,
+      "episodeCount": 10,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:0856e787-4944-4d77-a1fc-b165e134b997:ydIBzzSKYB9hloZ2",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 332,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 3,
+          "subtitleLanguages": [
+            "en",
+            "pt",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 6,
+          "unitId": "animeparadise:de2803ee-5bf3-7d80-fd1e-b130dc265467:ydIBzzSKYB9hloZ2",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 405,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 3,
+          "subtitleLanguages": [
+            "en",
+            "pt",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 10,
+          "unitId": "animeparadise:2bad33c8-26cf-c949-bed3-8814087ff498:ydIBzzSKYB9hloZ2",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 348,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 3,
+          "subtitleLanguages": [
+            "en",
+            "pt",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:ydIBzzSKYB9hloZ2",
+      "matchedTitle": "Attack on Titan Season 3 Part 2"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 288,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 404,
+      "episodeCount": 10,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:PcZRitDAgNmrwdY2p/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 206,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for PcZRitDAgNmrwdY2p/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 6,
+          "unitId": "allmanga:PcZRitDAgNmrwdY2p/6",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 266,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for PcZRitDAgNmrwdY2p/6 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 10,
+          "unitId": "allmanga:PcZRitDAgNmrwdY2p/10",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 271,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for PcZRitDAgNmrwdY2p/10 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:PcZRitDAgNmrwdY2p",
+      "matchedTitle": "Attack on Titan Season 3 Part 2"
+    }
+  },
+  {
+    "testCase": {
+      "id": 114446,
+      "name": "Bleach: Thousand-Year Blood War",
+      "category": "sequel",
+      "expectedEpisodes": 13
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 494,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 764,
+      "episodeCount": 13,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:02a50e4b-a9fb-4d2b-bb74-900fc346ee6b:AR1yjV4v9BFv6nCg",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 636,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "animeparadise:996aef86-2eb9-42c3-9dcc-d28953a59f76:AR1yjV4v9BFv6nCg",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 393,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "animeparadise:26b7e1be-1490-4055-81a2-f92526930d84:AR1yjV4v9BFv6nCg",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 661,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:AR1yjV4v9BFv6nCg",
+      "matchedTitle": "BLEACH: Thousand-Year Blood War"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 264,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 112,
+      "episodeCount": 13,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:uP4dqHNypYeYtTnzP/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 302,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for uP4dqHNypYeYtTnzP/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "allmanga:uP4dqHNypYeYtTnzP/7",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 282,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for uP4dqHNypYeYtTnzP/7 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "allmanga:uP4dqHNypYeYtTnzP/13",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 392,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for uP4dqHNypYeYtTnzP/13 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:uP4dqHNypYeYtTnzP",
+      "matchedTitle": "BLEACH: Thousand-Year Blood War"
+    }
+  },
+  {
+    "testCase": {
+      "id": 101338,
+      "name": "Mob Psycho 100 II",
+      "category": "sequel",
+      "expectedEpisodes": 13
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 529,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 282,
+      "episodeCount": 13,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:cb76134e-6046-3bd8-0feb-f8433cc9e0df:07CjysCKEuFjRcoZ",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 446,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "animeparadise:fe654aa6-0a8a-03dc-5fd1-d3c263a7d375:07CjysCKEuFjRcoZ",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 535,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "animeparadise:71580b7e-fd49-6fed-83ff-b04059bb547f:07CjysCKEuFjRcoZ",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 529,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:07CjysCKEuFjRcoZ",
+      "matchedTitle": "Mob Psycho 100 II"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 209,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 101,
+      "episodeCount": 13,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:KdnWHYj4rWbwqD9PW/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 258,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for KdnWHYj4rWbwqD9PW/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "allmanga:KdnWHYj4rWbwqD9PW/7",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 688,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for KdnWHYj4rWbwqD9PW/7 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "allmanga:KdnWHYj4rWbwqD9PW/13",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 262,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for KdnWHYj4rWbwqD9PW/13 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:KdnWHYj4rWbwqD9PW",
+      "matchedTitle": "Mob Psycho 100 II"
+    }
+  },
+  {
+    "testCase": {
+      "id": 136430,
+      "name": "Vinland Saga Season 2",
+      "category": "sequel",
+      "expectedEpisodes": 24
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 471,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 285,
+      "episodeCount": 24,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:444df8b3-26b6-4eb8-82d2-655d84971441:HreIqy3vunK7fcrv",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 702,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 3,
+          "subtitleLanguages": [
+            "en",
+            "it",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "animeparadise:574ae290-dddc-463f-8c0d-a5f626e27daf:HreIqy3vunK7fcrv",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 768,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 3,
+          "subtitleLanguages": [
+            "en",
+            "it",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 24,
+          "unitId": "animeparadise:d196eca2-6c08-4c47-b17f-a7150fb29a7c:HreIqy3vunK7fcrv",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 480,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 3,
+          "subtitleLanguages": [
+            "en",
+            "it",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:HreIqy3vunK7fcrv",
+      "matchedTitle": "Vinland Saga Season 2"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 229,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 109,
+      "episodeCount": 24,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:DYeWXwS86ByDEfgWX/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 669,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for DYeWXwS86ByDEfgWX/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "allmanga:DYeWXwS86ByDEfgWX/13",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 304,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for DYeWXwS86ByDEfgWX/13 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 24,
+          "unitId": "allmanga:DYeWXwS86ByDEfgWX/24",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 219,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for DYeWXwS86ByDEfgWX/24 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:DYeWXwS86ByDEfgWX",
+      "matchedTitle": "Vinland Saga Season 2"
+    }
+  },
+  {
+    "testCase": {
+      "id": 125367,
+      "name": "Kaguya-sama: Love is War - Ultra Romantic",
+      "category": "sequel",
+      "expectedEpisodes": 13
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 458,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 582,
+      "episodeCount": 13,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:81fb1b7a-8e89-96e2-b936-2aca5c625eb1:8BWWciz1bzrOlF7S",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 487,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 3,
+          "subtitleLanguages": [
+            "en",
+            "it",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "animeparadise:675fd6ce-29b7-6710-3d15-08a2651bd38e:8BWWciz1bzrOlF7S",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 463,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 3,
+          "subtitleLanguages": [
+            "en",
+            "it",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "animeparadise:040417e7-bf6f-c9b6-7844-37f7a15ae968:8BWWciz1bzrOlF7S",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 809,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 3,
+          "subtitleLanguages": [
+            "en",
+            "it",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:8BWWciz1bzrOlF7S",
+      "matchedTitle": "Kaguya-sama: Love is War -Ultra Romantic-"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 241,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 108,
+      "episodeCount": 13,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:Mk8Z4bqjYq9FNeRDS/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 261,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for Mk8Z4bqjYq9FNeRDS/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "allmanga:Mk8Z4bqjYq9FNeRDS/7",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 443,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for Mk8Z4bqjYq9FNeRDS/7 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "allmanga:Mk8Z4bqjYq9FNeRDS/13",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 270,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for Mk8Z4bqjYq9FNeRDS/13 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:Mk8Z4bqjYq9FNeRDS",
+      "matchedTitle": "Kaguya-sama: Love is War -Ultra Romantic-"
+    }
+  },
+  {
+    "testCase": {
+      "id": 131447,
+      "name": "Odd Taxi",
+      "category": "niche",
+      "expectedEpisodes": 13
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 495,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 246,
+      "episodeCount": 13,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:b93a3178-dcef-e4f3-0163-5467769ab65c:afSbuxwmAWfaQRBV",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 367,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "animeparadise:1e8f9a90-af97-6b1f-c2e1-c1f582ce5b36:afSbuxwmAWfaQRBV",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 359,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "animeparadise:077caa2a-6f7d-6ce8-227f-9dc9bbae377d:afSbuxwmAWfaQRBV",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 351,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:afSbuxwmAWfaQRBV",
+      "matchedTitle": "ODDTAXI"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 274,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 115,
+      "episodeCount": 13,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:92ScMAvyQPZcdyYZP/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 408,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for 92ScMAvyQPZcdyYZP/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "allmanga:92ScMAvyQPZcdyYZP/7",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 286,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for 92ScMAvyQPZcdyYZP/7 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "allmanga:92ScMAvyQPZcdyYZP/13",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 270,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for 92ScMAvyQPZcdyYZP/13 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:92ScMAvyQPZcdyYZP",
+      "matchedTitle": "Odd Taxi"
+    }
+  },
+  {
+    "testCase": {
+      "id": 132126,
+      "name": "Sonny Boy",
+      "category": "niche",
+      "expectedEpisodes": 12
+    },
+    "animeParadise": {
+      "searchSuccess": false,
+      "searchLatencyMs": 460,
+      "titleSimilarity": 0,
+      "mappingClassification": "MAPPING_NOT_FOUND",
+      "episodesSuccess": false,
+      "episodesLatencyMs": 0,
+      "episodeCount": 0,
+      "availableLanguages": [],
+      "testedEpisodes": [],
+      "overallFailureCategory": "NOT_FOUND"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 111,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 130,
+      "episodeCount": 12,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:fybZWFjZ3G9hgKZ7L/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 279,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for fybZWFjZ3G9hgKZ7L/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "allmanga:fybZWFjZ3G9hgKZ7L/7",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 421,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for fybZWFjZ3G9hgKZ7L/7 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 12,
+          "unitId": "allmanga:fybZWFjZ3G9hgKZ7L/12",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 219,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for fybZWFjZ3G9hgKZ7L/12 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:fybZWFjZ3G9hgKZ7L",
+      "matchedTitle": "Sonny Boy"
+    }
+  },
+  {
+    "testCase": {
+      "id": 20607,
+      "name": "Ping Pong the Animation",
+      "category": "niche",
+      "expectedEpisodes": 11
+    },
+    "animeParadise": {
+      "searchSuccess": false,
+      "searchLatencyMs": 471,
+      "titleSimilarity": 0,
+      "mappingClassification": "MAPPING_NOT_FOUND",
+      "episodesSuccess": false,
+      "episodesLatencyMs": 0,
+      "episodeCount": 0,
+      "availableLanguages": [],
+      "testedEpisodes": [],
+      "overallFailureCategory": "NOT_FOUND"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 116,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 114,
+      "episodeCount": 11,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:pheDKaFdcTGvjEWW4/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 697,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for pheDKaFdcTGvjEWW4/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 6,
+          "unitId": "allmanga:pheDKaFdcTGvjEWW4/6",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 272,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for pheDKaFdcTGvjEWW4/6 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 11,
+          "unitId": "allmanga:pheDKaFdcTGvjEWW4/11",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 266,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for pheDKaFdcTGvjEWW4/11 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:pheDKaFdcTGvjEWW4",
+      "matchedTitle": "Ping Pong the Animation"
+    }
+  },
+  {
+    "testCase": {
+      "id": 20973,
+      "name": "Shouwa Genroku Rakugo Shinjuu",
+      "category": "niche",
+      "expectedEpisodes": 12
+    },
+    "animeParadise": {
+      "searchSuccess": false,
+      "searchLatencyMs": 472,
+      "titleSimilarity": 0,
+      "mappingClassification": "MAPPING_NOT_FOUND",
+      "episodesSuccess": false,
+      "episodesLatencyMs": 0,
+      "episodeCount": 0,
+      "availableLanguages": [],
+      "testedEpisodes": [],
+      "overallFailureCategory": "NOT_FOUND"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 119,
+      "titleSimilarity": 0.91,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 110,
+      "episodeCount": 13,
+      "availableLanguages": [
+        "sub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:JnQDLzyKrTQMRGH9n/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 278,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for JnQDLzyKrTQMRGH9n/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "allmanga:JnQDLzyKrTQMRGH9n/7",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 302,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for JnQDLzyKrTQMRGH9n/7 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 13,
+          "unitId": "allmanga:JnQDLzyKrTQMRGH9n/13",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 274,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for JnQDLzyKrTQMRGH9n/13 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:JnQDLzyKrTQMRGH9n",
+      "matchedTitle": "Showa Genroku Rakugo Shinju"
+    }
+  },
+  {
+    "testCase": {
+      "id": 2246,
+      "name": "Mononoke",
+      "category": "niche",
+      "expectedEpisodes": 12
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 389,
+      "titleSimilarity": 0.85,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 299,
+      "episodeCount": 12,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:b9797820-402e-49bb-a52e-ff35bf98a220:67f6edf6d104e2798852a284",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 346,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "animeparadise:82031362-84e0-4d97-932d-f54b8ef70442:67f6edf6d104e2798852a284",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 623,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        },
+        {
+          "episodeNumber": 12,
+          "unitId": "animeparadise:af79d321-3e2d-437d-a075-13ccefbb0cfe:67f6edf6d104e2798852a284",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 333,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 1,
+          "subtitleLanguages": [
+            "en"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:67f6edf6d104e2798852a284",
+      "matchedTitle": "The Mononoke Lecture Logs of Chuzenji-sensei: He Just Solves All the Mysteries"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 746,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 107,
+      "episodeCount": 12,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:TqKdyeX7ZvKG5tpuj/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 268,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for TqKdyeX7ZvKG5tpuj/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 7,
+          "unitId": "allmanga:TqKdyeX7ZvKG5tpuj/7",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 596,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for TqKdyeX7ZvKG5tpuj/7 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        },
+        {
+          "episodeNumber": 12,
+          "unitId": "allmanga:TqKdyeX7ZvKG5tpuj/12",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 1038,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for TqKdyeX7ZvKG5tpuj/12 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:TqKdyeX7ZvKG5tpuj",
+      "matchedTitle": "Mononoke"
+    }
+  },
+  {
+    "testCase": {
+      "id": 199,
+      "name": "Spirited Away",
+      "category": "movie",
+      "expectedEpisodes": 1,
+      "format": "MOVIE"
+    },
+    "animeParadise": {
+      "searchSuccess": true,
+      "searchLatencyMs": 483,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 564,
+      "episodeCount": 1,
+      "availableLanguages": [],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "animeparadise:39700330-3e3a-bc71-75ca-49a08299a193:po68pNzKYBJp3FaP",
+          "resolveSuccess": true,
+          "resolveLatencyMs": 796,
+          "streamCount": 1,
+          "streamTypes": [
+            "HLS"
+          ],
+          "qualities": [
+            "auto"
+          ],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 4,
+          "subtitleLanguages": [
+            "en",
+            "it",
+            "pt",
+            "es"
+          ],
+          "hasArabicSub": false,
+          "hasEnglishSub": true,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [
+            "UNKNOWN_STREAM_HOST[stream.animeparadise.moe]"
+          ],
+          "subtitleFormat": "vtt"
+        }
+      ],
+      "providerMediaId": "animeparadise:po68pNzKYBJp3FaP",
+      "matchedTitle": "Spirited Away"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 254,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 162,
+      "episodeCount": 1,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:CSi9oF8YudfHuKvod/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 282,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for CSi9oF8YudfHuKvod/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:CSi9oF8YudfHuKvod",
+      "matchedTitle": "Spirited Away"
+    }
+  },
+  {
+    "testCase": {
+      "id": 21519,
+      "name": "Your Name.",
+      "category": "movie",
+      "expectedEpisodes": 1,
+      "format": "MOVIE"
+    },
+    "animeParadise": {
+      "searchSuccess": false,
+      "searchLatencyMs": 309,
+      "titleSimilarity": 0,
+      "mappingClassification": "MAPPING_NOT_FOUND",
+      "episodesSuccess": false,
+      "episodesLatencyMs": 0,
+      "episodeCount": 0,
+      "availableLanguages": [],
+      "testedEpisodes": [],
+      "overallFailureCategory": "NOT_FOUND"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 126,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 108,
+      "episodeCount": 1,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:mbhDNkX9ZQ5NPeCf5/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 310,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for mbhDNkX9ZQ5NPeCf5/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:mbhDNkX9ZQ5NPeCf5",
+      "matchedTitle": "Your Name."
+    }
+  },
+  {
+    "testCase": {
+      "id": 20954,
+      "name": "A Silent Voice",
+      "category": "movie",
+      "expectedEpisodes": 1,
+      "format": "MOVIE"
+    },
+    "animeParadise": {
+      "searchSuccess": false,
+      "searchLatencyMs": 359,
+      "titleSimilarity": 0,
+      "mappingClassification": "MAPPING_NOT_FOUND",
+      "episodesSuccess": false,
+      "episodesLatencyMs": 0,
+      "episodeCount": 0,
+      "availableLanguages": [],
+      "testedEpisodes": [],
+      "overallFailureCategory": "NOT_FOUND"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 113,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 108,
+      "episodeCount": 1,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:juiz9RT649YaGTaoQ/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 474,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for juiz9RT649YaGTaoQ/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:juiz9RT649YaGTaoQ",
+      "matchedTitle": "A Silent Voice"
+    }
+  },
+  {
+    "testCase": {
+      "id": 164,
+      "name": "Princess Mononoke",
+      "category": "movie",
+      "expectedEpisodes": 1,
+      "format": "MOVIE"
+    },
+    "animeParadise": {
+      "searchSuccess": false,
+      "searchLatencyMs": 328,
+      "titleSimilarity": 0,
+      "mappingClassification": "MAPPING_NOT_FOUND",
+      "episodesSuccess": false,
+      "episodesLatencyMs": 0,
+      "episodeCount": 0,
+      "availableLanguages": [],
+      "testedEpisodes": [],
+      "overallFailureCategory": "NOT_FOUND"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 124,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 106,
+      "episodeCount": 1,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:BpkpE5Hj83HHwwWLv/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 308,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for BpkpE5Hj83HHwwWLv/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:BpkpE5Hj83HHwwWLv",
+      "matchedTitle": "Princess Mononoke"
+    }
+  },
+  {
+    "testCase": {
+      "id": 142470,
+      "name": "Suzume",
+      "category": "movie",
+      "expectedEpisodes": 1,
+      "format": "MOVIE"
+    },
+    "animeParadise": {
+      "searchSuccess": false,
+      "searchLatencyMs": 332,
+      "titleSimilarity": 0,
+      "mappingClassification": "MAPPING_NOT_FOUND",
+      "episodesSuccess": false,
+      "episodesLatencyMs": 0,
+      "episodeCount": 0,
+      "availableLanguages": [],
+      "testedEpisodes": [],
+      "overallFailureCategory": "NOT_FOUND"
+    },
+    "allManga": {
+      "searchSuccess": true,
+      "searchLatencyMs": 118,
+      "titleSimilarity": 1,
+      "mappingClassification": "EXACT",
+      "episodesSuccess": true,
+      "episodesLatencyMs": 111,
+      "episodeCount": 1,
+      "availableLanguages": [
+        "sub",
+        "dub"
+      ],
+      "testedEpisodes": [
+        {
+          "episodeNumber": 1,
+          "unitId": "allmanga:7Q7AzQtSHjHm9DpL2/1",
+          "resolveSuccess": false,
+          "resolveLatencyMs": 218,
+          "streamCount": 0,
+          "streamTypes": [],
+          "qualities": [],
+          "has1080p": false,
+          "has720p": false,
+          "subtitlesCount": 0,
+          "subtitleLanguages": [],
+          "hasArabicSub": false,
+          "hasEnglishSub": false,
+          "isDirectHlsOrMp4": false,
+          "isMkissa": false,
+          "isEmbed": false,
+          "sanitizedSourceUrls": [],
+          "failureDetail": "AllManga returned no source URLs for 7Q7AzQtSHjHm9DpL2/1 (lang=sub)",
+          "failureCategory": "STREAM_FAILURE"
+        }
+      ],
+      "providerMediaId": "allmanga:7Q7AzQtSHjHm9DpL2",
+      "matchedTitle": "Suzume"
+    }
+  }
+]
