@@ -1,12 +1,17 @@
 import { getAnimeById, type AniListAnime } from "../../anilist/anilist.service.js";
 import { animeParadiseProvider } from "../../streaming/providers/animeparadise.provider.js";
-import { discoverCandidatesForAnime, type DiscoveredCandidate } from "./candidate-discovery.js";
+import { aniKotoProvider } from "../../streaming/providers/anikoto.provider.js";
+import {
+  discoverCandidatesForAnime,
+  type DiscoveredCandidate,
+  type MappingProviderName,
+} from "./candidate-discovery.js";
 import { scoreCandidate, type CandidateScoreResult } from "./candidate-scorer.js";
 import { classifyTitle } from "./candidate-classifier.js";
 
 export interface PlannedPart {
   partNumber: number;
-  provider: "animeparadise";
+  provider: MappingProviderName;
   providerId: string;
   title: string;
   episodeOffset: number;
@@ -252,10 +257,12 @@ export async function discoverFranchiseStructure(
 
 /**
  * Harvests candidates specifically for one logical season (plus root anime for context).
+ * Defaults to AniKoto as provider.
  */
 export async function discoverCandidatesForSeason(
   targetGroup: LogicalSeasonDefinition,
-  rootAnime: AniListAnime
+  rootAnime: AniListAnime,
+  provider: MappingProviderName = "anikoto"
 ): Promise<DiscoveredCandidate[]> {
   const candidateMap = new Map<string, DiscoveredCandidate>();
   const toHarvest: AniListAnime[] = [targetGroup.primaryAnilistAnime];
@@ -272,7 +279,7 @@ export async function discoverCandidatesForSeason(
 
   for (const entry of toHarvest) {
     try {
-      const disc = await discoverCandidatesForAnime(entry);
+      const disc = await discoverCandidatesForAnime(entry, provider);
       for (const c of disc.candidates) {
         if (!candidateMap.has(c.providerId)) {
           candidateMap.set(c.providerId, c);
@@ -280,7 +287,7 @@ export async function discoverCandidatesForSeason(
       }
     } catch (err: any) {
       console.warn(
-        `[Planner] Candidate discovery failed for entry #${entry.id}: ${err.message}`
+        `[Planner] Candidate discovery failed for entry #${entry.id} (${provider}): ${err.message}`
       );
     }
   }
@@ -323,18 +330,41 @@ export async function planSeasonFromCandidates(
 
   for (const match of matched) {
     try {
-      let units = episodeUnitsCache.get(match.candidate.providerId);
+      const cacheKey = `${match.candidate.provider}:${match.candidate.providerId}`;
+      let units = episodeUnitsCache.get(cacheKey);
       if (!units) {
-        const rawUnits = await animeParadiseProvider.getEpisodes(
-          match.candidate.providerId
-        );
+        let rawUnits: Array<{ number: number; title?: string; id: string }> | null = null;
+        if (match.candidate.provider === "anikoto") {
+          const kotoUnits = await aniKotoProvider.getEpisodes(
+            match.candidate.providerId
+          );
+          if (kotoUnits && kotoUnits.length > 0) {
+            rawUnits = kotoUnits.map((u) => ({
+              number: u.number,
+              title: u.title || `Episode ${u.number}`,
+              id: u.id,
+            }));
+          }
+        } else {
+          const paradiseUnits = await animeParadiseProvider.getEpisodes(
+            match.candidate.providerId
+          );
+          if (paradiseUnits && paradiseUnits.length > 0) {
+            rawUnits = paradiseUnits.map((u) => ({
+              number: u.number,
+              title: u.title || `Episode ${u.number}`,
+              id: u.id,
+            }));
+          }
+        }
+
         if (rawUnits) {
           units = rawUnits.map((u) => ({
             number: u.number,
-            title: u.title,
+            title: u.title ?? `Episode ${u.number}`,
             id: u.id,
           }));
-          episodeUnitsCache.set(match.candidate.providerId, units);
+          episodeUnitsCache.set(cacheKey, units);
         }
       }
 
@@ -412,7 +442,7 @@ export async function planSeasonFromCandidates(
 
     partsWithOffsets.push({
       partNumber: vp.partNumber,
-      provider: "animeparadise",
+      provider: vp.candidate.provider,
       providerId: vp.candidate.providerId,
       title: vp.candidate.title,
       episodeOffset: currentOffset,
@@ -436,53 +466,126 @@ export async function planSeasonFromCandidates(
 
 /**
  * Plans mapping for ONLY one requested season.
+ * Defaults to AniKoto as primary provider, with automatic AnimeParadise fallback if AniKoto mapping yields 0 parts.
  */
 export async function planSingleSeason(
   targetGroup: LogicalSeasonDefinition,
   rootAnime: AniListAnime,
-  candidates?: DiscoveredCandidate[]
+  candidates?: DiscoveredCandidate[],
+  preferredProvider: MappingProviderName = "anikoto"
 ): Promise<PlannedSeason> {
-  const allCandidates =
-    candidates ?? (await discoverCandidatesForSeason(targetGroup, rootAnime));
-  return planSeasonFromCandidates(targetGroup, allCandidates);
+  if (candidates && candidates.length > 0) {
+    return planSeasonFromCandidates(targetGroup, candidates);
+  }
+
+  // 1. Primary: Try preferredProvider (default AniKoto)
+  const primaryCandidates = await discoverCandidatesForSeason(
+    targetGroup,
+    rootAnime,
+    preferredProvider
+  );
+  const primaryPlan = await planSeasonFromCandidates(
+    targetGroup,
+    primaryCandidates
+  );
+
+  if (primaryPlan.parts.length > 0) {
+    return primaryPlan;
+  }
+
+  // 2. Fallback: If primary is anikoto and failed, fallback to animeparadise
+  if (preferredProvider === "anikoto") {
+    console.log(
+      `[Planner] AniKoto yielded 0 parts for season ${targetGroup.logicalSeasonNumber} ("${targetGroup.displayTitle}"). Falling back to AnimeParadise...`
+    );
+    const fallbackCandidates = await discoverCandidatesForSeason(
+      targetGroup,
+      rootAnime,
+      "animeparadise"
+    );
+    const fallbackPlan = await planSeasonFromCandidates(
+      targetGroup,
+      fallbackCandidates
+    );
+
+    if (fallbackPlan.parts.length > 0) {
+      console.log(
+        `[Planner] AnimeParadise fallback SUCCEEDED for season ${targetGroup.logicalSeasonNumber}: ${fallbackPlan.parts.length} part(s) mapped.`
+      );
+      return fallbackPlan;
+    }
+  }
+
+  return primaryPlan;
 }
 
 /**
- * Full franchise planning across all seasons (preserved for complete mapping workflows).
+ * Full franchise planning across all seasons.
+ * Uses AniKoto as primary provider with season-level fallback to AnimeParadise.
  */
 export async function planFranchiseMapping(
-  anilistId: number
+  anilistId: number,
+  preferredProvider: MappingProviderName = "anikoto"
 ): Promise<FranchisePlan> {
   const structure = await discoverFranchiseStructure(anilistId);
   const { rootAnime, requestedAnime, franchiseEntries, logicalGroups } = structure;
 
-  // Harvest candidates from all franchise entries
-  const candidateMap = new Map<string, DiscoveredCandidate>();
+  // Harvest candidates from preferred provider for all franchise entries
+  const primaryCandidateMap = new Map<string, DiscoveredCandidate>();
   for (const entry of franchiseEntries) {
     try {
-      const disc = await discoverCandidatesForAnime(entry);
+      const disc = await discoverCandidatesForAnime(entry, preferredProvider);
       for (const c of disc.candidates) {
-        if (!candidateMap.has(c.providerId)) {
-          candidateMap.set(c.providerId, c);
+        if (!primaryCandidateMap.has(c.providerId)) {
+          primaryCandidateMap.set(c.providerId, c);
         }
       }
     } catch (err: any) {
-      console.warn(`[Planner] Candidate discovery failed for entry #${entry.id}: ${err.message}`);
+      console.warn(
+        `[Planner] ${preferredProvider} candidate discovery failed for entry #${entry.id}: ${err.message}`
+      );
     }
   }
 
-  const allCandidates = Array.from(candidateMap.values());
+  const allPrimaryCandidates = Array.from(primaryCandidateMap.values());
+  const allDiscoveredCandidates: DiscoveredCandidate[] = [...allPrimaryCandidates];
   const plannedSeasons: PlannedSeason[] = [];
 
   for (const group of logicalGroups) {
-    const plannedSeason = await planSeasonFromCandidates(group, allCandidates);
+    let plannedSeason = await planSeasonFromCandidates(group, allPrimaryCandidates);
+
+    // If preferred provider is AniKoto and produced 0 parts, attempt AnimeParadise fallback for this season
+    if (plannedSeason.parts.length === 0 && preferredProvider === "anikoto") {
+      console.log(
+        `[Planner] AniKoto yielded 0 parts for season ${group.logicalSeasonNumber} ("${group.displayTitle}"). Attempting AnimeParadise fallback...`
+      );
+      const fallbackCandidates = await discoverCandidatesForSeason(
+        group,
+        rootAnime,
+        "animeparadise"
+      );
+      for (const fc of fallbackCandidates) {
+        if (!allDiscoveredCandidates.some((c) => c.provider === fc.provider && c.providerId === fc.providerId)) {
+          allDiscoveredCandidates.push(fc);
+        }
+      }
+
+      const fallbackSeason = await planSeasonFromCandidates(group, fallbackCandidates);
+      if (fallbackSeason.parts.length > 0) {
+        console.log(
+          `[Planner] AnimeParadise fallback SUCCEEDED for season ${group.logicalSeasonNumber}: ${fallbackSeason.parts.length} part(s) mapped.`
+        );
+        plannedSeason = fallbackSeason;
+      }
+    }
+
     plannedSeasons.push(plannedSeason);
   }
 
   return {
     rootAnime,
     requestedAnime,
-    allDiscoveredCandidates: allCandidates,
+    allDiscoveredCandidates,
     seasons: plannedSeasons,
   };
 }

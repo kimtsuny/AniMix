@@ -76,7 +76,7 @@ export function normalizeStreamResult(
     type: "video",
 
     streams: (raw.streams ?? []).map((stream) => ({
-      url: stream.sourceUrl,
+      url: stream.sourceUrl || (stream as any).url || "",
       isHLS: stream.isHLS,
       quality: stream.quality,
       language: stream.language,

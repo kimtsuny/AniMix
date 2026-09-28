@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import prisma from "../config/prisma.js";
 import {
-  mapAnimeToAnimeParadise,
+  mapAnime,
   mapRequestedSeason,
 } from "../services/anime/anime-mapping.service.js";
 import { syncSeasonEpisodes } from "../services/anime/episode.service.js";

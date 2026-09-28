@@ -165,7 +165,7 @@ export async function mapRequestedSeason(
   return promise;
 }
 
-export async function mapAnimeToAnimeParadise(
+export async function mapAnime(
   anilistId: number
 ): Promise<PersistResult> {
   const existing = inFlightMappings.get(anilistId);
@@ -184,6 +184,16 @@ export async function mapAnimeToAnimeParadise(
 
   inFlightMappings.set(anilistId, promise);
   return promise;
+}
+
+/**
+ * Backward-compatible mapping alias for franchise mapping.
+ * Uses the AniKoto-first mapping pipeline with AnimeParadise fallback.
+ */
+export async function mapAnimeToAnimeParadise(
+  anilistId: number
+): Promise<PersistResult> {
+  return mapAnime(anilistId);
 }
 
 export async function legacyMapAnimeToAnimeParadise(

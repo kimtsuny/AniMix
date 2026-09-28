@@ -74,10 +74,27 @@ export const aniKotoProvider: StreamingProvider = {
   },
 
   async getEpisodes(mediaId: string): Promise<IContentUnit[]> {
-    const rawId = mediaId.replace(/^anikoto:/, "").replace(/^megaplay:/, "");
+    const isExplicitAnilist = mediaId.startsWith("anilist:");
+    const rawId = mediaId.replace(/^anilist:/, "").replace(/^anikoto:/, "").replace(/^megaplay:/, "");
     const numericId = parseInt(rawId, 10);
 
-    // Case 1: Numeric AniList ID (from fallback or database mapping)
+    // Case 1: Try fetching real AniKoto series content units first (if not explicitly an AniList ID)
+    if (!isExplicitAnilist) {
+      try {
+        const units = await sdkAnikoto.fetchContentUnits(rawId);
+        if (units && units.length > 0) {
+          console.log(`[AniKoto Provider] Fetched ${units.length} catalog episode(s) for AniKoto series "${rawId}"`);
+          return units.map((u) => ({
+            ...u,
+            id: `anikoto:${u.id.replace(/^anikoto:/, "")}`,
+          }));
+        }
+      } catch (err: any) {
+        console.log(`[AniKoto Provider] Direct series fetch for "${rawId}" returned no units (${err.message}). Checking AniList ID fallback...`);
+      }
+    }
+
+    // Case 2: Numeric AniList ID (from fallback or direct AniList ID)
     if (!isNaN(numericId)) {
       try {
         let totalEpisodes = 1;
@@ -116,17 +133,7 @@ export const aniKotoProvider: StreamingProvider = {
       }
     }
 
-    // Case 2: AniKoto series ID (from AniKoto catalog search)
-    try {
-      const units = await sdkAnikoto.fetchContentUnits(rawId);
-      return units.map((u) => ({
-        ...u,
-        id: `anikoto:${u.id.replace(/^anikoto:/, "")}`,
-      }));
-    } catch (err: any) {
-      console.error(`[AniKoto Provider] getEpisodes error for series ${mediaId}:`, err.message);
-      return [];
-    }
+    return [];
   },
 
   async getStream(episodeId: string): Promise<ResolvedMediaStream> {
@@ -188,18 +195,74 @@ export const aniKotoProvider: StreamingProvider = {
     }
 
     // 1. Fetch MegaPlay embed page
-    const embedRes = await fetch(embedUrl, {
+    let embedRes = await fetch(embedUrl, {
       headers: {
         "User-Agent": DEFAULT_UA,
         Referer: refererUrl,
       },
     });
 
+    let embedPage = embedRes.ok ? await embedRes.text() : "";
+
+    // If direct MegaPlay AniList endpoint failed or returned Error, attempt catalog search resolution
+    if (
+      (!embedRes.ok || embedPage.includes("<title>Error - MegaPlay</title>")) &&
+      parts.length >= 2
+    ) {
+      const anilistId = parseInt(parts[0], 10);
+      const episodeNum = parseInt(parts[1], 10);
+
+      try {
+        console.log(
+          `[AniKoto Provider] Direct AniList stream unindexed for #${anilistId}. Attempting AniKoto catalog resolution...`
+        );
+        const aniListAnime = await getAnimeById(anilistId);
+        const titlesToTry = [
+          aniListAnime.title.english,
+          aniListAnime.title.romaji,
+        ].filter(Boolean) as string[];
+
+        let catalogUnitId: string | null = null;
+        for (const title of titlesToTry) {
+          const searchResults = await sdkAnikoto.search(title);
+          if (searchResults.length > 0) {
+            const rawSeriesId = searchResults[0].id.replace(/^anikoto:/, "");
+            const units = await sdkAnikoto.fetchContentUnits(rawSeriesId);
+            const matchingEp = units.find((u) => u.number === episodeNum);
+            if (matchingEp) {
+              catalogUnitId = matchingEp.id.replace(/^anikoto:/, "");
+              break;
+            }
+          }
+        }
+
+        if (catalogUnitId) {
+          console.log(
+            `[AniKoto Provider] Catalog resolution succeeded! Found unitId "${catalogUnitId}" for #${anilistId} ep ${episodeNum}`
+          );
+          embedUrl = `https://megaplay.buzz/stream/s-2/${catalogUnitId}/sub`;
+          refererUrl = "https://anikototv.to/";
+
+          embedRes = await fetch(embedUrl, {
+            headers: {
+              "User-Agent": DEFAULT_UA,
+              Referer: refererUrl,
+            },
+          });
+          if (embedRes.ok) {
+            embedPage = await embedRes.text();
+          }
+        }
+      } catch (catErr: any) {
+        console.warn(
+          `[AniKoto Provider] Catalog resolution failed for #${anilistId}: ${catErr.message}`
+        );
+      }
+    }
+
     if (!embedRes.ok) {
       throw new Error(`[AniKoto Provider] Embed fetch failed: HTTP ${embedRes.status}`);
     }
-
-    const embedPage = await embedRes.text();
 
     if (embedPage.includes("<title>Error - MegaPlay</title>")) {
       throw new Error(`[AniKoto Provider] MegaPlay has no mapping for "${cleaned}"`);

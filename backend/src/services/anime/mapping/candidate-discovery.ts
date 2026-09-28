@@ -1,8 +1,14 @@
+import { HttpClient, DomRegistry } from "anime-sdk";
 import { getAnimeById, type AniListAnime } from "../../anilist/anilist.service.js";
 import { classifyTitle, type ParsedTitleMetadata } from "./candidate-classifier.js";
 import { normalizeTitle } from "./title-normalizer.js";
 
 const ANIMEPARADISE_API_BASE = "https://api.animeparadise.moe";
+const anikotoHttp = new HttpClient({
+  timeoutMs: 15000,
+});
+
+export type MappingProviderName = "anikoto" | "animeparadise";
 
 export interface RawAnimeParadiseSearchItem {
   _id: string;
@@ -25,8 +31,17 @@ export interface RawAnimeParadiseSearchItem {
   };
 }
 
+export interface RawAniKotoSearchItem {
+  id: string;
+  title: string;
+  dataJp?: string;
+  episodeCount: number;
+  format?: string;
+  posterImage?: string;
+}
+
 export interface DiscoveredCandidate {
-  provider: "animeparadise";
+  provider: MappingProviderName;
   providerId: string;
   urn: string;
   title: string;
@@ -46,10 +61,12 @@ export interface CandidateDiscoveryResult {
   anilist: AniListAnime;
   searchQueries: string[];
   candidates: DiscoveredCandidate[];
+  provider: MappingProviderName;
 }
 
-// In-memory search cache to prevent duplicate queries during a mapping execution
-const searchCache = new Map<string, RawAnimeParadiseSearchItem[]>();
+// In-memory search caches to prevent duplicate queries during a mapping execution
+const searchCacheAnimeParadise = new Map<string, RawAnimeParadiseSearchItem[]>();
+const searchCacheAniKoto = new Map<string, RawAniKotoSearchItem[]>();
 
 /**
  * Generates deduplicated candidate search queries based on AniList metadata.
@@ -125,6 +142,70 @@ export function buildSearchQueries(anime: AniListAnime): string[] {
 }
 
 /**
+ * Queries AniKoto filter catalog for a query string.
+ * Results are cached in-memory during execution.
+ */
+async function fetchAniKotoSearch(
+  query: string
+): Promise<RawAniKotoSearchItem[]> {
+  const cacheKey = normalizeTitle(query);
+  if (searchCacheAniKoto.has(cacheKey)) {
+    return searchCacheAniKoto.get(cacheKey)!;
+  }
+
+  try {
+    const res = await anikotoHttp.get(
+      `https://anikototv.to/filter?keyword=${encodeURIComponent(query)}`
+    );
+
+    if (!res.ok) {
+      console.warn(`[Candidate Discovery] AniKoto search failed (${res.status}) for "${query}"`);
+      searchCacheAniKoto.set(cacheKey, []);
+      return [];
+    }
+
+    const html = await res.text();
+    const dom = DomRegistry.parse(html);
+    const items = dom.querySelectorAll(".main .item");
+    const results: RawAniKotoSearchItem[] = [];
+
+    for (const item of items) {
+      const posterEl = item.querySelector(".poster");
+      const id = posterEl?.getAttribute("data-tip") || "";
+      const nameEl = item.querySelector(".name");
+      const title = nameEl?.textContent?.trim() || "";
+      const dataJp = nameEl?.getAttribute("data-jp") || undefined;
+      const epText =
+        item.querySelector(".ep-status.total")?.textContent?.trim() ||
+        item.querySelector(".ep-status")?.textContent?.trim() ||
+        "0";
+      const epCount = parseInt(epText, 10);
+      const episodeCount = !isNaN(epCount) && epCount > 0 ? epCount : 0;
+      const format = item.querySelector(".right")?.textContent?.trim() || undefined;
+      const posterImage = item.querySelector("img")?.getAttribute("src") || undefined;
+
+      if (id && title) {
+        results.push({
+          id,
+          title,
+          dataJp,
+          episodeCount,
+          format,
+          posterImage,
+        });
+      }
+    }
+
+    searchCacheAniKoto.set(cacheKey, results);
+    return results;
+  } catch (error) {
+    console.warn(`[Candidate Discovery] Error searching AniKoto for "${query}":`, error);
+    searchCacheAniKoto.set(cacheKey, []);
+    return [];
+  }
+}
+
+/**
  * Queries AnimeParadise API directly for a query string with limit=50.
  * Results are cached in-memory during the execution.
  */
@@ -133,8 +214,8 @@ async function fetchAnimeParadiseSearch(
   timeoutMs = 10000
 ): Promise<RawAnimeParadiseSearchItem[]> {
   const cacheKey = normalizeTitle(query);
-  if (searchCache.has(cacheKey)) {
-    return searchCache.get(cacheKey)!;
+  if (searchCacheAnimeParadise.has(cacheKey)) {
+    return searchCacheAnimeParadise.get(cacheKey)!;
   }
 
   try {
@@ -153,27 +234,28 @@ async function fetchAnimeParadiseSearch(
 
     if (!res.ok) {
       console.warn(`[Candidate Discovery] AnimeParadise search failed (${res.status}) for "${query}"`);
-      searchCache.set(cacheKey, []);
+      searchCacheAnimeParadise.set(cacheKey, []);
       return [];
     }
 
     const json = (await res.json()) as { data?: RawAnimeParadiseSearchItem[] };
     const items = json?.data ?? [];
-    searchCache.set(cacheKey, items);
+    searchCacheAnimeParadise.set(cacheKey, items);
     return items;
   } catch (error) {
     console.warn(`[Candidate Discovery] Error searching AnimeParadise for "${query}":`, error);
-    searchCache.set(cacheKey, []);
+    searchCacheAnimeParadise.set(cacheKey, []);
     return [];
   }
 }
 
 /**
- * Discovers all AnimeParadise candidates for an AniList anime using multi-query search.
- * Results are deduplicated by provider ID and parsed into structured metadata.
+ * Discovers candidates for an AniList anime using multi-query search from the specified provider.
+ * Defaults to "anikoto".
  */
 export async function discoverCandidatesForAnime(
-  animeOrId: AniListAnime | number
+  animeOrId: AniListAnime | number,
+  provider: MappingProviderName = "anikoto"
 ): Promise<CandidateDiscoveryResult> {
   const anime =
     typeof animeOrId === "number" ? await getAnimeById(animeOrId) : animeOrId;
@@ -181,39 +263,67 @@ export async function discoverCandidatesForAnime(
   const queries = buildSearchQueries(anime);
   const candidateMap = new Map<string, DiscoveredCandidate>();
 
-  for (const query of queries) {
-    const items = await fetchAnimeParadiseSearch(query);
+  if (provider === "anikoto") {
+    for (const query of queries) {
+      const items = await fetchAniKotoSearch(query);
 
-    for (const item of items) {
-      if (!item._id || candidateMap.has(item._id)) continue;
+      for (const item of items) {
+        if (!item.id || candidateMap.has(item.id)) continue;
 
-      const year =
-        item.animeSeason?.year ??
-        (item.startDate ? new Date(item.startDate).getUTCFullYear() : undefined) ??
-        item.year;
+        const parsedMain = classifyTitle(item.title);
+        const parsedEnglish = item.dataJp
+          ? classifyTitle(item.dataJp)
+          : undefined;
 
-      const episodeCount = item.episodeCount ?? item.episodes ?? 0;
+        candidateMap.set(item.id, {
+          provider: "anikoto",
+          providerId: item.id,
+          urn: `anikoto:${item.id}`,
+          title: item.title,
+          alternativeTitle: item.dataJp ? { romaji: item.dataJp } : undefined,
+          parsedMain,
+          parsedEnglish,
+          year: undefined,
+          episodeCount: item.episodeCount,
+          posterImage: item.posterImage,
+        });
+      }
+    }
+  } else {
+    for (const query of queries) {
+      const items = await fetchAnimeParadiseSearch(query);
 
-      const parsedMain = classifyTitle(item.title);
-      const parsedEnglish = item.alternativeTitle?.english
-        ? classifyTitle(item.alternativeTitle.english)
-        : undefined;
+      for (const item of items) {
+        if (!item._id || candidateMap.has(item._id)) continue;
 
-      candidateMap.set(item._id, {
-        provider: "animeparadise",
-        providerId: item._id,
-        urn: `animeparadise:${item._id}`,
-        title: item.title,
-        alternativeTitle: item.alternativeTitle,
-        parsedMain,
-        parsedEnglish,
-        year,
-        episodeCount,
-        posterImage:
-          item.posterImage?.large ??
-          item.posterImage?.medium ??
-          item.posterImage?.small,
-      });
+        const year =
+          item.animeSeason?.year ??
+          (item.startDate ? new Date(item.startDate).getUTCFullYear() : undefined) ??
+          item.year;
+
+        const episodeCount = item.episodeCount ?? item.episodes ?? 0;
+
+        const parsedMain = classifyTitle(item.title);
+        const parsedEnglish = item.alternativeTitle?.english
+          ? classifyTitle(item.alternativeTitle.english)
+          : undefined;
+
+        candidateMap.set(item._id, {
+          provider: "animeparadise",
+          providerId: item._id,
+          urn: `animeparadise:${item._id}`,
+          title: item.title,
+          alternativeTitle: item.alternativeTitle,
+          parsedMain,
+          parsedEnglish,
+          year,
+          episodeCount,
+          posterImage:
+            item.posterImage?.large ??
+            item.posterImage?.medium ??
+            item.posterImage?.small,
+        });
+      }
     }
   }
 
@@ -221,5 +331,19 @@ export async function discoverCandidatesForAnime(
     anilist: anime,
     searchQueries: queries,
     candidates: Array.from(candidateMap.values()),
+    provider,
   };
 }
+
+export async function discoverAniKotoCandidatesForAnime(
+  animeOrId: AniListAnime | number
+): Promise<CandidateDiscoveryResult> {
+  return discoverCandidatesForAnime(animeOrId, "anikoto");
+}
+
+export async function discoverAnimeParadiseCandidatesForAnime(
+  animeOrId: AniListAnime | number
+): Promise<CandidateDiscoveryResult> {
+  return discoverCandidatesForAnime(animeOrId, "animeparadise");
+}
+

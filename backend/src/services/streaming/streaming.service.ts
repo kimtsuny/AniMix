@@ -5,18 +5,18 @@ import {
   type NormalizedStreamResult,
 } from "./stream.mapper.js";
 
-import { animeParadiseProvider } from "./providers/animeparadise.provider.js";
 import { aniKotoProvider } from "./providers/anikoto.provider.js";
+import { animeParadiseProvider } from "./providers/animeparadise.provider.js";
 
 /**
  * Streaming providers ordered by priority.
  *
- * 1. AnimeParadise = primary provider
- * 2. AniKoto = fallback provider
+ * 1. AniKoto = primary provider
+ * 2. AnimeParadise = secondary / fallback provider
  */
 const providers: StreamingProvider[] = [
-  animeParadiseProvider,
   aniKotoProvider,
+  animeParadiseProvider,
 ];
 
 /**
@@ -26,15 +26,15 @@ const providers: StreamingProvider[] = [
  *
  * Episode DB ID
  *      ↓
- * EpisodeProviderMapping
+ * Try Primary Provider: AniKoto
  *      ↓
- * Provider
+ * If AniKoto succeeds → return normalized stream
  *      ↓
- * Provider Episode ID
+ * If AniKoto fails → Try Fallback Provider: AnimeParadise
  *      ↓
- * Streaming Provider
+ * If AnimeParadise succeeds → return normalized stream
  *      ↓
- * Normalized Stream
+ * If both fail → throw Error
  */
 export async function getStream(
   episodeId: number
@@ -62,113 +62,159 @@ export async function getStream(
     throw new Error(`Episode ${episodeId} not found`);
   }
 
-  // Prioritize mappings with an active providerSeasonMapping from Phase 3
-  // and prioritize AnimeParadise as primary provider
-  const sortedMappings = [...episode.providerMappings].sort((a, b) => {
-    if (a.provider === "animeparadise" && b.provider !== "animeparadise") return -1;
-    if (a.provider !== "animeparadise" && b.provider === "animeparadise") return 1;
-    if (a.providerSeasonMappingId && !b.providerSeasonMappingId) return -1;
-    if (!a.providerSeasonMappingId && b.providerSeasonMappingId) return 1;
-    return 0;
-  });
+  const anilistId = episode.season?.anilistId ?? episode.season?.anime?.anilistId;
 
-  for (const mapping of sortedMappings) {
-    const provider = providers.find(
-      (item) => item.name === mapping.provider
-    );
+  // ============================================================
+  // 1. PRIMARY PROVIDER: AniKoto
+  // ============================================================
+  const anikotoMapping = episode.providerMappings.find(
+    (m) => m.provider === "anikoto"
+  );
+  const anikotoIdentifier =
+    anikotoMapping?.providerId ??
+    (anilistId ? `anikoto:${anilistId}:${episode.number}` : null);
 
-    if (!provider) {
-      console.warn(
-        `[Streaming] Provider "${mapping.provider}" is not registered`
-      );
-
-      continue;
-    }
-
+  if (anikotoIdentifier) {
     try {
       console.log(
-        `[Streaming] Trying provider "${provider.name}" for episode ${episodeId}`
+        `[Streaming] [Primary: AniKoto] Attempting stream resolution for episode ${episodeId} ("${anikotoIdentifier}")...`
       );
 
-      const rawResult = await provider.getStream(
-        mapping.providerId
-      );
-
-      const normalizedResult =
-        normalizeStreamResult(rawResult as any);
+      const rawResult = await aniKotoProvider.getStream(anikotoIdentifier);
+      const normalizedResult = normalizeStreamResult(rawResult as any);
 
       if (
         normalizedResult.type === "video" &&
-        normalizedResult.streams.length > 0
+        normalizedResult.streams.length > 0 &&
+        normalizedResult.streams.some((s) => !!s.url)
       ) {
         console.log(
-          `[Streaming] Provider "${provider.name}" succeeded for episode ${episodeId}`
+          `[Streaming] [Primary: AniKoto] Stream resolution succeeded for episode ${episodeId}`
+        );
+
+        // Record the successful AniKoto mapping if not already stored
+        if (!anikotoMapping && anilistId) {
+          await prisma.episodeProviderMapping
+            .upsert({
+              where: {
+                episodeId_provider: {
+                  episodeId,
+                  provider: "anikoto",
+                },
+              },
+              update: {
+                providerId: anikotoIdentifier,
+              },
+              create: {
+                episodeId,
+                provider: "anikoto",
+                providerId: anikotoIdentifier,
+              },
+            })
+            .catch((err) => {
+              console.warn(
+                "[Streaming] Failed to persist AniKoto mapping:",
+                err.message
+              );
+            });
+        }
+
+        return normalizedResult;
+      }
+
+      console.warn(
+        `[Streaming] [Primary: AniKoto] Returned no usable video streams for episode ${episodeId}`
+      );
+    } catch (anikotoError: any) {
+      console.warn(
+        `[Streaming] [Primary: AniKoto] Failed for episode ${episodeId}: ${anikotoError.message}`
+      );
+    }
+  } else {
+    console.log(
+      `[Streaming] [Primary: AniKoto] No AniKoto identifier or AniList ID available for episode ${episodeId}`
+    );
+  }
+
+  // ============================================================
+  // 2. SECONDARY / EMERGENCY FALLBACK: AnimeParadise
+  // ============================================================
+  console.log(
+    `[Streaming] Primary provider AniKoto failed or unavailable. Falling back to AnimeParadise for episode ${episodeId}...`
+  );
+
+  const animeParadiseMapping = episode.providerMappings.find(
+    (m) => m.provider === "animeparadise"
+  );
+
+  if (animeParadiseMapping) {
+    try {
+      console.log(
+        `[Streaming] [Fallback: AnimeParadise] Attempting stream for episode ${episodeId} (providerId: "${animeParadiseMapping.providerId}")...`
+      );
+
+      const rawResult = await animeParadiseProvider.getStream(
+        animeParadiseMapping.providerId
+      );
+      const normalizedResult = normalizeStreamResult(rawResult as any);
+
+      if (
+        normalizedResult.type === "video" &&
+        normalizedResult.streams.length > 0 &&
+        normalizedResult.streams.some((s) => !!s.url)
+      ) {
+        console.log(
+          `[Streaming] [Fallback: AnimeParadise] Succeeded for episode ${episodeId}`
         );
 
         return normalizedResult;
       }
 
       console.warn(
-        `[Streaming] Provider "${provider.name}" returned no streams`
+        `[Streaming] [Fallback: AnimeParadise] Returned no usable video streams for episode ${episodeId}`
       );
+    } catch (apError: any) {
+      console.error(
+        `[Streaming] [Fallback: AnimeParadise] Failed for episode ${episodeId}:`,
+        apError.message
+      );
+    }
+  } else {
+    console.warn(
+      `[Streaming] [Fallback: AnimeParadise] No AnimeParadise mapping found for episode ${episodeId}`
+    );
+  }
+
+  // ============================================================
+  // 3. OTHER REGISTERED PROVIDERS (if any exist)
+  // ============================================================
+  for (const mapping of episode.providerMappings) {
+    if (mapping.provider === "anikoto" || mapping.provider === "animeparadise") {
+      continue;
+    }
+
+    const provider = providers.find((item) => item.name === mapping.provider);
+    if (!provider) continue;
+
+    try {
+      console.log(
+        `[Streaming] Trying other registered provider "${provider.name}" for episode ${episodeId}`
+      );
+
+      const rawResult = await provider.getStream(mapping.providerId);
+      const normalizedResult = normalizeStreamResult(rawResult as any);
+
+      if (
+        normalizedResult.type === "video" &&
+        normalizedResult.streams.length > 0 &&
+        normalizedResult.streams.some((s) => !!s.url)
+      ) {
+        return normalizedResult;
+      }
     } catch (error) {
       console.error(
         `[Streaming] Provider "${provider.name}" failed:`,
         error
-      );
-    }
-  }
-
-  // Fallback: If primary provider mappings failed or none were present, try AniKoto
-  const anilistId = episode.season?.anilistId ?? episode.season?.anime?.anilistId;
-  const anikotoAlreadyAttempted = sortedMappings.some((m) => m.provider === "anikoto");
-
-  if (anilistId && !anikotoAlreadyAttempted) {
-    try {
-      console.log(
-        `[Streaming] Primary provider(s) failed. Attempting AniKoto fallback for episode ${episodeId} (AniList: ${anilistId}, Episode: ${episode.number})...`
-      );
-      const anikotoRaw = await aniKotoProvider.getStream(
-        `anikoto:${anilistId}:${episode.number}`
-      );
-      const normalizedAniKoto = normalizeStreamResult(anikotoRaw as any);
-
-      if (
-        normalizedAniKoto.type === "video" &&
-        normalizedAniKoto.streams.length > 0
-      ) {
-        console.log(
-          `[Streaming] AniKoto fallback succeeded for episode ${episodeId}`
-        );
-
-        // Record the AniKoto mapping for this episode
-        await prisma.episodeProviderMapping
-          .upsert({
-            where: {
-              episodeId_provider: {
-                episodeId,
-                provider: "anikoto",
-              },
-            },
-            update: {
-              providerId: `anikoto:${anilistId}:${episode.number}`,
-            },
-            create: {
-              episodeId,
-              provider: "anikoto",
-              providerId: `anikoto:${anilistId}:${episode.number}`,
-            },
-          })
-          .catch((err) => {
-            console.warn("[Streaming] Failed to persist AniKoto mapping:", err.message);
-          });
-
-        return normalizedAniKoto;
-      }
-    } catch (fallbackError: any) {
-      console.warn(
-        `[Streaming] AniKoto fallback failed for episode ${episodeId}:`,
-        fallbackError.message
       );
     }
   }
