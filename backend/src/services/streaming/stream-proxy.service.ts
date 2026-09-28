@@ -102,7 +102,6 @@ export function createProxySession(params: {
     default?: boolean;
   }>;
 }): ProxySession {
-  // Evict oldest session if limit reached
   if (SESSIONS.size >= MAX_SESSIONS) {
     const oldestKey = SESSIONS.keys().next().value;
     if (oldestKey) SESSIONS.delete(oldestKey);
@@ -112,14 +111,31 @@ export function createProxySession(params: {
   const now = Date.now();
 
   const allowedHosts = new Set<string>();
+
+  // Video stream host
   try {
     const streamHost = new URL(params.streamUrl).hostname.toLowerCase();
     allowedHosts.add(streamHost);
   } catch {
     // Ignore invalid stream URL
   }
+
+  // Known CDN hosts
   for (const d of ALLOWED_CDN_DOMAINS) {
     allowedHosts.add(d);
+  }
+
+  // Subtitle hosts
+  for (const subtitle of params.subtitles || []) {
+    try {
+      const parsed = new URL(subtitle.url);
+
+      if (parsed.protocol === "https:") {
+        allowedHosts.add(parsed.hostname.toLowerCase());
+      }
+    } catch {
+      // Ignore invalid subtitle URL
+    }
   }
 
   const session: ProxySession = {
