@@ -235,6 +235,45 @@ export const reanimeProvider: StreamingProvider = {
       if (fJson.success && Array.isArray(fJson.servers) && fJson.servers.length > 0) {
         servers = fJson.servers;
       }
+    } else {
+      const status = fRes.status;
+      const statusText = fRes.statusText;
+      const contentType = fRes.headers.get("content-type") || "";
+      const serverHeader = fRes.headers.get("server") || "";
+      const cfRay = fRes.headers.get("cf-ray") || "";
+      const cfMitigated = fRes.headers.get("cf-mitigated") || "";
+
+      let rawBody = "";
+      try {
+        rawBody = await fRes.text();
+      } catch (readErr: any) {
+        rawBody = `[Failed to read response body: ${readErr.message}]`;
+      }
+      const preview = rawBody.slice(0, 1000).replace(/\s+/g, " ").trim();
+
+      const isCloudflareChallenge =
+        cfMitigated.toLowerCase() === "challenge" ||
+        rawBody.includes("cf-mitigated") ||
+        rawBody.includes("Just a moment") ||
+        rawBody.includes("challenges.cloudflare.com") ||
+        rawBody.includes("turnstile");
+
+      console.error(`[ReAnime Provider] Flix request failed:`, {
+        url: `https://reanime.to/api/flix/${anilistId}/${episodeNum}`,
+        status,
+        statusText,
+        contentType,
+        server: serverHeader,
+        cfRay,
+        cfMitigated,
+        isCloudflareChallenge,
+        bodyPreview: preview,
+      });
+
+      const challengeNote = isCloudflareChallenge ? " - Cloudflare challenge" : "";
+      throw new Error(
+        `[ReAnime Provider] ReAnime API returned HTTP ${status} (${statusText || "Error"})${challengeNote}`
+      );
     }
 
     if (servers.length === 0) {
