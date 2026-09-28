@@ -1,7 +1,7 @@
 import prisma from "../../config/prisma.js";
 import { animeParadiseProvider } from "../streaming/providers/animeparadise.provider.js";
 import type { AnimeParadiseEpisode } from "../streaming/providers/animeparadise.provider.js";
-import { reanimeProvider } from "../streaming/providers/reanime.provider.js";
+import { aniKotoProvider } from "../streaming/providers/anikoto.provider.js";
 
 export async function syncSeasonEpisodes(
   seasonId: number
@@ -39,8 +39,8 @@ export async function syncSeasonEpisodes(
           episodes = (await animeParadiseProvider.getEpisodes(
             partMapping.providerId
           )) as AnimeParadiseEpisode[];
-        } else if (partMapping.provider === "reanime") {
-          episodes = (await reanimeProvider.getEpisodes(
+        } else if (partMapping.provider === "anikoto") {
+          episodes = (await aniKotoProvider.getEpisodes(
             partMapping.providerId
           )) as any[];
         } else {
@@ -180,43 +180,43 @@ export async function syncSeasonEpisodes(
         err.message
       );
     }
-  } else if (season.provider === "reanime" && season.providerId) {
+  } else if (season.provider === "anikoto" && season.providerId) {
     try {
-      episodes = (await reanimeProvider.getEpisodes(
+      episodes = (await aniKotoProvider.getEpisodes(
         season.providerId
       )) as any[];
     } catch (err: any) {
       console.warn(
-        `[Episodes] ReAnime getEpisodes failed for season ${seasonId}:`,
+        `[Episodes] AniKoto getEpisodes failed for season ${seasonId}:`,
         err.message
       );
     }
   }
 
-  // Fallback to ReAnime if AnimeParadise returned 0 episodes or season is marked "not_available" / "na_"
+  // Fallback to AniKoto if AnimeParadise returned 0 episodes or season is marked "not_available" / "na_"
   if (episodes.length === 0 && season.anilistId) {
     console.log(
-      `[Episodes] Primary provider has no episodes for season ${seasonId}. Attempting ReAnime fallback for AniList #${season.anilistId}...`
+      `[Episodes] Primary provider has no episodes for season ${seasonId}. Attempting AniKoto fallback for AniList #${season.anilistId}...`
     );
     try {
-      const reanimeEpisodes = await reanimeProvider.getEpisodes(
+      const anikotoEpisodes = await aniKotoProvider.getEpisodes(
         String(season.anilistId)
       );
-      if (reanimeEpisodes.length > 0) {
-        episodes = reanimeEpisodes as any[];
-        effectiveProvider = "reanime";
+      if (anikotoEpisodes.length > 0) {
+        episodes = anikotoEpisodes as any[];
+        effectiveProvider = "anikoto";
 
         await prisma.animeSeason.update({
           where: { id: season.id },
           data: {
-            provider: "reanime",
-            providerId: `reanime:${season.anilistId}`,
+            provider: "anikoto",
+            providerId: `anikoto:${season.anilistId}`,
           },
         });
       }
     } catch (err: any) {
       console.warn(
-        `[Episodes] ReAnime fallback episode fetch failed:`,
+        `[Episodes] AniKoto fallback episode fetch failed:`,
         err.message
       );
     }

@@ -6,19 +6,17 @@ import {
 } from "./stream.mapper.js";
 
 import { animeParadiseProvider } from "./providers/animeparadise.provider.js";
-import { reanimeProvider } from "./providers/reanime.provider.js";
-import { gogoanimeProvider } from "./providers/gogoanime.provider.js";
+import { aniKotoProvider } from "./providers/anikoto.provider.js";
 
 /**
  * Streaming providers ordered by priority.
  *
- * The provider is selected using the EpisodeProviderMapping
- * stored in the database.
+ * 1. AnimeParadise = primary provider
+ * 2. AniKoto = fallback provider
  */
 const providers: StreamingProvider[] = [
   animeParadiseProvider,
-  reanimeProvider,
-  gogoanimeProvider,
+  aniKotoProvider,
 ];
 
 /**
@@ -121,55 +119,55 @@ export async function getStream(
     }
   }
 
-  // Fallback: If primary provider mappings failed or none were present, try ReAnime
+  // Fallback: If primary provider mappings failed or none were present, try AniKoto
   const anilistId = episode.season?.anilistId ?? episode.season?.anime?.anilistId;
-  const reanimeAlreadyAttempted = sortedMappings.some((m) => m.provider === "reanime");
+  const anikotoAlreadyAttempted = sortedMappings.some((m) => m.provider === "anikoto");
 
-  if (anilistId && !reanimeAlreadyAttempted) {
+  if (anilistId && !anikotoAlreadyAttempted) {
     try {
       console.log(
-        `[Streaming] Primary provider(s) failed. Attempting ReAnime fallback for episode ${episodeId} (AniList: ${anilistId}, Episode: ${episode.number})...`
+        `[Streaming] Primary provider(s) failed. Attempting AniKoto fallback for episode ${episodeId} (AniList: ${anilistId}, Episode: ${episode.number})...`
       );
-      const reanimeRaw = await reanimeProvider.getStream(
-        `reanime:${anilistId}:${episode.number}`
+      const anikotoRaw = await aniKotoProvider.getStream(
+        `anikoto:${anilistId}:${episode.number}`
       );
-      const normalizedReanime = normalizeStreamResult(reanimeRaw as any);
+      const normalizedAniKoto = normalizeStreamResult(anikotoRaw as any);
 
       if (
-        normalizedReanime.type === "video" &&
-        normalizedReanime.streams.length > 0
+        normalizedAniKoto.type === "video" &&
+        normalizedAniKoto.streams.length > 0
       ) {
         console.log(
-          `[Streaming] ReAnime fallback succeeded for episode ${episodeId}`
+          `[Streaming] AniKoto fallback succeeded for episode ${episodeId}`
         );
 
-        // Record the ReAnime mapping for this episode
+        // Record the AniKoto mapping for this episode
         await prisma.episodeProviderMapping
           .upsert({
             where: {
               episodeId_provider: {
                 episodeId,
-                provider: "reanime",
+                provider: "anikoto",
               },
             },
             update: {
-              providerId: `reanime:${anilistId}:${episode.number}`,
+              providerId: `anikoto:${anilistId}:${episode.number}`,
             },
             create: {
               episodeId,
-              provider: "reanime",
-              providerId: `reanime:${anilistId}:${episode.number}`,
+              provider: "anikoto",
+              providerId: `anikoto:${anilistId}:${episode.number}`,
             },
           })
           .catch((err) => {
-            console.warn("[Streaming] Failed to persist ReAnime mapping:", err.message);
+            console.warn("[Streaming] Failed to persist AniKoto mapping:", err.message);
           });
 
-        return normalizedReanime;
+        return normalizedAniKoto;
       }
     } catch (fallbackError: any) {
       console.warn(
-        `[Streaming] ReAnime fallback failed for episode ${episodeId}:`,
+        `[Streaming] AniKoto fallback failed for episode ${episodeId}:`,
         fallbackError.message
       );
     }

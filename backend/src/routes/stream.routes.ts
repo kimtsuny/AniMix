@@ -9,11 +9,11 @@ import {
 
 const router = Router();
 
-router.get("/reanime/:sessionId/master.m3u8", getMasterPlaylist);
-router.get("/reanime/:sessionId/variant", getVariantPlaylist);
-router.get("/reanime/:sessionId/key", getKey);
-router.get("/reanime/:sessionId/segment", getSegment);
-router.get("/reanime/:sessionId/subtitles/:trackId", getSubtitle);
-router.get("/reanime/:sessionId/subtitle", getSubtitle);
+router.get("/anikoto/:sessionId/master.m3u8", getMasterPlaylist);
+router.get("/anikoto/:sessionId/variant", getVariantPlaylist);
+router.get("/anikoto/:sessionId/key", getKey);
+router.get("/anikoto/:sessionId/segment", getSegment);
+router.get("/anikoto/:sessionId/subtitles/:trackId", getSubtitle);
+router.get("/anikoto/:sessionId/subtitle", getSubtitle);
 
 export default router;

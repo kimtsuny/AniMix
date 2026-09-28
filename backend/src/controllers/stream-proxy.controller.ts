@@ -3,6 +3,9 @@ import {
   StreamProxyService,
 } from "../services/streaming/stream-proxy.service.js";
 
+const DEFAULT_UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
 export async function getMasterPlaylist(
   req: Request,
   res: Response
@@ -18,25 +21,29 @@ export async function getMasterPlaylist(
 
     const upstreamRes = await fetch(session.streamUrl, {
       headers: {
-        "Referer": "https://flixcloud.cc/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        Referer: session.referer,
+        "User-Agent": DEFAULT_UA,
       },
     });
 
     if (!upstreamRes.ok) {
-      res.status(upstreamRes.status).send(`Upstream CDN returned HTTP ${upstreamRes.status}`);
+      res
+        .status(upstreamRes.status)
+        .send(`Upstream CDN returned HTTP ${upstreamRes.status}`);
       return;
     }
 
     const rawBody = await upstreamRes.text();
-    const unmasked = StreamProxyService.unmaskM3u8(rawBody, session.pkKey);
 
     // Rewrite variant and audio streams to relative proxy routes
-    const lines = unmasked.split("\n");
+    const lines = rawBody.split("\n");
     const rewritten = lines.map((line) => {
       const trimmed = line.trim();
       // Audio stream URI
-      if (trimmed.startsWith("#EXT-X-MEDIA:TYPE=AUDIO") && trimmed.includes('URI="')) {
+      if (
+        trimmed.startsWith("#EXT-X-MEDIA:TYPE=AUDIO") &&
+        trimmed.includes('URI="')
+      ) {
         return trimmed.replace(/URI="([^"]+)"/, (_, relUri) => {
           const absUrl = new URL(relUri, session.streamUrl).toString();
           return `URI="variant?url=${encodeURIComponent(absUrl)}"`;
@@ -73,27 +80,28 @@ export async function getVariantPlaylist(
       return;
     }
 
-    if (!StreamProxyService.isAllowedUpstreamUrl(targetUrl)) {
+    if (!StreamProxyService.isAllowedUpstreamUrl(targetUrl, session)) {
       res.status(403).send("Forbidden: Upstream host is not permitted");
       return;
     }
 
     const upstreamRes = await fetch(targetUrl, {
       headers: {
-        "Referer": "https://flixcloud.cc/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        Referer: session.referer,
+        "User-Agent": DEFAULT_UA,
       },
     });
 
     if (!upstreamRes.ok) {
-      res.status(upstreamRes.status).send(`Upstream variant error HTTP ${upstreamRes.status}`);
+      res
+        .status(upstreamRes.status)
+        .send(`Upstream variant error HTTP ${upstreamRes.status}`);
       return;
     }
 
     const rawBody = await upstreamRes.text();
-    const unmasked = StreamProxyService.unmaskM3u8(rawBody, session.pkKey);
 
-    const lines = unmasked.split("\n");
+    const lines = rawBody.split("\n");
     const rewritten = lines.map((line) => {
       const trimmed = line.trim();
       // Rewrite AES-128 key URI
@@ -122,17 +130,19 @@ export async function getVariantPlaylist(
 
 export async function getKey(req: Request, res: Response): Promise<void> {
   try {
+    const sessionId = String(req.params.sessionId);
+    const session = StreamProxyService.getProxySession(sessionId);
     const targetUrl = req.query.url as string;
 
-    if (!targetUrl || !StreamProxyService.isAllowedUpstreamUrl(targetUrl)) {
+    if (!session || !targetUrl || !StreamProxyService.isAllowedUpstreamUrl(targetUrl, session)) {
       res.status(403).send("Forbidden: Invalid key URL");
       return;
     }
 
     const kRes = await fetch(targetUrl, {
       headers: {
-        "Referer": "https://flixcloud.cc/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        Referer: session.referer,
+        "User-Agent": DEFAULT_UA,
       },
     });
 
@@ -154,16 +164,18 @@ export async function getKey(req: Request, res: Response): Promise<void> {
 
 export async function getSegment(req: Request, res: Response): Promise<void> {
   try {
+    const sessionId = String(req.params.sessionId);
+    const session = StreamProxyService.getProxySession(sessionId);
     const targetUrl = req.query.url as string;
 
-    if (!targetUrl || !StreamProxyService.isAllowedUpstreamUrl(targetUrl)) {
+    if (!session || !targetUrl || !StreamProxyService.isAllowedUpstreamUrl(targetUrl, session)) {
       res.status(403).send("Forbidden: Invalid segment URL");
       return;
     }
 
     const upstreamHeaders: Record<string, string> = {
-      "Referer": "https://flixcloud.cc/",
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      Referer: session.referer,
+      "User-Agent": DEFAULT_UA,
     };
     if (req.headers.range) {
       upstreamHeaders["Range"] = req.headers.range;
@@ -173,7 +185,7 @@ export async function getSegment(req: Request, res: Response): Promise<void> {
       headers: upstreamHeaders,
     });
 
-    res.setHeader("Content-Type", "video/mp2t");
+    res.setHeader("Content-Type", segRes.headers.get("content-type") || "video/mp2t");
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Cache-Control", "public, max-age=86400");
     if (segRes.headers.get("content-range")) {
@@ -210,14 +222,22 @@ export async function getSubtitle(req: Request, res: Response): Promise<void> {
       }
     }
 
-    if (!targetUrl || !StreamProxyService.isAllowedUpstreamUrl(targetUrl)) {
+    if (!targetUrl || (session && !StreamProxyService.isAllowedUpstreamUrl(targetUrl, session))) {
       res.status(403).send("Forbidden: Invalid subtitle URL");
       return;
     }
 
-    const subRes = await fetch(targetUrl);
+    const subRes = await fetch(targetUrl, {
+      headers: {
+        Referer: session?.referer || "https://megaplay.buzz/",
+        "User-Agent": DEFAULT_UA,
+      },
+    });
+
     if (!subRes.ok) {
-      res.status(subRes.status).send(`Upstream subtitle error HTTP ${subRes.status}`);
+      res
+        .status(subRes.status)
+        .send(`Upstream subtitle error HTTP ${subRes.status}`);
       return;
     }
 
