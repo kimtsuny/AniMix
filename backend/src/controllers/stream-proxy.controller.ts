@@ -46,12 +46,14 @@ export async function getMasterPlaylist(
       ) {
         return trimmed.replace(/URI="([^"]+)"/, (_, relUri) => {
           const absUrl = new URL(relUri, session.streamUrl).toString();
+          StreamProxyService.addAllowedHost(session, absUrl);
           return `URI="variant?url=${encodeURIComponent(absUrl)}"`;
         });
       }
       // Variant stream URI
       if (!trimmed.startsWith("#") && trimmed.endsWith(".m3u8")) {
         const absUrl = new URL(trimmed, session.streamUrl).toString();
+        StreamProxyService.addAllowedHost(session, absUrl);
         return `variant?url=${encodeURIComponent(absUrl)}`;
       }
       return line;
@@ -108,12 +110,14 @@ export async function getVariantPlaylist(
       if (trimmed.startsWith("#EXT-X-KEY:") && trimmed.includes('URI="')) {
         return trimmed.replace(/URI="([^"]+)"/, (_, keyRel) => {
           const absKey = new URL(keyRel, targetUrl).toString();
+          StreamProxyService.addAllowedHost(session, absKey);
           return `URI="key?url=${encodeURIComponent(absKey)}"`;
         });
       }
       // Rewrite media segment line
       if (!trimmed.startsWith("#") && trimmed.length > 0) {
         const absSeg = new URL(trimmed, targetUrl).toString();
+        StreamProxyService.addAllowedHost(session, absSeg);
         return `segment?url=${encodeURIComponent(absSeg)}`;
       }
       return line;
@@ -185,23 +189,52 @@ export async function getSegment(req: Request, res: Response): Promise<void> {
       headers: upstreamHeaders,
     });
 
-    res.setHeader("Content-Type", segRes.headers.get("content-type") || "video/mp2t");
+    res.status(segRes.status);
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Cache-Control", "public, max-age=86400");
+
     if (segRes.headers.get("content-range")) {
       res.setHeader("Content-Range", segRes.headers.get("content-range")!);
     }
-    if (segRes.headers.get("content-length")) {
-      res.setHeader("Content-Length", segRes.headers.get("content-length")!);
-    }
 
-    res.status(segRes.status);
     if (req.method === "HEAD") {
+      const upstreamCt = segRes.headers.get("content-type") || "";
+      const contentType =
+        upstreamCt.startsWith("image/") ||
+        upstreamCt.startsWith("text/") ||
+        upstreamCt === "application/octet-stream"
+          ? "video/mp2t"
+          : upstreamCt;
+      res.setHeader("Content-Type", contentType);
+      if (segRes.headers.get("content-length")) {
+        res.setHeader("Content-Length", segRes.headers.get("content-length")!);
+      }
       res.end();
       return;
     }
 
     const segBuf = Buffer.from(await segRes.arrayBuffer());
+
+    // Safe media type detection:
+    // 1. MPEG-TS packets begin with the sync byte 0x47
+    // 2. Fragmented MP4 packets contain the 'ftyp' box identifier at offset 4
+    let contentType = "video/mp2t";
+    if (segBuf.length >= 8 && segBuf.subarray(4, 8).toString("ascii") === "ftyp") {
+      contentType = "video/mp4";
+    } else if (segBuf.length > 0 && segBuf[0] === 0x47) {
+      contentType = "video/mp2t";
+    } else {
+      const upstreamCt = segRes.headers.get("content-type") || "";
+      if (upstreamCt.includes("mp4")) {
+        contentType = "video/mp4";
+      } else {
+        contentType = "video/mp2t";
+      }
+    }
+
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Content-Length", segBuf.length);
+
     res.send(segBuf);
   } catch (err: any) {
     res.status(500).send(`Proxy segment error: ${err.message}`);

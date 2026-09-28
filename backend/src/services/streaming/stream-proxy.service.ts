@@ -4,6 +4,7 @@ export interface ProxySession {
   sessionId: string;
   streamUrl: string;
   referer: string;
+  allowedHosts: Set<string>;
   subtitles: Array<{
     url: string;
     language: string;
@@ -30,12 +31,31 @@ setInterval(() => {
   }
 }, 10 * 60 * 1000).unref();
 
-// Strict SSRF Allowlist for MegaPlay / AniKoto video delivery CDNs
+// Base trusted domains for MegaPlay / AniKoto infrastructure
 const ALLOWED_CDN_DOMAINS = [
   "megaplay.buzz",
   "nexabloom.top",
   "lunarfrontier.top",
 ];
+
+export function addAllowedHost(
+  session: ProxySession,
+  urlOrHost: string
+): void {
+  try {
+    let hostname = urlOrHost.trim().toLowerCase();
+    if (urlOrHost.includes("://")) {
+      const parsed = new URL(urlOrHost);
+      if (parsed.protocol !== "https:") return;
+      hostname = parsed.hostname.toLowerCase();
+    }
+    if (hostname) {
+      session.allowedHosts.add(hostname);
+    }
+  } catch {
+    // Ignore invalid URL formats
+  }
+}
 
 export function isAllowedUpstreamUrl(
   rawUrl: string,
@@ -46,25 +66,26 @@ export function isAllowedUpstreamUrl(
     if (parsed.protocol !== "https:") return false;
     const hostname = parsed.hostname.toLowerCase();
 
-    // Check if hostname matches or is subdomain of allowed CDNs
-    const isDomainAllowed = ALLOWED_CDN_DOMAINS.some(
-      (allowed) => hostname === allowed || hostname.endsWith("." + allowed)
-    );
-    if (isDomainAllowed) return true;
+    // 1. Session-scoped validation:
+    // If an active session is provided, only allow hosts that were registered
+    // by the session's stream manifest chain or base origin.
+    if (session) {
+      if (session.allowedHosts.has(hostname)) {
+        return true;
+      }
 
-    // Also allow the exact host or domain of the active session's streamUrl
-    if (session?.streamUrl) {
-      try {
-        const sessionHost = new URL(session.streamUrl).hostname.toLowerCase();
-        if (hostname === sessionHost || hostname.endsWith("." + sessionHost)) {
+      // Also allow exact subdomains of any host registered in session.allowedHosts
+      for (const allowed of session.allowedHosts) {
+        if (hostname === allowed || hostname.endsWith("." + allowed)) {
           return true;
         }
-      } catch {
-        // ignore invalid session URL
       }
     }
 
-    return false;
+    // 2. Fallback check against known base infrastructure domains
+    return ALLOWED_CDN_DOMAINS.some(
+      (allowed) => hostname === allowed || hostname.endsWith("." + allowed)
+    );
   } catch {
     return false;
   }
@@ -89,10 +110,23 @@ export function createProxySession(params: {
 
   const sessionId = crypto.randomBytes(16).toString("hex");
   const now = Date.now();
+
+  const allowedHosts = new Set<string>();
+  try {
+    const streamHost = new URL(params.streamUrl).hostname.toLowerCase();
+    allowedHosts.add(streamHost);
+  } catch {
+    // Ignore invalid stream URL
+  }
+  for (const d of ALLOWED_CDN_DOMAINS) {
+    allowedHosts.add(d);
+  }
+
   const session: ProxySession = {
     sessionId,
     streamUrl: params.streamUrl,
     referer: params.referer || "https://megaplay.buzz/",
+    allowedHosts,
     subtitles: params.subtitles || [],
     createdAt: now,
     expiresAt: now + CACHE_TTL_MS,
@@ -121,6 +155,7 @@ export function srtToWebVtt(srtText: string): string {
 export const StreamProxyService = {
   createProxySession,
   getProxySession,
+  addAllowedHost,
   isAllowedUpstreamUrl,
   srtToWebVtt,
 };
