@@ -3,211 +3,20 @@ import { animeParadiseProvider } from "../streaming/providers/animeparadise.prov
 import type { AnimeParadiseEpisode } from "../streaming/providers/animeparadise.provider.js";
 import { aniKotoProvider } from "../streaming/providers/anikoto.provider.js";
 import { getAnimeById } from "../anilist/anilist.service.js";
-import { classifyTitle } from "./mapping/candidate-classifier.js";
-import { normalizeTitle } from "./mapping/title-normalizer.js";
-
-const ROMAN_NUMERALS: Record<string, number> = {
-  i: 1,
-  ii: 2,
-  iii: 3,
-  iv: 4,
-  v: 5,
-  vi: 6,
-  vii: 7,
-  viii: 8,
-  ix: 9,
-  x: 10,
-};
-
 /**
- * Separately retrieves AnimeParadise episode thumbnails for a season,
- * independent of the selected streaming provider.
- * Returns a map: logical episode number -> thumbnail image URL.
+ * Reliably extracts the episode number from an AniList streaming episode title.
+ * Examples:
+ *   "Episode 1 - ..." -> 1
+ *   "Episode 28 - ..." -> 28
  */
-async function fetchAnimeParadiseThumbnails(
-  season: {
-    id: number;
-    number: number;
-    title: string | null;
-    provider?: string | null;
-    providerId?: string | null;
-    anime?: { title: string } | null;
-  },
-  seasonProviderMappings: Array<{
-    provider: string;
-    providerId: string;
-    partNumber: number;
-    episodeOffset: number;
-    episodeCount: number;
-  }>
-): Promise<Map<number, string>> {
-  const thumbnailMap = new Map<number, string>();
-
-  // 1. Check if the season already has AnimeParadise parts in seasonProviderMappings
-  const dbParadiseParts = seasonProviderMappings.filter(
-    (p) => p.provider === "animeparadise"
-  );
-  if (dbParadiseParts.length > 0) {
-    for (const part of dbParadiseParts) {
-      try {
-        const episodes = (await animeParadiseProvider.getEpisodes(
-          part.providerId
-        )) as AnimeParadiseEpisode[];
-        for (const ep of episodes) {
-          const logicalNumber = ep.number + part.episodeOffset;
-          if (ep.thumbnail && ep.thumbnail.trim().length > 0) {
-            thumbnailMap.set(logicalNumber, ep.thumbnail.trim());
-          }
-        }
-      } catch (err: any) {
-        console.warn(
-          `[Episodes] Failed to fetch AnimeParadise episodes for part ${part.providerId}:`,
-          err.message
-        );
-      }
-    }
-    if (thumbnailMap.size > 0) {
-      return thumbnailMap;
-    }
+function parseEpisodeNumberFromTitle(title: string | null | undefined): number | null {
+  if (!title) return null;
+  const match = title.match(/(?:^|\b)(?:Episode|Ep\.?)\s*(\d+)\b/i) ?? title.match(/^E(\d+)\b/i);
+  if (match) {
+    const num = parseInt(match[1], 10);
+    return Number.isFinite(num) ? num : null;
   }
-
-  // 2. Check if the season itself is mapped directly to AnimeParadise
-  if (
-    season.provider === "animeparadise" &&
-    season.providerId &&
-    !season.providerId.startsWith("na_")
-  ) {
-    try {
-      const episodes = (await animeParadiseProvider.getEpisodes(
-        season.providerId
-      )) as AnimeParadiseEpisode[];
-      for (const ep of episodes) {
-        if (ep.thumbnail && ep.thumbnail.trim().length > 0) {
-          thumbnailMap.set(ep.number, ep.thumbnail.trim());
-        }
-      }
-      if (thumbnailMap.size > 0) {
-        return thumbnailMap;
-      }
-    } catch (err: any) {
-      console.warn(
-        `[Episodes] Failed to fetch AnimeParadise episodes for season providerId ${season.providerId}:`,
-        err.message
-      );
-    }
-  }
-
-  // 3. Independent discovery via AnimeParadise search
-  const candidateQueries = [
-    season.title,
-    season.anime?.title,
-  ].filter((t): t is string => Boolean(t && t.trim().length > 0));
-
-  const seenQueries = new Set<string>();
-
-  for (const query of candidateQueries) {
-    const normKey = normalizeTitle(query);
-    if (seenQueries.has(normKey)) continue;
-    seenQueries.add(normKey);
-
-    try {
-      const searchResults = await animeParadiseProvider.search(query);
-      if (!searchResults || searchResults.length === 0) continue;
-
-      const matchedParts: Array<{
-        partNumber: number;
-        id: string;
-        title: string;
-      }> = [];
-
-      for (const res of searchResults) {
-        const classified = classifyTitle(res.title);
-        const romanEndMatch = res.title.match(
-          /\b(ii|iii|iv|v|vi|vii|viii|ix|x)\b$/i
-        );
-        const resSeason =
-          classified.explicitSeasonNumber ??
-          classified.ordinalSeasonNumber ??
-          (romanEndMatch
-            ? ROMAN_NUMERALS[romanEndMatch[1].toLowerCase()]
-            : null);
-
-        let isMatch = false;
-        if (resSeason === season.number) {
-          isMatch = true;
-        } else if (
-          classified.isFinalSeason &&
-          (season.number === 4 || (season.title && /final/i.test(season.title)))
-        ) {
-          isMatch = true;
-        } else if (
-          season.number === 1 &&
-          !resSeason &&
-          !classified.isFinalSeason
-        ) {
-          const normAnime = normalizeTitle(season.anime?.title ?? query);
-          if (
-            normAnime.includes(classified.normalizedBaseTitle) ||
-            classified.normalizedBaseTitle.includes(normAnime)
-          ) {
-            isMatch = true;
-          }
-        }
-
-        if (isMatch) {
-          const rawPart = classified.partNumber ?? classified.courNumber ?? 1;
-          matchedParts.push({
-            partNumber: rawPart,
-            id: res.id,
-            title: res.title,
-          });
-        }
-      }
-
-      if (matchedParts.length === 0) continue;
-
-      // Deduplicate parts by partNumber
-      const uniqueParts = new Map<number, (typeof matchedParts)[0]>();
-      for (const part of matchedParts) {
-        if (!uniqueParts.has(part.partNumber)) {
-          uniqueParts.set(part.partNumber, part);
-        }
-      }
-
-      const sortedParts = Array.from(uniqueParts.values()).sort(
-        (a, b) => a.partNumber - b.partNumber
-      );
-
-      let currentOffset = 0;
-      for (const part of sortedParts) {
-        try {
-          const episodes = (await animeParadiseProvider.getEpisodes(
-            part.id
-          )) as AnimeParadiseEpisode[];
-
-          if (episodes && episodes.length > 0) {
-            for (const ep of episodes) {
-              const logicalNum = ep.number + currentOffset;
-              if (ep.thumbnail && ep.thumbnail.trim().length > 0) {
-                thumbnailMap.set(logicalNum, ep.thumbnail.trim());
-              }
-            }
-            currentOffset += episodes.length;
-          }
-        } catch {
-          // silently continue
-        }
-      }
-
-      if (thumbnailMap.size > 0) {
-        break;
-      }
-    } catch {
-      // silently continue
-    }
-  }
-
-  return thumbnailMap;
+  return null;
 }
 
 export async function syncSeasonEpisodes(
@@ -227,22 +36,30 @@ export async function syncSeasonEpisodes(
     throw new Error(`Anime season ${seasonId} not found`);
   }
 
-  // Resolve thumbnail fallback:
-  // 2. AniList coverImage.extraLarge
-  // 3. AniList coverImage.large
-  // 4. Database anime coverImage
-  // 5. null
+  // Resolve AniList thumbnail and cover image fallback:
+  // 1. AniList streamingEpisodes[].thumbnail for exact episode number
+  // 2. AniList coverImage.extraLarge for current season
+  // 3. null
   const anilistId = season.anilistId ?? season.anime?.anilistId;
-  let anilistExtraLarge: string | null = null;
-  let anilistLarge: string | null = null;
+  let anilistCoverImage: string | null = null;
+  const anilistThumbnailMap = new Map<number, string>();
 
   if (anilistId) {
     try {
       const anilistData = await getAnimeById(anilistId);
       const xl = anilistData?.coverImage?.extraLarge?.trim();
-      const l = anilistData?.coverImage?.large?.trim();
-      anilistExtraLarge = xl && xl.length > 0 ? xl : null;
-      anilistLarge = l && l.length > 0 ? l : null;
+      anilistCoverImage = xl && xl.length > 0 ? xl : null;
+
+      if (anilistData?.streamingEpisodes) {
+        for (const streamingEp of anilistData.streamingEpisodes) {
+          if (streamingEp.thumbnail && streamingEp.thumbnail.trim().length > 0) {
+            const epNum = parseEpisodeNumberFromTitle(streamingEp.title);
+            if (epNum !== null && !anilistThumbnailMap.has(epNum)) {
+              anilistThumbnailMap.set(epNum, streamingEp.thumbnail.trim());
+            }
+          }
+        }
+      }
     } catch (err: any) {
       console.warn(
         `[Episodes] Failed to fetch AniList metadata for season ${seasonId} (AniList ID ${anilistId}):`,
@@ -250,14 +67,6 @@ export async function syncSeasonEpisodes(
       );
     }
   }
-
-  const animeCoverImage =
-    season.anime?.coverImage && season.anime.coverImage.trim().length > 0
-      ? season.anime.coverImage.trim()
-      : null;
-
-  const fallbackThumbnail =
-    anilistExtraLarge ?? anilistLarge ?? animeCoverImage ?? null;
 
   // 2. Check for multi-part provider mappings (Phase 3 architecture)
   const seasonProviderMappings = await prisma.animeSeasonProviderMapping.findMany({
@@ -268,12 +77,6 @@ export async function syncSeasonEpisodes(
       partNumber: "asc",
     },
   });
-
-  // Independently retrieve episode thumbnails from AnimeParadise
-  const paradiseThumbnailMap = await fetchAnimeParadiseThumbnails(
-    season,
-    seasonProviderMappings
-  );
 
   if (seasonProviderMappings.length > 0) {
     console.log(
@@ -323,12 +126,9 @@ export async function syncSeasonEpisodes(
 
       for (const ep of episodes) {
         const logicalEpisodeNumber = ep.number + partMapping.episodeOffset;
-        const paradiseImage =
-          paradiseThumbnailMap.get(logicalEpisodeNumber) ??
-          (ep.thumbnail && ep.thumbnail.trim().length > 0
-            ? ep.thumbnail.trim()
-            : null);
-        const thumbnail = paradiseImage ?? fallbackThumbnail;
+        const anilistEpisodeThumbnail =
+          anilistThumbnailMap.get(logicalEpisodeNumber) ?? null;
+        const thumbnail = anilistEpisodeThumbnail ?? anilistCoverImage ?? null;
 
         // Upsert logical Episode using seasonId + logicalEpisodeNumber
         const dbEpisode = await prisma.episode.upsert({
@@ -340,7 +140,7 @@ export async function syncSeasonEpisodes(
           },
           update: {
             title: ep.title,
-            thumbnail: thumbnail ?? undefined,
+            thumbnail,
           },
           create: {
             seasonId,
@@ -507,12 +307,9 @@ export async function syncSeasonEpisodes(
   );
 
   for (const episode of episodes) {
-    const paradiseImage =
-      paradiseThumbnailMap.get(episode.number) ??
-      (episode.thumbnail && episode.thumbnail.trim().length > 0
-        ? episode.thumbnail.trim()
-        : null);
-    const thumbnail = paradiseImage ?? fallbackThumbnail;
+    const anilistEpisodeThumbnail =
+      anilistThumbnailMap.get(episode.number) ?? null;
+    const thumbnail = anilistEpisodeThumbnail ?? anilistCoverImage ?? null;
 
     const dbEpisode = await prisma.episode.upsert({
       where: {

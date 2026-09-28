@@ -20,6 +20,11 @@ const ANIME_BY_ID_QUERY = `
 
       bannerImage
 
+      streamingEpisodes {
+        title
+        thumbnail
+      }
+
       episodes
       duration
       format
@@ -86,6 +91,11 @@ export interface AniListAnime {
   };
 
   bannerImage: string | null;
+
+  streamingEpisodes?: Array<{
+    title: string | null;
+    thumbnail: string | null;
+  }> | null;
 
   episodes: number | null;
   duration: number | null;
