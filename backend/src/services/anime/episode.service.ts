@@ -11,7 +11,10 @@ import { getAnimeById } from "../anilist/anilist.service.js";
  */
 function parseEpisodeNumberFromTitle(title: string | null | undefined): number | null {
   if (!title) return null;
-  const match = title.match(/(?:^|\b)(?:Episode|Ep\.?)\s*(\d+)\b/i) ?? title.match(/^E(\d+)\b/i);
+  const match =
+    title.match(/(?:^|\b)(?:Episode|Ep\.?)\s*(\d+)\b/i) ??
+    title.match(/^E(\d+)\b/i) ??
+    title.match(/^#?(\d+)\s*[-:]/);
   if (match) {
     const num = parseInt(match[1], 10);
     return Number.isFinite(num) ? num : null;
@@ -39,7 +42,8 @@ export async function syncSeasonEpisodes(
   // Resolve AniList thumbnail and cover image fallback:
   // 1. AniList streamingEpisodes[].thumbnail for exact episode number
   // 2. AniList coverImage.extraLarge for current season
-  // 3. null
+  // 3. AniList coverImage.large for current season
+  // 4. null
   const anilistId = season.anilistId ?? season.anime?.anilistId;
   let anilistCoverImage: string | null = null;
   const anilistThumbnailMap = new Map<number, string>();
@@ -48,14 +52,16 @@ export async function syncSeasonEpisodes(
     try {
       const anilistData = await getAnimeById(anilistId);
       const xl = anilistData?.coverImage?.extraLarge?.trim();
-      anilistCoverImage = xl && xl.length > 0 ? xl : null;
+      const lg = anilistData?.coverImage?.large?.trim();
+      anilistCoverImage = (xl && xl.length > 0 ? xl : null) ?? (lg && lg.length > 0 ? lg : null);
 
       if (anilistData?.streamingEpisodes) {
         for (const streamingEp of anilistData.streamingEpisodes) {
-          if (streamingEp.thumbnail && streamingEp.thumbnail.trim().length > 0) {
+          const thumb = streamingEp.thumbnail?.trim();
+          if (thumb && thumb.length > 0) {
             const epNum = parseEpisodeNumberFromTitle(streamingEp.title);
             if (epNum !== null && !anilistThumbnailMap.has(epNum)) {
-              anilistThumbnailMap.set(epNum, streamingEp.thumbnail.trim());
+              anilistThumbnailMap.set(epNum, thumb);
             }
           }
         }
@@ -127,7 +133,9 @@ export async function syncSeasonEpisodes(
       for (const ep of episodes) {
         const logicalEpisodeNumber = ep.number + partMapping.episodeOffset;
         const anilistEpisodeThumbnail =
-          anilistThumbnailMap.get(logicalEpisodeNumber) ?? null;
+          anilistThumbnailMap.get(logicalEpisodeNumber) ??
+          anilistThumbnailMap.get(ep.number) ??
+          null;
         const thumbnail = anilistEpisodeThumbnail ?? anilistCoverImage ?? null;
 
         // Upsert logical Episode using seasonId + logicalEpisodeNumber

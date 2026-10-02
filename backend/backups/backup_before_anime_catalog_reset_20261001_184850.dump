@@ -1,0 +1,24 @@
+-- Database Backup: backup_before_anime_catalog_reset_20261001_184850
+-- Created At: 2026-10-01T15:48:54.371Z
+-- PostgreSQL Target
+
+BEGIN;
+
+-- Table: "User" (1 rows)
+INSERT INTO "User" ("id", "username", "email", "password", "createdAt") VALUES (1, 'kimtsuny', 'altyym59@gmail.com', '$2b$10$Xez9.Pjouh/c/3XsTOMT7.E6gA3kLCuNFCIZlcKdDrLHmYWBFWzV2', '2026-09-25T16:09:29.032Z');
+
+-- No rows in "Anime"
+
+-- No rows in "AnimeSeason"
+
+-- No rows in "AnimeProviderMapping"
+
+-- No rows in "AnimeSeasonProviderMapping"
+
+-- No rows in "Episode"
+
+-- No rows in "EpisodeProviderMapping"
+
+-- No rows in "Favorite"
+
+COMMIT;

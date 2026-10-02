@@ -1,0 +1,77 @@
+{
+  "metadata": {
+    "timestamp": "20261001_184850",
+    "createdAt": "2026-10-01T15:48:54.371Z",
+    "databaseUrl": "postgresql://neondb_owner:***@ep-dry-wave-asj1bdge.c-4.eu-central-1.aws.neon.tech/neondb?sslmode=require"
+  },
+  "tables": {
+    "User": [
+      {
+        "id": 1,
+        "username": "kimtsuny",
+        "email": "altyym59@gmail.com",
+        "password": "$2b$10$Xez9.Pjouh/c/3XsTOMT7.E6gA3kLCuNFCIZlcKdDrLHmYWBFWzV2",
+        "createdAt": "2026-09-25T16:09:29.032Z"
+      }
+    ],
+    "Anime": [],
+    "AnimeSeason": [],
+    "Episode": [],
+    "AnimeSeasonProviderMapping": [],
+    "EpisodeProviderMapping": [],
+    "AnimeProviderMapping": [],
+    "Favorite": [],
+    "_prisma_migrations": [
+      {
+        "id": "c27d5205-e1bf-45e4-86bd-b4af953f6d80",
+        "checksum": "76efd336ceccd3baebeaa2e136d59e0461bb97fd8ab8b6868118dd9fe21b37c7",
+        "finished_at": "2026-09-25T13:32:56.216Z",
+        "migration_name": "20260719145915_init",
+        "logs": null,
+        "rolled_back_at": null,
+        "started_at": "2026-09-25T13:32:55.572Z",
+        "applied_steps_count": 1
+      },
+      {
+        "id": "85e78ed1-3f36-4d3b-95b5-4069f1a2065d",
+        "checksum": "f7c3340542de657eb64f2f5293ec67499235ae55d4194c02d5205f2459c6d592",
+        "finished_at": "2026-09-25T13:32:56.727Z",
+        "migration_name": "20260805162507_add_favorites",
+        "logs": null,
+        "rolled_back_at": null,
+        "started_at": "2026-09-25T13:32:56.358Z",
+        "applied_steps_count": 1
+      },
+      {
+        "id": "723dde7f-e346-485c-9439-c087b17e8864",
+        "checksum": "a651b38e2da2a31f5236bc8cfba2f2d83289e2caf3e12c7a971344a3e91ae4f8",
+        "finished_at": "2026-09-25T13:32:57.294Z",
+        "migration_name": "20260912171651_add_anime_content",
+        "logs": null,
+        "rolled_back_at": null,
+        "started_at": "2026-09-25T13:32:56.875Z",
+        "applied_steps_count": 1
+      },
+      {
+        "id": "94385735-6caa-4b90-a0d0-f2b64c4763fc",
+        "checksum": "d2fad8987153b12bdfa5415da8d7afb1465512494a3186f4411ce4ed14e3d386",
+        "finished_at": "2026-09-25T13:32:58.065Z",
+        "migration_name": "20260915181203_add_anime_seasons",
+        "logs": null,
+        "rolled_back_at": null,
+        "started_at": "2026-09-25T13:32:57.680Z",
+        "applied_steps_count": 1
+      },
+      {
+        "id": "837e96de-a1fe-4927-a8ba-42934b19e9cd",
+        "checksum": "49a84b63450426aa6edc387421bbddab00b46da976b8b0fdc082ed97f9a3f04e",
+        "finished_at": "2026-09-25T13:32:58.625Z",
+        "migration_name": "20260925122910_add_season_provider_mappings",
+        "logs": null,
+        "rolled_back_at": null,
+        "started_at": "2026-09-25T13:32:58.205Z",
+        "applied_steps_count": 1
+      }
+    ]
+  }
+}
