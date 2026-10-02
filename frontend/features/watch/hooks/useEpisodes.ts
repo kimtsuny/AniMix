@@ -66,9 +66,17 @@ export function useEpisodes(
         setLoadedSeasonNumber(seasonNumber);
         setError(null);
 
-        // Episode selection is owned by useWatch.
-        // Loading a new season must not carry over the previous season's selection.
-        setSelectedEpisode(data.season.episodes[0] ?? null);
+        setSelectedEpisode((current) => {
+          if (current) {
+            return (
+              data.season.episodes.find(
+                (episode) => episode.id === current.id
+              ) ?? data.season.episodes[0] ?? null
+            );
+          }
+
+          return data.season.episodes[0] ?? null;
+        });
       })
       .catch((err) => {
         if (cancelled) return;
@@ -96,7 +104,7 @@ export function useEpisodes(
     return () => {
       cancelled = true;
     };
-  }, [animeId, seasonNumber]);
+  }, [animeId, seasonNumber, loadedAnimeId]);
 
   const selectEpisode = useCallback(
     (episode: Episode) => {
