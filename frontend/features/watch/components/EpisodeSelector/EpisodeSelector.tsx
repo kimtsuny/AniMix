@@ -44,6 +44,7 @@ export function EpisodeSelector({
 
       {/* 2. Episode Carousel */}
       <EpisodeList
+        key={selectedSeason}
         episodes={episodes}
         selectedEpisodeNumber={selectedEpisodeNumber}
         isLoading={isLoading}
