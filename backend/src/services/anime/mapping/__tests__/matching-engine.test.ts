@@ -19,6 +19,7 @@ import {
 
 import type { DiscoveredCandidate } from "../candidate-discovery.js";
 import type { AniListAnime } from "../../../anilist/anilist.service.js";
+import { groupIntoLogicalSeasons } from "../phase3-planner.js";
 
 describe("Title Normalizer", () => {
   it("normalizes 'SPY×FAMILY' and 'SPY x FAMILY' to identical strings", () => {
@@ -629,6 +630,297 @@ describe("Candidate Scoring & Decision Logic", () => {
     assert.strictEqual(scoreCandidate(narutoTarget, narutoCand).decision, "MATCHED");
     assert.strictEqual(scoreCandidate(narutoTarget, shippudenCand).decision, "UNMAPPED");
     assert.strictEqual(scoreCandidate(narutoTarget, movieCand).decision, "UNMAPPED");
+  });
+
+  it("8. Dragon Ball franchise: matches target seasons accurately and excludes movies/other series", () => {
+    // Target: Dragon Ball (1986, 153 eps)
+    const db1986Target = makeMockAniList({
+      id: 223,
+      title: { english: "Dragon Ball", romaji: "Dragon Ball" },
+      episodes: 153,
+      seasonYear: 1986,
+    });
+
+    // Target: Dragon Ball Z (1989, 291 eps)
+    const dbzTarget = makeMockAniList({
+      id: 813,
+      title: { english: "Dragon Ball Z", romaji: "Dragon Ball Z" },
+      episodes: 291,
+      seasonYear: 1989,
+    });
+
+    // Target: Dragon Ball GT (1996, 64 eps)
+    const dbgtTarget = makeMockAniList({
+      id: 225,
+      title: { english: "Dragon Ball GT", romaji: "Dragon Ball GT" },
+      episodes: 64,
+      seasonYear: 1996,
+    });
+
+    // Target: Dragon Ball Super (2015, 131 eps)
+    const dbsTarget = makeMockAniList({
+      id: 21175,
+      title: { english: "Dragon Ball Super", romaji: "Dragon Ball Super" },
+      episodes: 131,
+      seasonYear: 2015,
+    });
+
+    const candDB = makeMockCandidate({
+      id: "db-1232",
+      title: "Dragon Ball",
+      year: 1986,
+      episodes: 153,
+    });
+    const candDBZ = makeMockCandidate({
+      id: "dbz-1456",
+      title: "Dragon Ball Z",
+      year: 1989,
+      episodes: 291,
+    });
+    const candDBGT = makeMockCandidate({
+      id: "dbgt-3954",
+      title: "Dragon Ball GT",
+      year: 1996,
+      episodes: 64,
+    });
+    const candDBS = makeMockCandidate({
+      id: "dbs-132",
+      title: "Dragon Ball Super",
+      year: 2015,
+      episodes: 131,
+    });
+    const candMovieBroly = makeMockCandidate({
+      id: "db-movie-broly",
+      title: "Dragon Ball Super: Broly",
+      year: 2018,
+      episodes: 1,
+    });
+
+    // Dragon Ball 1986 matching
+    assert.strictEqual(scoreCandidate(db1986Target, candDB).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(db1986Target, candDBZ).decision, "UNMAPPED");
+    assert.strictEqual(scoreCandidate(db1986Target, candDBGT).decision, "UNMAPPED");
+    assert.strictEqual(scoreCandidate(db1986Target, candDBS).decision, "UNMAPPED");
+    assert.strictEqual(scoreCandidate(db1986Target, candMovieBroly).decision, "UNMAPPED");
+
+    // Dragon Ball Z matching
+    assert.strictEqual(scoreCandidate(dbzTarget, candDBZ).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(dbzTarget, candDB).decision, "UNMAPPED");
+    assert.strictEqual(scoreCandidate(dbzTarget, candDBGT).decision, "UNMAPPED");
+
+    // Dragon Ball GT matching
+    assert.strictEqual(scoreCandidate(dbgtTarget, candDBGT).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(dbgtTarget, candDBZ).decision, "UNMAPPED");
+
+    // Dragon Ball Super matching
+    assert.strictEqual(scoreCandidate(dbsTarget, candDBS).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(dbsTarget, candMovieBroly).decision, "UNMAPPED");
+  });
+
+  it("9. Ranma ½ 1989 vs Ranma ½ 2024: release year strictly prevents cross-matching", () => {
+    // Target 1: Ranma ½ (1989 classic)
+    const ranma1989Target = makeMockAniList({
+      id: 210,
+      title: { english: "Ranma ½", romaji: "Ranma ½" },
+      episodes: 18,
+      seasonYear: 1989,
+    });
+
+    // Target 2: Ranma1/2 (2024 remake)
+    const ranma2024Target = makeMockAniList({
+      id: 178533,
+      title: { english: "Ranma1/2 (2024)", romaji: "Ranma 1/2 (2024)" },
+      episodes: 12,
+      seasonYear: 2024,
+    });
+
+    // AniKoto Candidates
+    const candRanma1989 = makeMockCandidate({
+      id: "ranma-831",
+      title: "Ranma ½",
+      altEnglish: "Ranma ½",
+      year: 1989,
+      episodes: 161, // complete TV run on AniKoto
+    });
+
+    const candRanma2024 = makeMockCandidate({
+      id: "ranma-6625",
+      title: "Ranma 1/2",
+      altEnglish: "Ranma ½ (2024)",
+      year: 2024,
+      episodes: 12,
+    });
+
+    const candRanma2024S2 = makeMockCandidate({
+      id: "ranma-8190",
+      title: "Ranma ½ (2024) 2nd Season",
+      altEnglish: "Ranma ½ (2024) 2nd Season",
+      year: 2025,
+      episodes: 12,
+    });
+
+    // Ranma 1989 target must MATCH 1989 candidate and REJECT 2024 candidates
+    const res1989_for_1989 = scoreCandidate(ranma1989Target, candRanma1989);
+    assert.strictEqual(res1989_for_1989.decision, "MATCHED");
+    assert.strictEqual(res1989_for_1989.conflicts.length, 0);
+
+    const res1989_for_2024 = scoreCandidate(ranma1989Target, candRanma2024);
+    assert.strictEqual(res1989_for_2024.decision, "UNMAPPED");
+    assert.ok(
+      res1989_for_2024.conflicts.some((c) => c.includes("Release year conflict")),
+      "Ranma 1989 must reject Ranma 2024 due to 35-year release gap"
+    );
+
+    // Ranma 2024 target must MATCH 2024 candidate and REJECT 1989 candidate
+    const res2024_for_2024 = scoreCandidate(ranma2024Target, candRanma2024);
+    assert.strictEqual(res2024_for_2024.decision, "MATCHED");
+    assert.strictEqual(res2024_for_2024.conflicts.length, 0);
+
+    const res2024_for_1989 = scoreCandidate(ranma2024Target, candRanma1989);
+    assert.strictEqual(res2024_for_1989.decision, "UNMAPPED");
+    assert.ok(
+      res2024_for_1989.conflicts.some((c) => c.includes("Release year conflict")),
+      "Ranma 2024 must reject Ranma 1989 due to 35-year release gap"
+    );
+
+    // Ranma 2024 S2 candidate must be rejected for S1 target
+    assert.strictEqual(scoreCandidate(ranma2024Target, candRanma2024S2).decision, "UNMAPPED");
+  });
+
+  it("10. Remakes: separates Shaman King (2001) from (2021) and FMA (2003) from Brotherhood", () => {
+    const sk2001Target = makeMockAniList({
+      id: 154,
+      title: { english: "Shaman King", romaji: "Shaman King" },
+      episodes: 64,
+      seasonYear: 2001,
+    });
+    const sk2021Cand = makeMockCandidate({
+      id: "sk-2021",
+      title: "Shaman King (2021)",
+      year: 2021,
+      episodes: 52,
+    });
+    const sk2001Cand = makeMockCandidate({
+      id: "sk-2001",
+      title: "Shaman King",
+      year: 2001,
+      episodes: 64,
+    });
+
+    assert.strictEqual(scoreCandidate(sk2001Target, sk2001Cand).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(sk2001Target, sk2021Cand).decision, "UNMAPPED");
+
+    const fma2003Target = makeMockAniList({
+      id: 121,
+      title: { english: "Fullmetal Alchemist", romaji: "Fullmetal Alchemist" },
+      episodes: 51,
+      seasonYear: 2003,
+    });
+    const fmaBrotherhoodCand = makeMockCandidate({
+      id: "fma-brotherhood",
+      title: "Fullmetal Alchemist: Brotherhood",
+      year: 2009,
+      episodes: 64,
+    });
+    const fma2003Cand = makeMockCandidate({
+      id: "fma-2003",
+      title: "Fullmetal Alchemist",
+      year: 2003,
+      episodes: 51,
+    });
+
+    assert.strictEqual(scoreCandidate(fma2003Target, fma2003Cand).decision, "MATCHED");
+    assert.strictEqual(scoreCandidate(fma2003Target, fmaBrotherhoodCand).decision, "UNMAPPED");
+  });
+
+  it("11. Year Proximity: evaluates exact year, close year, neutral missing year, and gap conflicts", () => {
+    const target = makeMockAniList({
+      title: { english: "Show A", romaji: "Show A" },
+      seasonYear: 2020,
+      episodes: 12,
+    });
+
+    // Exact match: 2020
+    const exact = makeMockCandidate({ id: "1", title: "Show A", year: 2020, episodes: 12 });
+    assert.strictEqual(scoreCandidate(target, exact).decision, "MATCHED");
+
+    // 1 year difference (e.g. broadcast spanned or delayed) -> compatible
+    const oneYear = makeMockCandidate({ id: "2", title: "Show A", year: 2021, episodes: 12 });
+    assert.strictEqual(scoreCandidate(target, oneYear).decision, "MATCHED");
+
+    // Missing candidate year -> neutral, does NOT automatically reject
+    const missingYear = makeMockCandidate({ id: "3", title: "Show A", episodes: 12 });
+    const missingRes = scoreCandidate(target, missingYear);
+    assert.strictEqual(missingRes.decision, "MATCHED");
+    assert.strictEqual(missingRes.signalBreakdown.yearProximity.score, 0.5);
+
+    // Large discrepancy (>= 3 years) -> conflict penalty
+    const conflictYear = makeMockCandidate({ id: "4", title: "Show A", year: 2010, episodes: 12 });
+    const conflictRes = scoreCandidate(target, conflictYear);
+    assert.strictEqual(conflictRes.decision, "UNMAPPED");
+    assert.ok(conflictRes.conflicts.some((c) => c.includes("Release year conflict")));
+  });
+
+  it("12. Chronological Season Ordering for Franchises without Season numbers", () => {
+    const db1 = makeMockAniList({
+      id: 223,
+      title: { english: "Dragon Ball", romaji: "Dragon Ball" },
+      seasonYear: 1986,
+    });
+    db1.startDate = { year: 1986, month: 2, day: 26 };
+
+    const db2 = makeMockAniList({
+      id: 813,
+      title: { english: "Dragon Ball Z", romaji: "Dragon Ball Z" },
+      seasonYear: 1989,
+    });
+    db2.startDate = { year: 1989, month: 4, day: 26 };
+
+    const db3 = makeMockAniList({
+      id: 225,
+      title: { english: "Dragon Ball GT", romaji: "Dragon Ball GT" },
+      seasonYear: 1996,
+    });
+    db3.startDate = { year: 1996, month: 2, day: 7 };
+
+    const db4 = makeMockAniList({
+      id: 21175,
+      title: { english: "Dragon Ball Super", romaji: "Dragon Ball Super" },
+      seasonYear: 2015,
+    });
+    db4.startDate = { year: 2015, month: 7, day: 5 };
+
+    const db5 = makeMockAniList({
+      id: 170083,
+      title: { english: "Dragon Ball DAIMA", romaji: "Dragon Ball DAIMA" },
+      seasonYear: 2024,
+    });
+    db5.startDate = { year: 2024, month: 10, day: 11 };
+
+    // Pass in random order to test deterministic chronological sorting
+    const unordered = [db4, db2, db5, db1, db3];
+    const groups = groupIntoLogicalSeasons(unordered);
+
+    assert.strictEqual(groups.length, 5);
+    assert.strictEqual(groups[0].logicalSeasonNumber, 1);
+    assert.strictEqual(groups[0].primaryAnilistAnime.id, 223);
+    assert.strictEqual(groups[0].displayTitle, "Dragon Ball");
+
+    assert.strictEqual(groups[1].logicalSeasonNumber, 2);
+    assert.strictEqual(groups[1].primaryAnilistAnime.id, 813);
+    assert.strictEqual(groups[1].displayTitle, "Dragon Ball Z");
+
+    assert.strictEqual(groups[2].logicalSeasonNumber, 3);
+    assert.strictEqual(groups[2].primaryAnilistAnime.id, 225);
+    assert.strictEqual(groups[2].displayTitle, "Dragon Ball GT");
+
+    assert.strictEqual(groups[3].logicalSeasonNumber, 4);
+    assert.strictEqual(groups[3].primaryAnilistAnime.id, 21175);
+    assert.strictEqual(groups[3].displayTitle, "Dragon Ball Super");
+
+    assert.strictEqual(groups[4].logicalSeasonNumber, 5);
+    assert.strictEqual(groups[4].primaryAnilistAnime.id, 170083);
+    assert.strictEqual(groups[4].displayTitle, "Dragon Ball DAIMA");
   });
 });
 

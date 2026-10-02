@@ -38,6 +38,7 @@ export interface RawAniKotoSearchItem {
   episodeCount: number;
   format?: string;
   posterImage?: string;
+  detailUrl?: string;
 }
 
 export interface DiscoveredCandidate {
@@ -54,7 +55,9 @@ export interface DiscoveredCandidate {
   parsedEnglish?: ParsedTitleMetadata;
   year?: number;
   episodeCount: number;
+  format?: string;
   posterImage?: string;
+  detailUrl?: string;
 }
 
 export interface CandidateDiscoveryResult {
@@ -141,8 +144,90 @@ export function buildSearchQueries(anime: AniListAnime): string[] {
   return queries;
 }
 
+// In-memory cache for AniKoto watch page years
+const anikotoYearCache = new Map<string, number | undefined>();
+
+/**
+ * Extracts release year from an AniKoto watch page metadata (.bmeta).
+ */
+export async function extractAniKotoYear(
+  detailUrl: string
+): Promise<number | undefined> {
+  if (!detailUrl) return undefined;
+  if (anikotoYearCache.has(detailUrl)) {
+    return anikotoYearCache.get(detailUrl);
+  }
+
+  try {
+    const res = await anikotoHttp.get(detailUrl);
+    if (!res.ok) {
+      anikotoYearCache.set(detailUrl, undefined);
+      return undefined;
+    }
+    const html = await res.text();
+    const dom = DomRegistry.parse(html);
+    const bmeta =
+      dom.querySelector(".bmeta")?.textContent ||
+      dom.querySelector(".meta")?.textContent ||
+      "";
+
+    // Match "Premiered: SPRING 1989" or "Aired: Apr 15, 1989" or isolated 4-digit year
+    const match =
+      bmeta.match(/(?:Premiered|Aired)[^0-9]*\b(19\d{2}|20\d{2})\b/i) ||
+      bmeta.match(/\b(19\d{2}|20\d{2})\b/);
+
+    const year = match ? parseInt(match[1], 10) : undefined;
+    anikotoYearCache.set(detailUrl, year);
+    return year;
+  } catch {
+    anikotoYearCache.set(detailUrl, undefined);
+    return undefined;
+  }
+}
+
+/**
+ * Parses items from an AniKoto search results DOM.
+ */
+function parseAniKotoItems(dom: any): RawAniKotoSearchItem[] {
+  const items = dom.querySelectorAll(".main .item");
+  const results: RawAniKotoSearchItem[] = [];
+
+  for (const item of items) {
+    const posterEl = item.querySelector(".poster");
+    const id = posterEl?.getAttribute("data-tip") || "";
+    const nameEl = item.querySelector("a.name") || item.querySelector(".name");
+    const title = nameEl?.textContent?.trim() || "";
+    const dataJp = nameEl?.getAttribute("data-jp") || undefined;
+    const detailUrl = nameEl?.getAttribute("href") || undefined;
+    const epText =
+      item.querySelector(".ep-status.total")?.textContent?.trim() ||
+      item.querySelector(".ep-status")?.textContent?.trim() ||
+      "0";
+    const epCount = parseInt(epText, 10);
+    const episodeCount = !isNaN(epCount) && epCount > 0 ? epCount : 0;
+    const format = item.querySelector(".right")?.textContent?.trim() || undefined;
+    const posterImage = item.querySelector("img")?.getAttribute("src") || undefined;
+
+    if (id && title) {
+      results.push({
+        id,
+        title,
+        dataJp,
+        episodeCount,
+        format,
+        posterImage,
+        detailUrl,
+      });
+    }
+  }
+
+  return results;
+}
+
 /**
  * Queries AniKoto filter catalog for a query string.
+ * Fetches page 1 and automatically fetches page 2 when page 1 has a full 30 results
+ * (essential for large franchises like Dragon Ball, Ranma, One Piece, etc.).
  * Results are cached in-memory during execution.
  */
 async function fetchAniKotoSearch(
@@ -154,45 +239,38 @@ async function fetchAniKotoSearch(
   }
 
   try {
-    const res = await anikotoHttp.get(
-      `https://anikototv.to/filter?keyword=${encodeURIComponent(query)}`
+    const resP1 = await anikotoHttp.get(
+      `https://anikototv.to/filter?keyword=${encodeURIComponent(query)}&page=1`
     );
 
-    if (!res.ok) {
-      console.warn(`[Candidate Discovery] AniKoto search failed (${res.status}) for "${query}"`);
+    if (!resP1.ok) {
+      console.warn(`[Candidate Discovery] AniKoto search failed (${resP1.status}) for "${query}"`);
       searchCacheAniKoto.set(cacheKey, []);
       return [];
     }
 
-    const html = await res.text();
-    const dom = DomRegistry.parse(html);
-    const items = dom.querySelectorAll(".main .item");
-    const results: RawAniKotoSearchItem[] = [];
+    const htmlP1 = await resP1.text();
+    const domP1 = DomRegistry.parse(htmlP1);
+    const results = parseAniKotoItems(domP1);
 
-    for (const item of items) {
-      const posterEl = item.querySelector(".poster");
-      const id = posterEl?.getAttribute("data-tip") || "";
-      const nameEl = item.querySelector(".name");
-      const title = nameEl?.textContent?.trim() || "";
-      const dataJp = nameEl?.getAttribute("data-jp") || undefined;
-      const epText =
-        item.querySelector(".ep-status.total")?.textContent?.trim() ||
-        item.querySelector(".ep-status")?.textContent?.trim() ||
-        "0";
-      const epCount = parseInt(epText, 10);
-      const episodeCount = !isNaN(epCount) && epCount > 0 ? epCount : 0;
-      const format = item.querySelector(".right")?.textContent?.trim() || undefined;
-      const posterImage = item.querySelector("img")?.getAttribute("src") || undefined;
-
-      if (id && title) {
-        results.push({
-          id,
-          title,
-          dataJp,
-          episodeCount,
-          format,
-          posterImage,
-        });
+    // If page 1 returned 30 items, there is high likelihood of relevant items on page 2
+    if (results.length >= 30) {
+      try {
+        const resP2 = await anikotoHttp.get(
+          `https://anikototv.to/filter?keyword=${encodeURIComponent(query)}&page=2`
+        );
+        if (resP2.ok) {
+          const htmlP2 = await resP2.text();
+          const domP2 = DomRegistry.parse(htmlP2);
+          const p2Items = parseAniKotoItems(domP2);
+          for (const item of p2Items) {
+            if (!results.some((r) => r.id === item.id)) {
+              results.push(item);
+            }
+          }
+        }
+      } catch {
+        // non-fatal, proceed with page 1 results
       }
     }
 
@@ -275,6 +353,31 @@ export async function discoverCandidatesForAnime(
           ? classifyTitle(item.dataJp)
           : undefined;
 
+        let year = parsedMain.year ?? parsedEnglish?.year ?? undefined;
+
+        // If year is not yet known and we have a detailUrl, enrich year for plausible candidate matches
+        if (year === undefined && item.detailUrl) {
+          const normItem = normalizeTitle(item.title);
+          const targetTitles = [
+            anime.title.english,
+            anime.title.romaji,
+            ...(anime.synonyms ?? []),
+          ].filter(Boolean) as string[];
+
+          const isPlausible = targetTitles.some((t) => {
+            const normT = normalizeTitle(t);
+            return (
+              normItem.includes(normT) ||
+              normT.includes(normItem) ||
+              normItem.startsWith(normT.slice(0, 6))
+            );
+          });
+
+          if (isPlausible) {
+            year = await extractAniKotoYear(item.detailUrl);
+          }
+        }
+
         candidateMap.set(item.id, {
           provider: "anikoto",
           providerId: item.id,
@@ -283,9 +386,11 @@ export async function discoverCandidatesForAnime(
           alternativeTitle: item.dataJp ? { romaji: item.dataJp } : undefined,
           parsedMain,
           parsedEnglish,
-          year: undefined,
+          year,
           episodeCount: item.episodeCount,
+          format: item.format,
           posterImage: item.posterImage,
+          detailUrl: item.detailUrl,
         });
       }
     }

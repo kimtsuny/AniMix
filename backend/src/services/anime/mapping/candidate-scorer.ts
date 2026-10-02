@@ -29,11 +29,11 @@ export interface ScorerWeights {
 }
 
 export const DEFAULT_SCORER_WEIGHTS: ScorerWeights = {
-  titleSimilarity: 0.30,
-  baseTitleMatch: 0.20,
+  titleSimilarity: 0.25,
+  baseTitleMatch: 0.15,
   seasonMatch: 0.20,
   partMatch: 0.10,
-  yearProximity: 0.10,
+  yearProximity: 0.20,
   formatCompatibility: 0.05,
   episodeCompatibility: 0.05,
 };
@@ -127,7 +127,7 @@ export function scoreCandidate(
     candMain.isFinalSeason || candEn.isFinalSeason;
 
   // ============================================================
-  // 1. Title Similarity (Full Title)
+  // 1. Title Similarity (Full Title & Synonyms)
   // ============================================================
   const titlesToCompareTarget = [
     target.title.english,
@@ -185,7 +185,7 @@ export function scoreCandidate(
   }
 
   // ============================================================
-  // 3. Season Number Alignment
+  // 3. Season Number Alignment (DO NOT REQUIRE "SEASON")
   // ============================================================
   let seasonScore = 0.5; // neutral by default
   let seasonReason = "Season not explicitly specified in target or candidate";
@@ -205,15 +205,15 @@ export function scoreCandidate(
     seasonReason = "Both target and candidate are marked as Final Season";
     reasons.push(seasonReason);
   } else if (targetMeta.isFinalSeason && candidateSeasonNumber !== null) {
-    seasonScore = 0.2;
+    seasonScore = 0.0;
     seasonReason = `Target is Final Season, candidate has numeric season ${candidateSeasonNumber}`;
     conflicts.push(seasonReason);
   } else if (targetMeta.isFinalSeason && !candidateIsFinal) {
-    seasonScore = 0.1;
+    seasonScore = 0.0;
     seasonReason = "Target is Final Season, but candidate is not marked as Final Season";
     conflicts.push(seasonReason);
   } else if (!targetMeta.isFinalSeason && candidateIsFinal) {
-    seasonScore = 0.1;
+    seasonScore = 0.0;
     seasonReason = "Candidate is Final Season, but target is not Final Season";
     conflicts.push(seasonReason);
   } else if (targetMeta.targetSeasonNumber === null && candidateSeasonNumber !== null) {
@@ -229,7 +229,7 @@ export function scoreCandidate(
     }
   } else if (targetMeta.targetSeasonNumber !== null && candidateSeasonNumber === null) {
     if (targetMeta.targetSeasonNumber > 1) {
-      seasonScore = 0.1;
+      seasonScore = 0.0;
       seasonReason = `Target is Season ${targetMeta.targetSeasonNumber}, but candidate does not specify a season`;
       conflicts.push(seasonReason);
     } else {
@@ -291,7 +291,6 @@ export function scoreCandidate(
     partReason = `Target expects Part ${targetMeta.targetPartNumber}, but candidate has no part designation`;
     conflicts.push(partReason);
   } else if (targetMeta.targetPartNumber === null && candidatePartNumber !== null) {
-    // Target is general season, candidate is specific part (e.g. S3 vs S3 Part 2)
     partScore = 0.5;
     partReason = `Candidate specifies Part ${candidatePartNumber}, target is whole season`;
   }
@@ -303,10 +302,10 @@ export function scoreCandidate(
   };
 
   // ============================================================
-  // 5. Release Year Proximity
+  // 5. Release Year Proximity (CRITICAL RULES #2, #3)
   // ============================================================
-  let yearScore = 0.5;
-  let yearReason = "Year unknown on target or candidate";
+  let yearScore = 0.5; // neutral by default if year unknown on candidate
+  let yearReason = "Year unknown on candidate or target";
 
   const targetYear = targetMeta.targetYear;
   const candidateYear = candidate.year;
@@ -318,16 +317,16 @@ export function scoreCandidate(
       yearReason = `Exact release year match (${targetYear})`;
       reasons.push(yearReason);
     } else if (diff === 1) {
-      yearScore = 0.8;
+      yearScore = 0.85;
       yearReason = `Release year compatible (Target: ${targetYear}, Candidate: ${candidateYear})`;
       reasons.push(yearReason);
     } else if (diff === 2) {
-      yearScore = 0.5;
+      yearScore = 0.60;
       yearReason = `Release year close (Target: ${targetYear}, Candidate: ${candidateYear})`;
     } else {
-      // Discrepancy >= 3 years (e.g. Fruits Basket 2001 vs 2019)
+      // Discrepancy >= 3 years (e.g. Ranma 1989 vs 2024, Fruits Basket 2001 vs 2019)
       yearScore = 0.0;
-      yearReason = `Release year conflict (Target: ${targetYear} vs Candidate: ${candidateYear})`;
+      yearReason = `Release year conflict (Target: ${targetYear} vs Candidate: ${candidateYear}, diff: ${diff} yrs)`;
       conflicts.push(yearReason);
     }
   }
@@ -344,17 +343,43 @@ export function scoreCandidate(
   let formatScore = 0.8;
   let formatReason = "Format compatible";
 
-  if (targetMeta.targetFormat === "MOVIE" && (candMain.isMovie || candEn.isMovie)) {
+  const isCandMovie =
+    candMain.isMovie || candEn.isMovie || candidate.format === "Movie";
+  const isCandOVA =
+    candMain.isOVA || candEn.isOVA || candidate.format === "OVA";
+  const isCandSpecial =
+    candMain.isSpecial || candEn.isSpecial || candidate.format === "Special";
+
+  if (targetMeta.targetFormat === "MOVIE" && isCandMovie) {
     formatScore = 1.0;
     formatReason = "Both target and candidate are movies";
     reasons.push(formatReason);
-  } else if (targetMeta.targetFormat === "TV" && (candMain.isMovie || candEn.isMovie)) {
+  } else if (targetMeta.targetFormat === "MOVIE" && !isCandMovie) {
+    formatScore = 0.1;
+    formatReason = "Target is a Movie, but candidate is not marked as Movie";
+    conflicts.push(formatReason);
+  } else if (
+    (targetMeta.targetFormat === "TV" ||
+      targetMeta.targetFormat === "TV_SHORT" ||
+      targetMeta.targetFormat === "ONA") &&
+    (candidate.format === "TV" ||
+      candidate.format === "ONA" ||
+      (!isCandMovie && !isCandOVA && !isCandSpecial))
+  ) {
+    formatScore = 1.0;
+    formatReason = "TV / episodic series format matches";
+    reasons.push(formatReason);
+  } else if (targetMeta.targetFormat === "TV" && isCandMovie) {
     formatScore = 0.0;
     formatReason = "Format mismatch: Target is a TV series, but candidate is a Movie";
     conflicts.push(formatReason);
-  } else if (targetMeta.targetFormat === "TV" && (candMain.isOVA || candEn.isOVA)) {
+  } else if (targetMeta.targetFormat === "TV" && isCandOVA) {
     formatScore = 0.1;
     formatReason = "Format mismatch: Target is a TV series, but candidate is an OVA";
+    conflicts.push(formatReason);
+  } else if (targetMeta.targetFormat === "TV" && isCandSpecial) {
+    formatScore = 0.1;
+    formatReason = "Format mismatch: Target is a TV series, but candidate is a Special";
     conflicts.push(formatReason);
   }
 
@@ -384,18 +409,31 @@ export function scoreCandidate(
       epReason = `Exact episode count match (${actual} eps)`;
       reasons.push(epReason);
     } else if (diff <= 2) {
-      epScore = 0.8;
+      epScore = 0.85;
       epReason = `Episode count close (Target: ${exp}, Candidate: ${actual})`;
-    } else if (exp >= 3 && (Math.abs(actual - exp * 2) <= 2 || Math.abs(actual - exp * 3) <= 2)) {
+    } else if (
+      exp >= 3 &&
+      (Math.abs(actual - exp * 2) <= 2 || Math.abs(actual - exp * 3) <= 2)
+    ) {
       epScore = 0.9;
       epReason = `Episode count compatible with multi-audio / sub-dub catalog format (${actual} units for ${exp} episodes)`;
+      reasons.push(epReason);
+    } else if (
+      actual > exp &&
+      targetYear != null &&
+      candidateYear != null &&
+      Math.abs(targetYear - candidateYear) <= 1
+    ) {
+      // Candidate contains full combined run of franchise released in same era (e.g. Ranma 161 eps)
+      epScore = 0.85;
+      epReason = `Candidate contains complete franchise / extended run (${actual} eps for target ${exp} eps) in matching era`;
       reasons.push(epReason);
     } else if (actual > exp * 1.5 && actual - exp >= 5) {
       epScore = 0.1;
       epReason = `Candidate has far more episodes than target season (Target: ${exp}, Candidate: ${actual})`;
       conflicts.push(epReason);
     } else {
-      epScore = 0.4;
+      epScore = 0.5;
       epReason = `Episode count difference (Target: ${exp}, Candidate: ${actual})`;
     }
   } else if (candidate.episodeCount > 0) {
@@ -422,19 +460,20 @@ export function scoreCandidate(
 
   let finalScore = totalWeight > 0 ? weightedScore / totalWeight : 0;
 
-  // Severe penalty if major conflict is present (e.g. wrong season or 0 episodes)
+  // Severe penalty if major conflict is present (e.g. wrong season, wrong year, or 0 episodes)
   const hasZeroEpisodes = candidate.episodeCount === 0;
   const hasSeasonConflict =
     seasonScore === 0.0 ||
     conflicts.some((c) => c.toLowerCase().includes("season"));
-  const hasYearConflict = yearScore === 0.0 && targetYear !== null && candidateYear !== null;
+  const hasYearConflict =
+    yearScore === 0.0 && targetYear !== null && candidateYear !== null;
   const hasFormatConflict = formatScore === 0.0;
 
   if (hasZeroEpisodes) {
     finalScore = Math.min(finalScore, 0.35);
   }
   if (hasSeasonConflict || hasYearConflict || hasFormatConflict) {
-    finalScore = Math.min(finalScore, 0.40);
+    finalScore = Math.min(finalScore, 0.35);
   }
 
   // ============================================================
@@ -442,9 +481,15 @@ export function scoreCandidate(
   // ============================================================
   let decision: "MATCHED" | "AMBIGUOUS" | "UNMAPPED";
 
-  if (finalScore >= 0.72 && conflicts.length === 0) {
+  if (finalScore >= 0.70 && conflicts.length === 0) {
     decision = "MATCHED";
-  } else if (finalScore >= 0.50 && !hasZeroEpisodes && !hasSeasonConflict && !hasFormatConflict) {
+  } else if (
+    finalScore >= 0.48 &&
+    !hasZeroEpisodes &&
+    !hasSeasonConflict &&
+    !hasYearConflict &&
+    !hasFormatConflict
+  ) {
     decision = "AMBIGUOUS";
   } else {
     decision = "UNMAPPED";

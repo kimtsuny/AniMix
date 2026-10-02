@@ -87,66 +87,72 @@ export async function collectFranchiseSeasons(
 ): Promise<AniListAnime[]> {
   const seasons: AniListAnime[] = [rootAnime];
   const visited = new Set<number>([rootAnime.id]);
-  let current = rootAnime;
+  const queue: AniListAnime[] = [rootAnime];
 
-  while (current) {
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+
+    // Find all SEQUEL edges that represent TV, TV_SHORT, or ONA series
     const sequelEdges = current.relations.edges.filter(
       (edge) =>
         edge.relationType === "SEQUEL" &&
         edge.node.type === "ANIME" &&
-        (edge.node.format === "TV" || edge.node.format === null || edge.node.format === "TV_SHORT")
+        (edge.node.format === "TV" ||
+          edge.node.format === null ||
+          edge.node.format === "TV_SHORT" ||
+          edge.node.format === "ONA")
     );
 
-    if (sequelEdges.length === 0) {
-      // Check if there is an intermediate sequel (like an OVA/Movie/Special) that leads to another TV sequel
-      const nonTvSequel = current.relations.edges.find(
-        (edge) =>
-          edge.relationType === "SEQUEL" &&
-          edge.node.type === "ANIME" &&
-          !visited.has(edge.node.id)
-      );
-      if (nonTvSequel) {
-        try {
-          const intermediate = await getAnimeById(nonTvSequel.node.id);
-          visited.add(intermediate.id);
-          const nextTvSequel = intermediate.relations.edges.find(
-            (edge) =>
-              edge.relationType === "SEQUEL" &&
-              edge.node.type === "ANIME" &&
-              (edge.node.format === "TV" || edge.node.format === null || edge.node.format === "TV_SHORT") &&
-              !visited.has(edge.node.id)
-          );
-          if (nextTvSequel) {
-            const nextAnime = await getAnimeById(nextTvSequel.node.id);
-            visited.add(nextAnime.id);
-            seasons.push(nextAnime);
-            current = nextAnime;
-            continue;
-          }
-        } catch {
-          // ignore
-        }
-      }
-      break;
-    }
-
-    let nextFound = false;
     for (const edge of sequelEdges) {
       if (!visited.has(edge.node.id)) {
         visited.add(edge.node.id);
         try {
           const nextAnime = await getAnimeById(edge.node.id);
           seasons.push(nextAnime);
-          current = nextAnime;
-          nextFound = true;
-          break;
+          queue.push(nextAnime);
         } catch {
-          // continue
+          // ignore error fetching node
         }
       }
     }
 
-    if (!nextFound) break;
+    // Also check intermediate non-TV sequels (like an OVA/Movie/Special) that bridge to another TV sequel
+    const nonTvSequels = current.relations.edges.filter(
+      (edge) =>
+        edge.relationType === "SEQUEL" &&
+        edge.node.type === "ANIME" &&
+        edge.node.format !== "TV" &&
+        edge.node.format !== "TV_SHORT" &&
+        edge.node.format !== "ONA" &&
+        !visited.has(edge.node.id)
+    );
+
+    for (const nonTv of nonTvSequels) {
+      try {
+        const intermediate = await getAnimeById(nonTv.node.id);
+        visited.add(intermediate.id);
+        const nextTvSequels = intermediate.relations.edges.filter(
+          (edge) =>
+            edge.relationType === "SEQUEL" &&
+            edge.node.type === "ANIME" &&
+            (edge.node.format === "TV" ||
+              edge.node.format === null ||
+              edge.node.format === "TV_SHORT" ||
+              edge.node.format === "ONA") &&
+            !visited.has(edge.node.id)
+        );
+        for (const nextEdge of nextTvSequels) {
+          if (!visited.has(nextEdge.node.id)) {
+            visited.add(nextEdge.node.id);
+            const nextAnime = await getAnimeById(nextEdge.node.id);
+            seasons.push(nextAnime);
+            queue.push(nextAnime);
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
   }
 
   return seasons;
@@ -155,6 +161,7 @@ export async function collectFranchiseSeasons(
 /**
  * Groups AniList franchise entries into logical seasons.
  * Handles split-cours / parts belonging to the same season (e.g. AoT S3 P1 & P2).
+ * For franchises without explicit season numbers, sorts chronologically by release year.
  */
 export interface LogicalSeasonDefinition {
   logicalSeasonNumber: number;
@@ -166,9 +173,44 @@ export interface LogicalSeasonDefinition {
 export function groupIntoLogicalSeasons(
   franchiseEntries: AniListAnime[]
 ): LogicalSeasonDefinition[] {
+  // Sort franchise entries:
+  // If explicit season numbers exist on entries, respect them.
+  // Otherwise, sort chronologically by release year / start date (Critical Rule #4).
+  const sortedEntries = [...franchiseEntries].sort((a, b) => {
+    const parsedA = classifyTitle(a.title.english || a.title.romaji || "");
+    const parsedB = classifyTitle(b.title.english || b.title.romaji || "");
+    const numA = parsedA.explicitSeasonNumber ?? parsedA.ordinalSeasonNumber;
+    const numB = parsedB.explicitSeasonNumber ?? parsedB.ordinalSeasonNumber;
+
+    if (numA !== null && numB !== null) {
+      if (numA !== numB) return numA - numB;
+    }
+
+    const yearA = a.seasonYear ?? a.startDate?.year ?? 0;
+    const yearB = b.seasonYear ?? b.startDate?.year ?? 0;
+
+    // Entries with missing or unannounced release year sort at the end (future/TBA)
+    if (yearA === 0 && yearB !== 0) return 1;
+    if (yearB === 0 && yearA !== 0) return -1;
+
+    const dateA =
+      yearA * 10000 +
+      ((a.startDate?.month ?? 1) * 100) +
+      (a.startDate?.day ?? 1);
+
+    const dateB =
+      yearB * 10000 +
+      ((b.startDate?.month ?? 1) * 100) +
+      (b.startDate?.day ?? 1);
+
+    if (dateA !== dateB) return dateA - dateB;
+
+    return a.id - b.id;
+  });
+
   const groups: LogicalSeasonDefinition[] = [];
 
-  for (const entry of franchiseEntries) {
+  for (const entry of sortedEntries) {
     const titleEn = entry.title.english ?? "";
     const titleRo = entry.title.romaji ?? "";
     const parsed = classifyTitle(titleEn || titleRo);
@@ -183,7 +225,6 @@ export function groupIntoLogicalSeasons(
     // If this is a subsequent part/cour of the previous season, attach to last group
     if (isPartOrCour && groups.length > 0) {
       const lastGroup = groups[groups.length - 1];
-      // Verify base title compatibility
       lastGroup.relatedAnilistEntries.push(entry);
       continue;
     }

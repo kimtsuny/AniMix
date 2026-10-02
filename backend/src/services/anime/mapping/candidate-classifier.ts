@@ -56,12 +56,12 @@ export function classifyTitle(rawTitle: string): ParsedTitleMetadata {
   const title = (rawTitle ?? "").trim();
   let workingTitle = title;
 
-  // 1. Detect Year qualifier (e.g. "(2019)", "[2001]", or trailing "2019")
+  // 1. Detect Year qualifier (e.g. "(2019)", "[2001]", "(2024)", or trailing "2019")
   let year: number | null = null;
-  const yearMatch = workingTitle.match(/[([{\s](19\d{2}|20\d{2})[)\]}\s]?$/i);
+  const yearMatch = workingTitle.match(/(?:^|[\s([{\-_/])(19\d{2}|20\d{2})(?:[\s)\]}\-_/]|$)/i);
   if (yearMatch) {
     year = parseInt(yearMatch[1], 10);
-    // Remove year tag from working title
+    // Remove year tag from working title cleanly
     workingTitle = workingTitle.replace(yearMatch[0], " ").trim();
   }
 
