@@ -47,8 +47,8 @@ export function WatchPageContent({
    * Episode card selection (in-place)
    */
   const handleEpisodeSelect = useCallback(
-    (ep: { id: number }) => {
-      selectEpisode(ep.id);
+    (ep: Parameters<typeof selectEpisode>[0]) => {
+      selectEpisode(ep);
     },
     [selectEpisode]
   );

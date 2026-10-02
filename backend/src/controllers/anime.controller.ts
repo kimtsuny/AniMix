@@ -5,6 +5,7 @@ import {
   mapRequestedSeason,
 } from "../services/anime/anime-mapping.service.js";
 import { syncSeasonEpisodes } from "../services/anime/episode.service.js";
+import { resolveAnonymousSeasonEpisodes } from "../services/anime/anonymous-anime.service.js";
 
 export async function getSeasonEpisodes(
   req: Request,
@@ -26,6 +27,45 @@ export async function getSeasonEpisodes(
       });
       return;
     }
+
+    const isAuthenticated = !!req.user;
+
+    // ============================================================
+    // ANONYMOUS VISITOR MODE
+    // - Zero database reads/writes
+    // - Zero caching
+    // - Live AniList + AniKoto matching & season resolution
+    // ============================================================
+    if (!isAuthenticated) {
+      console.log(
+        `[Anime Controller] Anonymous request for anime #${anilistId}, season #${seasonNumber}. Resolving live without DB...`
+      );
+
+      const result = await resolveAnonymousSeasonEpisodes(
+        anilistId,
+        seasonNumber
+      );
+
+      if (!result) {
+        res.status(404).json({
+          message: `[Anime Controller] Season ${seasonNumber} for Anime #${anilistId} could not be resolved.`,
+        });
+        return;
+      }
+
+      console.log(
+        `[Performance] total anonymous getSeasonEpisodes request time: ${(
+          performance.now() - reqStart
+        ).toFixed(1)} ms`
+      );
+
+      res.status(200).json(result);
+      return;
+    }
+
+    // ============================================================
+    // AUTHENTICATED USER MODE (DB-first)
+    // ============================================================
 
     // ============================================================
     // 1. Find Anime in database

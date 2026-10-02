@@ -263,11 +263,6 @@ export function groupIntoLogicalSeasons(
 /**
  * Plans franchise mapping and multi-part episode offsets without touching the DB.
  */
-// In-memory episode cache to avoid repeated network calls for the same provider entry
-const episodeUnitsCache = new Map<
-  string,
-  Array<{ number: number; title: string; id: string }>
->();
 
 export interface FranchiseStructure {
   rootAnime: AniListAnime;
@@ -371,43 +366,38 @@ export async function planSeasonFromCandidates(
 
   for (const match of matched) {
     try {
-      const cacheKey = `${match.candidate.provider}:${match.candidate.providerId}`;
-      let units = episodeUnitsCache.get(cacheKey);
-      if (!units) {
-        let rawUnits: Array<{ number: number; title?: string; id: string }> | null = null;
-        if (match.candidate.provider === "anikoto") {
-          const kotoUnits = await aniKotoProvider.getEpisodes(
-            match.candidate.providerId
-          );
-          if (kotoUnits && kotoUnits.length > 0) {
-            rawUnits = kotoUnits.map((u) => ({
-              number: u.number,
-              title: u.title || `Episode ${u.number}`,
-              id: u.id,
-            }));
-          }
-        } else {
-          const paradiseUnits = await animeParadiseProvider.getEpisodes(
-            match.candidate.providerId
-          );
-          if (paradiseUnits && paradiseUnits.length > 0) {
-            rawUnits = paradiseUnits.map((u) => ({
-              number: u.number,
-              title: u.title || `Episode ${u.number}`,
-              id: u.id,
-            }));
-          }
+      let rawUnits: Array<{ number: number; title?: string; id: string }> | null = null;
+      if (match.candidate.provider === "anikoto") {
+        const kotoUnits = await aniKotoProvider.getEpisodes(
+          match.candidate.providerId
+        );
+        if (kotoUnits && kotoUnits.length > 0) {
+          rawUnits = kotoUnits.map((u) => ({
+            number: u.number,
+            title: u.title || `Episode ${u.number}`,
+            id: u.id,
+          }));
         }
+      } else {
+        const paradiseUnits = await animeParadiseProvider.getEpisodes(
+          match.candidate.providerId
+        );
+        if (paradiseUnits && paradiseUnits.length > 0) {
+          rawUnits = paradiseUnits.map((u) => ({
+            number: u.number,
+            title: u.title || `Episode ${u.number}`,
+            id: u.id,
+          }));
+        }
+      }
 
-        if (rawUnits) {
-          units = rawUnits.map((u) => ({
+      const units = rawUnits
+        ? rawUnits.map((u) => ({
             number: u.number,
             title: u.title ?? `Episode ${u.number}`,
             id: u.id,
-          }));
-          episodeUnitsCache.set(cacheKey, units);
-        }
-      }
+          }))
+        : null;
 
       if (!units || units.length === 0) {
         skippedCandidates.push({

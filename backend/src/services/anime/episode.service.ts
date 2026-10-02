@@ -9,7 +9,7 @@ import { getAnimeById } from "../anilist/anilist.service.js";
  *   "Episode 1 - ..." -> 1
  *   "Episode 28 - ..." -> 28
  */
-function parseEpisodeNumberFromTitle(title: string | null | undefined): number | null {
+export function parseEpisodeNumberFromTitle(title: string | null | undefined): number | null {
   if (!title) return null;
   const match =
     title.match(/(?:^|\b)(?:Episode|Ep\.?)\s*(\d+)\b/i) ??

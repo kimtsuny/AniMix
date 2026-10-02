@@ -223,3 +223,119 @@ export async function getStream(
     `All streaming providers failed for episode ${episodeId}`
   );
 }
+
+/**
+ * Resolves a playable stream for an anonymous episode request without any database lookups or records.
+ *
+ * Flow:
+ * Provider & ProviderId
+ *      ↓
+ * Try Primary Provider: AniKoto
+ *      ↓
+ * If AniKoto succeeds → return normalized stream
+ *      ↓
+ * If AniKoto fails → Try Fallback Provider: AnimeParadise
+ *      ↓
+ * If AnimeParadise succeeds → return normalized stream
+ *      ↓
+ * If both fail → throw Error
+ */
+export async function getAnonymousStream(
+  provider: string,
+  providerId: string
+): Promise<NormalizedStreamResult> {
+  if (!provider || !providerId) {
+    throw new Error("Provider and providerId are required for anonymous stream");
+  }
+
+  // 1. PRIMARY PROVIDER: AniKoto
+  if (provider === "anikoto") {
+    try {
+      console.log(
+        `[Streaming] [Anonymous] [Primary: AniKoto] Resolving stream for "${providerId}"...`
+      );
+      const rawResult = await aniKotoProvider.getStream(providerId);
+      const normalizedResult = normalizeStreamResult(rawResult as any);
+
+      if (
+        normalizedResult.type === "video" &&
+        normalizedResult.streams.length > 0 &&
+        normalizedResult.streams.some((s) => !!s.url)
+      ) {
+        console.log(
+          `[Streaming] [Anonymous] [Primary: AniKoto] Stream resolution succeeded for "${providerId}"`
+        );
+        return normalizedResult;
+      }
+
+      console.warn(
+        `[Streaming] [Anonymous] [Primary: AniKoto] Returned no usable video streams for "${providerId}"`
+      );
+    } catch (anikotoError: any) {
+      console.warn(
+        `[Streaming] [Anonymous] [Primary: AniKoto] Failed for "${providerId}": ${anikotoError.message}`
+      );
+    }
+  }
+
+  // 2. SECONDARY / EMERGENCY FALLBACK: AnimeParadise
+  const shouldTryAnimeParadise =
+    provider === "animeparadise" ||
+    (provider === "anikoto" && !providerId.startsWith("na_"));
+
+  if (shouldTryAnimeParadise) {
+    try {
+      console.log(
+        `[Streaming] [Anonymous] [Fallback: AnimeParadise] Attempting stream for "${providerId}"...`
+      );
+
+      const rawResult = await animeParadiseProvider.getStream(providerId);
+      const normalizedResult = normalizeStreamResult(rawResult as any);
+
+      if (
+        normalizedResult.type === "video" &&
+        normalizedResult.streams.length > 0 &&
+        normalizedResult.streams.some((s) => !!s.url)
+      ) {
+        console.log(
+          `[Streaming] [Anonymous] [Fallback: AnimeParadise] Succeeded for "${providerId}"`
+        );
+        return normalizedResult;
+      }
+    } catch (apError: any) {
+      console.warn(
+        `[Streaming] [Anonymous] [Fallback: AnimeParadise] Failed for "${providerId}": ${apError.message}`
+      );
+    }
+  }
+
+  // 3. OTHER REGISTERED PROVIDERS
+  for (const prov of providers) {
+    if (prov.name === "anikoto" || prov.name === "animeparadise") continue;
+    if (prov.name === provider) {
+      try {
+        console.log(
+          `[Streaming] [Anonymous] Trying provider "${prov.name}" for "${providerId}"`
+        );
+        const rawResult = await prov.getStream(providerId);
+        const normalizedResult = normalizeStreamResult(rawResult as any);
+        if (
+          normalizedResult.type === "video" &&
+          normalizedResult.streams.length > 0 &&
+          normalizedResult.streams.some((s) => !!s.url)
+        ) {
+          return normalizedResult;
+        }
+      } catch (err: any) {
+        console.error(
+          `[Streaming] [Anonymous] Provider "${prov.name}" failed:`,
+          err.message
+        );
+      }
+    }
+  }
+
+  throw new Error(
+    `All streaming providers failed for provider "${provider}" and providerId "${providerId}"`
+  );
+}

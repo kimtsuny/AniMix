@@ -1,21 +1,23 @@
 import { httpClient } from "@/shared/api/http-client";
 
 export interface Episode {
-  id: number;
+  id: number | null;
   number: number;
   title: string | null;
   thumbnail: string | null;
+  provider?: string;
+  providerId?: string;
 }
 
 export interface Season {
-  id: number;
+  id: number | null;
   number: number;
   title: string | null;
   episodeCount: number;
 }
 
 export interface Anime {
-  id: number;
+  id: number | null;
   anilistId: number;
   title: string;
   description: string | null;
@@ -27,7 +29,7 @@ export interface GetSeasonEpisodesResponse {
   anime: Anime;
   seasons: Season[];
   season: {
-    id: number;
+    id: number | null;
     number: number;
     title: string | null;
     episodes: Episode[];

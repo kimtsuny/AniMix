@@ -23,7 +23,7 @@ interface UseWatchResult {
   streamError: string | null;
 
   selectEpisode: (
-    episodeId: number
+    episodeOrId: Episode | number
   ) => void;
 
   selectSeason: (
@@ -82,7 +82,13 @@ export function useWatch(
     if (!target) return;
 
     setSelectedEpisode((current) => {
-      if (current && current.id === target.id) return current;
+      if (
+        current &&
+        ((target.id !== null && current.id === target.id) ||
+          current.number === target.number)
+      ) {
+        return current;
+      }
       return target;
     });
 
@@ -96,17 +102,28 @@ export function useWatch(
   }, [episodes, animeId, seasonNumber, selectEpisodeFromEpisodes]);
 
   /*
-   * Fetch stream for the currently selected episode.
+   * Fetch stream for the currently selected episode (supports DB episodeId or anonymous providerId).
    */
   const {
     data: stream,
     isLoading: isStreamLoading,
     error: streamError,
-  } = useStream(episodeId);
+  } = useStream(selectedEpisode ?? episodeId);
 
   const selectEpisode = useCallback(
-    (id: number) => {
-      const ep = episodes.find((item) => item.id === id);
+    (target: Episode | number) => {
+      const ep =
+        typeof target === "number"
+          ? episodes.find(
+              (item) =>
+                (item.id !== null && item.id === target) ||
+                item.number === target
+            )
+          : episodes.find(
+              (item) =>
+                (target.id !== null && item.id === target.id) ||
+                item.number === target.number
+            );
       if (!ep) return;
 
       targetEpisodeNumberRef.current = ep.number;
@@ -135,7 +152,10 @@ export function useWatch(
     if (!selectedEpisode) return -1;
 
     return episodes.findIndex(
-      (episode) => episode.id === selectedEpisode.id
+      (episode) =>
+        selectedEpisode.id !== null && episode.id !== null
+          ? episode.id === selectedEpisode.id
+          : episode.number === selectedEpisode.number
     );
   }, [episodes, selectedEpisode]);
 
@@ -143,7 +163,7 @@ export function useWatch(
     if (currentIndex <= 0) return undefined;
 
     const prevEp = episodes[currentIndex - 1];
-    selectEpisode(prevEp.id);
+    selectEpisode(prevEp);
     return prevEp.number;
   }, [currentIndex, episodes, selectEpisode]);
 
@@ -156,7 +176,7 @@ export function useWatch(
     }
 
     const nextEp = episodes[currentIndex + 1];
-    selectEpisode(nextEp.id);
+    selectEpisode(nextEp);
     return nextEp.number;
   }, [currentIndex, episodes, selectEpisode]);
 

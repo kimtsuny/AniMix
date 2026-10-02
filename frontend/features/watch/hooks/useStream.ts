@@ -3,8 +3,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getEpisodeStream,
+  getAnonymousEpisodeStream,
   type StreamResponse,
 } from "../api/services/stream.service";
+
+export type StreamTarget =
+  | number
+  | {
+      id?: number | null;
+      provider?: string;
+      providerId?: string;
+    }
+  | null;
 
 interface UseStreamResult {
   data: StreamResponse | null;
@@ -14,24 +24,33 @@ interface UseStreamResult {
 }
 
 export function useStream(
-  episodeId: number | null
+  target: StreamTarget
 ): UseStreamResult {
   const [data, setData] = useState<StreamResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Track the latest active episode ID and request generation counter
-  const activeEpisodeIdRef = useRef<number | null>(episodeId);
-  activeEpisodeIdRef.current = episodeId;
+  const targetKey =
+    typeof target === "number"
+      ? `id:${target}`
+      : target?.id != null
+      ? `id:${target.id}`
+      : target?.provider && target?.providerId
+      ? `anon:${target.provider}:${target.providerId}`
+      : null;
+
+  // Track the latest active target key and request generation counter
+  const activeTargetKeyRef = useRef<string | null>(targetKey);
+  activeTargetKeyRef.current = targetKey;
 
   const requestIdRef = useRef(0);
 
   const fetchStream = useCallback(async () => {
-    const currentEpisodeId = episodeId;
+    const currentKey = targetKey;
     requestIdRef.current += 1;
     const currentRequestId = requestIdRef.current;
 
-    if (!currentEpisodeId) {
+    if (!currentKey) {
       setData(null);
       setIsLoading(false);
       setError(null);
@@ -44,12 +63,25 @@ export function useStream(
       // Immediately clear stale stream data so old stream cannot linger
       setData(null);
 
-      const result = await getEpisodeStream(currentEpisodeId);
+      let result: StreamResponse;
 
-      // Verify this response matches the latest request and active episode
+      if (typeof target === "number") {
+        result = await getEpisodeStream(target);
+      } else if (target?.id != null) {
+        result = await getEpisodeStream(target.id);
+      } else if (target?.provider && target?.providerId) {
+        result = await getAnonymousEpisodeStream(
+          target.provider,
+          target.providerId
+        );
+      } else {
+        return;
+      }
+
+      // Verify this response matches the latest request and active target
       if (
         currentRequestId !== requestIdRef.current ||
-        activeEpisodeIdRef.current !== currentEpisodeId
+        activeTargetKeyRef.current !== currentKey
       ) {
         return;
       }
@@ -58,7 +90,7 @@ export function useStream(
     } catch (err) {
       if (
         currentRequestId !== requestIdRef.current ||
-        activeEpisodeIdRef.current !== currentEpisodeId
+        activeTargetKeyRef.current !== currentKey
       ) {
         return;
       }
@@ -73,18 +105,18 @@ export function useStream(
     } finally {
       if (
         currentRequestId === requestIdRef.current &&
-        activeEpisodeIdRef.current === currentEpisodeId
+        activeTargetKeyRef.current === currentKey
       ) {
         setIsLoading(false);
       }
     }
-  }, [episodeId]);
+  }, [targetKey, target]);
 
   useEffect(() => {
     fetchStream();
 
     return () => {
-      // Invalidate in-flight request when episodeId changes or component unmounts
+      // Invalidate in-flight request when target changes or component unmounts
       requestIdRef.current += 1;
     };
   }, [fetchStream]);

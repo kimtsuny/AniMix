@@ -28,3 +28,17 @@ export async function getEpisodeStream(
     `/episodes/${episodeId}/stream`
   );
 }
+
+export async function getAnonymousEpisodeStream(
+  provider: string,
+  providerId: string
+): Promise<StreamResponse> {
+  const query = new URLSearchParams({
+    provider,
+    providerId,
+  });
+
+  return httpClient<StreamResponse>(
+    `/episodes/anonymous/stream?${query.toString()}`
+  );
+}
