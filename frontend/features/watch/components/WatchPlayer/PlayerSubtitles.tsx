@@ -2,10 +2,13 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Check } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import type { Subtitle } from "../../api/services/stream.service";
+import { LanguageMenuRow } from "./LanguageMenuRow";
+import { PlayerTooltip } from "./PlayerTooltip";
 
 /**
- * YouTube-style Closed Captions (CC) icon matching the reference image.
+ * YouTube / ReAnime style Closed Captions (CC) icon matching the reference image.
  */
 function CcIcon({ className = "size-5" }: { className?: string }) {
   return (
@@ -39,126 +42,114 @@ export function PlayerSubtitles({
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const handleClickOutside = useCallback(
-    (e: MouseEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(e.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    },
-    []
-  );
+  const handleClickOutside = useCallback((e: MouseEvent) => {
+    if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      setIsOpen(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
-      document.addEventListener(
-        "mousedown",
-        handleClickOutside
-      );
+      document.addEventListener("mousedown", handleClickOutside);
     }
-
-    return () =>
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, handleClickOutside]);
+
+  // Handle Escape key to close menu
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
 
   const hasSubtitles = subtitles.length > 0;
   const isActive = activeSubtitleIndex !== null;
 
   if (!hasSubtitles) {
     return (
-      <button
-        className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full flex items-center justify-center text-white/25 cursor-not-allowed flex-shrink-0"
-        aria-label="Subtitles unavailable"
-        title="No subtitles available"
-        disabled
-      >
-        <CcIcon className="size-5" />
-      </button>
+      <PlayerTooltip label="Subtitles">
+        <button
+          className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full flex items-center justify-center text-white/25 cursor-not-allowed flex-shrink-0"
+          aria-label="Subtitles unavailable"
+          disabled
+        >
+          <CcIcon className="size-5" />
+        </button>
+      </PlayerTooltip>
     );
   }
 
   return (
     <div className="relative flex items-center" ref={menuRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`relative w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors flex-shrink-0 ${
-          isOpen ? "bg-white/15 text-white" : ""
-        } ${
-          isActive
-            ? "text-[#e63946]"
-            : "text-white/90 hover:text-white"
-        }`}
-        aria-label="Subtitles"
-        title="Subtitles"
-      >
-        <CcIcon className="size-5" />
-        {isActive && (
-          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#e63946]" />
-        )}
-      </button>
+      <PlayerTooltip label="Subtitles" disabled={isOpen}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={`relative w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors flex-shrink-0 ${
+            isOpen ? "bg-white/15 text-white" : ""
+          } ${
+            isActive
+              ? "text-[#e63946]"
+              : "text-white/90 hover:text-white"
+          }`}
+          aria-label="Subtitles"
+        >
+          <CcIcon className="size-5" />
+          {isActive && (
+            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#e63946]" />
+          )}
+        </button>
+      </PlayerTooltip>
 
-      {isOpen && (
-        <div className="absolute bottom-full right-0 mb-2 w-48 rounded-xl bg-[#141414]/95 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden z-50">
-          <div className="py-1">
-            {/* Header */}
-            <div className="px-4 py-2 text-xs text-white/50 font-medium uppercase tracking-wider">
-              Subtitles
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.98 }}
+            transition={{ duration: 0.12, ease: "easeOut" }}
+            className="absolute bottom-full right-0 mb-3 w-[265px] sm:w-[275px] max-w-[calc(100vw-24px)] rounded-2xl bg-[#131215]/95 backdrop-blur-xl border border-white/[0.08] shadow-2xl shadow-black/80 p-1.5 z-50 overflow-hidden"
+          >
+            <div className="flex flex-col space-y-0.5">
+              {/* Header */}
+              <div className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-white/60 tracking-wider uppercase border-b border-white/[0.06] mb-0.5">
+                <CcIcon className="size-4 text-white/60" />
+                <span>Subtitles</span>
+              </div>
+
+              <div className="space-y-0.5 max-h-[260px] overflow-y-auto pr-0.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20">
+                {/* Off option */}
+                <LanguageMenuRow
+                  label="Off"
+                  isSelected={activeSubtitleIndex === null}
+                  onClick={() => {
+                    onSubtitleChange(null);
+                    setIsOpen(false);
+                  }}
+                />
+
+                {/* Subtitle options */}
+                {subtitles.map((subtitle, index) => (
+                  <LanguageMenuRow
+                    key={`${subtitle.language}-${index}`}
+                    label={subtitle.label}
+                    language={subtitle.language}
+                    isSelected={activeSubtitleIndex === index}
+                    onClick={() => {
+                      onSubtitleChange(index);
+                      setIsOpen(false);
+                    }}
+                  />
+                ))}
+              </div>
             </div>
-
-            {/* Off option */}
-            <button
-              onClick={() => {
-                onSubtitleChange(null);
-                setIsOpen(false);
-              }}
-              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-white/90 hover:bg-white/10 transition-colors"
-            >
-              {activeSubtitleIndex === null && (
-                <Check className="size-3.5 text-[#e63946]" />
-              )}
-              <span
-                className={
-                  activeSubtitleIndex === null
-                    ? "text-[#e63946]"
-                    : ""
-                }
-              >
-                Off
-              </span>
-            </button>
-
-            {/* Subtitle options */}
-            {subtitles.map((subtitle, index) => (
-              <button
-                key={`${subtitle.language}-${index}`}
-                onClick={() => {
-                  onSubtitleChange(index);
-                  setIsOpen(false);
-                }}
-                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-white/90 hover:bg-white/10 transition-colors"
-              >
-                {activeSubtitleIndex === index && (
-                  <Check className="size-3.5 text-[#e63946]" />
-                )}
-                <span
-                  className={
-                    activeSubtitleIndex === index
-                      ? "text-[#e63946]"
-                      : ""
-                  }
-                >
-                  {subtitle.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

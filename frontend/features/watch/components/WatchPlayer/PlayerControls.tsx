@@ -13,6 +13,7 @@ import { PlayerProgress } from "./PlayerProgress";
 import { PlayerVolume } from "./PlayerVolume";
 import { PlayerSettings } from "./PlayerSettings";
 import { PlayerSubtitles } from "./PlayerSubtitles";
+import { PlayerTooltip } from "./PlayerTooltip";
 import type { Subtitle } from "../../api/services/stream.service";
 
 interface PlayerControlsProps {
@@ -88,40 +89,43 @@ export function PlayerControls({
         {/* Controls row */}
         <div className="flex items-center justify-between px-3 md:px-5 pb-3.5 pt-2 gap-2">
           {/* ── Left controls pill ── */}
-          <div className="inline-flex items-center h-9 md:h-[38px] px-1 md:px-1.5 rounded-lg border border-white/10 bg-black/40 backdrop-blur-md shadow-sm shadow-black/20 gap-0.5 md:gap-1">
+          <div className="inline-flex items-center h-9 md:h-[38px] px-1 md:px-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-md shadow-sm shadow-black/20 gap-0.5 md:gap-1">
             {/* Play / Pause */}
-            <button
-              onClick={onPlayPause}
-              className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
-              aria-label={isPlaying ? "Pause" : "Play"}
-              title={isPlaying ? "Pause" : "Play"}
-            >
-              {isPlaying ? (
-                <Pause className="size-5 fill-white text-white" />
-              ) : (
-                <Play className="size-5 fill-white text-white translate-x-0.5" />
-              )}
-            </button>
+            <PlayerTooltip label={isPlaying ? "Pause" : "Play"}>
+              <button
+                onClick={onPlayPause}
+                className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
+                aria-label={isPlaying ? "Pause" : "Play"}
+              >
+                {isPlaying ? (
+                  <Pause className="size-5 fill-white text-white" />
+                ) : (
+                  <Play className="size-5 fill-white text-white translate-x-0.5" />
+                )}
+              </button>
+            </PlayerTooltip>
 
             {/* Previous episode */}
-            <button
-              onClick={onPreviousEpisode}
-              className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
-              aria-label="Previous episode"
-              title="Previous episode"
-            >
-              <SkipBack className="size-5 fill-white text-white" />
-            </button>
+            <PlayerTooltip label="Previous Episode">
+              <button
+                onClick={onPreviousEpisode}
+                className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
+                aria-label="Previous episode"
+              >
+                <SkipBack className="size-5 fill-white text-white" />
+              </button>
+            </PlayerTooltip>
 
             {/* Next episode */}
-            <button
-              onClick={onNextEpisode}
-              className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
-              aria-label="Next episode"
-              title="Next episode"
-            >
-              <SkipForward className="size-5 fill-white text-white" />
-            </button>
+            <PlayerTooltip label="Next Episode">
+              <button
+                onClick={onNextEpisode}
+                className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
+                aria-label="Next episode"
+              >
+                <SkipForward className="size-5 fill-white text-white" />
+              </button>
+            </PlayerTooltip>
 
             {/* Volume */}
             <PlayerVolume
@@ -140,7 +144,7 @@ export function PlayerControls({
           </div>
 
           {/* ── Right controls pill ── */}
-          <div className="inline-flex items-center h-9 md:h-[38px] px-1 md:px-1.5 rounded-lg border border-white/10 bg-black/40 backdrop-blur-md shadow-sm shadow-black/20 gap-0.5 md:gap-1 flex-shrink-0">
+          <div className="inline-flex items-center h-9 md:h-[38px] px-1 md:px-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-md shadow-sm shadow-black/20 gap-0.5 md:gap-1 flex-shrink-0">
             {/* Subtitles / CC */}
             <PlayerSubtitles
               subtitles={subtitles}
@@ -155,31 +159,42 @@ export function PlayerControls({
               playbackRate={playbackRate}
               onQualityChange={onQualityChange}
               onPlaybackRateChange={onPlaybackRateChange}
+              subtitles={subtitles}
+              activeSubtitleIndex={activeSubtitleIndex}
+              onSubtitleChange={onSubtitleChange}
             />
 
             {/* Picture in Picture — desktop only */}
-            <button
-              onClick={onPiPToggle}
-              className="hidden md:flex w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
-              aria-label="Picture in Picture"
-              title="Picture in Picture"
+            <PlayerTooltip
+              label="Picture in Picture"
+              wrapperClassName="hidden md:inline-flex"
             >
-              <PictureInPicture2 className="size-5 text-white" />
-            </button>
+              <button
+                onClick={onPiPToggle}
+                className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
+                aria-label="Picture in Picture"
+              >
+                <PictureInPicture2 className="size-5 text-white" />
+              </button>
+            </PlayerTooltip>
 
             {/* Fullscreen */}
-            <button
-              onClick={onFullscreenToggle}
-              className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
-              aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-              title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+            <PlayerTooltip
+              label={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+              align="right"
             >
-              {isFullscreen ? (
-                <Minimize className="size-5 text-white" />
-              ) : (
-                <Maximize className="size-5 text-white" />
-              )}
-            </button>
+              <button
+                onClick={onFullscreenToggle}
+                className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
+                aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+              >
+                {isFullscreen ? (
+                  <Minimize className="size-5 text-white" />
+                ) : (
+                  <Maximize className="size-5 text-white" />
+                )}
+              </button>
+            </PlayerTooltip>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Volume2, VolumeX, Volume1 } from "lucide-react";
+import { PlayerTooltip } from "./PlayerTooltip";
 
 interface PlayerVolumeProps {
   volume: number;
@@ -50,14 +51,15 @@ export function PlayerVolume({
         if (!isDragging) setIsExpanded(false);
       }}
     >
-      <button
-        onClick={onMuteToggle}
-        className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
-        aria-label={muted ? "Unmute" : "Mute"}
-        title={muted ? "Unmute" : "Mute"}
-      >
-        <VolumeIcon className="size-5 text-white" />
-      </button>
+      <PlayerTooltip label="Volume" disabled={isDragging}>
+        <button
+          onClick={onMuteToggle}
+          className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
+          aria-label={muted ? "Unmute" : "Mute"}
+        >
+          <VolumeIcon className="size-5 text-white" />
+        </button>
+      </PlayerTooltip>
 
       <div
         className="overflow-hidden transition-all duration-200 flex items-center"

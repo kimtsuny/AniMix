@@ -56,8 +56,8 @@ export function PlayerProgress({
   );
 
   /**
-   * Immediate synchronous DOM update with ZERO transition and ZERO animation delay.
-   * Directly sets CSS variables and content on the exact same frame as the mouse event.
+   * Updates CSS variable --hover-percent for the full-width white hover preview bar
+   * and hover timestamp preview with a subtle 50ms linear follow transition.
    */
   const updateHoverImmediate = useCallback((clientX: number) => {
     if (!trackRef.current || durationRef.current <= 0) return;
@@ -201,48 +201,48 @@ export function PlayerProgress({
     >
       <div
         ref={trackRef}
-        className="relative w-full h-7 flex items-center py-1.5"
+        className="relative w-full h-8 flex items-center py-2"
         onMouseEnter={handleMouseEnter}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         onTouchStart={handleTouchStart}
       >
-        {/* Hover timestamp preview — NO transition on position, updates synchronously with cursor */}
+        {/* Hover timestamp preview — centered directly over the cursor with translateX(-50%) and 50ms linear transition */}
         <div
           ref={hoverTimestampRef}
-          className="absolute bottom-full mb-1.5 px-2 py-0.5 rounded-md bg-black/85 backdrop-blur-md border border-white/15 text-white text-[11px] md:text-xs font-mono font-medium tracking-tight shadow-lg shadow-black/50 select-none pointer-events-none whitespace-nowrap opacity-0"
+          className="absolute bottom-full mb-2 px-2.5 py-0.5 rounded-md bg-black/85 backdrop-blur-md border border-white/15 text-white text-[11px] md:text-xs font-mono font-medium tracking-tight shadow-lg shadow-black/50 select-none pointer-events-none whitespace-nowrap opacity-0"
           style={{
-            left: "var(--hover-percent, 0%)",
-            transform: "translateX(calc(-1 * var(--hover-percent, 0%)))",
-            transition: "none",
+            left: "clamp(28px, var(--hover-percent, 0%), calc(100% - 28px))",
+            transform: "translateX(-50%)",
+            transition: "left 50ms linear, opacity 100ms ease",
           }}
         >
           0:00
         </div>
 
-        {/* Track background */}
-        <div className="absolute w-full h-[5px] group-hover/progress:h-[7px] rounded-full bg-white/20 transition-[height] duration-150" />
+        {/* Track background — 9px normal, 11px hover */}
+        <div className="absolute w-full h-[9px] group-hover/progress:h-[11px] rounded-full bg-white/20 transition-[height] duration-150" />
 
-        {/* Hover preview — NO transition on width or position, strictly instantaneous */}
+        {/* White hover preview bar — extends from 0% to mouse position with subtle 50ms linear follow */}
         <div
           ref={hoverBarRef}
-          className="absolute h-[5px] group-hover/progress:h-[7px] rounded-full bg-white/30 pointer-events-none opacity-0"
+          className="absolute h-[9px] group-hover/progress:h-[11px] rounded-full bg-white/40 pointer-events-none opacity-0"
           style={{
             width: "var(--hover-percent, 0%)",
-            transition: "none",
+            transition: "width 50ms linear, height 150ms ease, opacity 100ms ease",
           }}
         />
 
         {/* Played portion — red (tied purely to actual video playback currentTime) */}
         <div
-          className="absolute h-[5px] group-hover/progress:h-[7px] rounded-full bg-[#e63946] transition-[height] duration-150 pointer-events-none shadow-[0_0_8px_rgba(230,57,70,0.4)]"
+          className="absolute h-[9px] group-hover/progress:h-[11px] rounded-full bg-[#e63946] transition-[height] duration-150 pointer-events-none shadow-[0_0_10px_rgba(230,57,70,0.5)]"
           style={{ width: `${progress}%` }}
         />
 
         {/* Thumb — polished rounded knob */}
         <div
-          className={`absolute w-4 h-4 rounded-full bg-white border-2 border-[#e63946] shadow-md shadow-black/60 transition-transform duration-150 -translate-x-1/2 pointer-events-none ${
+          className={`absolute w-[18px] h-[18px] rounded-full bg-white border-[2.5px] border-[#e63946] shadow-md shadow-black/60 transition-transform duration-150 -translate-x-1/2 pointer-events-none ${
             isDragging
               ? "scale-100 opacity-100 ring-2 ring-[#e63946]/40"
               : "scale-0 opacity-0 group-hover/progress:scale-100 group-hover/progress:opacity-100"
