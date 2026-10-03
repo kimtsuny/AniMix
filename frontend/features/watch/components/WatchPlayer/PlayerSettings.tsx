@@ -9,6 +9,7 @@ import {
   Check,
   Settings,
   Languages,
+  Loader2,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Subtitle } from "../../api/services/stream.service";
@@ -58,7 +59,6 @@ interface PlayerSettingsProps {
   onAudioTrackChange?: (id: string | number) => void;
 }
 
-const QUALITIES = ["1080p", "720p", "480p", "360p", "Auto"];
 const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 type MenuTab = "main" | "quality" | "speed" | "subtitles" | "audio";
@@ -81,10 +81,8 @@ export function PlayerSettings({
   const [activeTab, setActiveTab] = useState<MenuTab>("main");
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const qualitiesList =
-    availableQualities && availableQualities.length > 0
-      ? availableQualities
-      : QUALITIES;
+  const qualitiesList = availableQualities ?? [];
+  const isLoadingQualities = qualitiesList.length === 0;
 
   const handleClickOutside = useCallback((e: MouseEvent) => {
     if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -204,7 +202,7 @@ export function PlayerSettings({
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
                     <span className="text-xs text-white/50 group-hover:text-white/70 tabular-nums">
-                      {quality}
+                      {quality || (isLoadingQualities ? "Loading..." : "Auto")}
                     </span>
                     <ChevronRight className="size-4 text-white/35 group-hover:text-white/60 transition-colors" />
                   </div>
@@ -275,39 +273,46 @@ export function PlayerSettings({
                 </div>
 
                 <div className="space-y-0.5 max-h-[260px] overflow-y-auto pr-0.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20">
-                  {qualitiesList.map((q) => {
-                    const isSelected = quality === q;
-                    return (
-                      <button
-                        key={q}
-                        onClick={() => {
-                          onQualityChange(q);
-                          setIsOpen(false);
-                          setActiveTab("main");
-                        }}
-                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-colors duration-150 text-left ${
-                          isSelected
-                            ? "bg-[#e63946]/12 text-white font-medium"
-                            : "text-white/80 hover:bg-white/[0.08] hover:text-white"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          {isSelected ? (
-                            <Check className="size-4 text-[#e63946] flex-shrink-0" />
-                          ) : (
-                            <span className="w-4 flex-shrink-0" />
-                          )}
-                          <span
-                            className={`text-[13px] ${
-                              isSelected ? "text-[#e63946] font-medium" : ""
-                            }`}
-                          >
-                            {q}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
+                  {isLoadingQualities ? (
+                    <div className="px-3.5 py-6 text-center text-xs text-white/40 flex flex-col items-center justify-center gap-2">
+                      <Loader2 className="size-4 animate-spin text-white/40" />
+                      <span>Loading qualities...</span>
+                    </div>
+                  ) : (
+                    qualitiesList.map((q) => {
+                      const isSelected = quality === q;
+                      return (
+                        <button
+                          key={q}
+                          onClick={() => {
+                            onQualityChange(q);
+                            setIsOpen(false);
+                            setActiveTab("main");
+                          }}
+                          className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-colors duration-150 text-left ${
+                            isSelected
+                              ? "bg-[#e63946]/12 text-white font-medium"
+                              : "text-white/80 hover:bg-white/[0.08] hover:text-white"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            {isSelected ? (
+                              <Check className="size-4 text-[#e63946] flex-shrink-0" />
+                            ) : (
+                              <span className="w-4 flex-shrink-0" />
+                            )}
+                            <span
+                              className={`text-[13px] ${
+                                isSelected ? "text-[#e63946] font-medium" : ""
+                              }`}
+                            >
+                              {q}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
                 </div>
               </motion.div>
             )}

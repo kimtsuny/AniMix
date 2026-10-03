@@ -123,9 +123,10 @@ export function WatchPlayer({
   const [isFullscreen, setIsFullscreen] =
     useState(false);
 
-  const [quality, setQuality] = useState("Auto");
+  const [quality, setQuality] = useState("");
   const [availableQualities, setAvailableQualities] = useState<string[]>([]);
   const qualityLevelsRef = useRef<Map<string, number>>(new Map());
+  const userSelectedQualityRef = useRef<string | null>(null);
 
   const [playbackRate, setPlaybackRate] =
     useState(1);
@@ -230,8 +231,9 @@ export function WatchPlayer({
     setCenterAction(null);
 
     qualityLevelsRef.current.clear();
+    userSelectedQualityRef.current = null;
     setAvailableQualities([]);
-    setQuality("Auto");
+    setQuality("");
 
     const defaultSubIndex = findEnglishSubtitleIndex(subtitles);
     setActiveSubtitleIndex(defaultSubIndex);
@@ -259,22 +261,9 @@ export function WatchPlayer({
     let hlsInstance: Hls | null = null;
 
     /*
-     * Native HLS
+     * HLS.js (MSE supported browsers: Chrome, Firefox, Edge, Safari macOS)
      */
     if (
-      activeStream.isHLS &&
-      video.canPlayType(
-        "application/vnd.apple.mpegurl"
-      )
-    ) {
-      video.src = source;
-      video.load();
-    }
-
-    /*
-     * HLS.js
-     */
-    else if (
       activeStream.isHLS &&
       Hls.isSupported()
     ) {
@@ -316,10 +305,22 @@ export function WatchPlayer({
         const heightMap = new Map<number, { index: number; bitrate: number }>();
 
         levels.forEach((level, index) => {
-          if (!level.height || level.height <= 0) return;
-          const existing = heightMap.get(level.height);
+          let height = level.height;
+          if ((!height || height <= 0) && (level as any).attrs?.RESOLUTION) {
+            const parts = String((level as any).attrs.RESOLUTION).split("x");
+            if (parts.length === 2) {
+              const parsed = parseInt(parts[1], 10);
+              if (!isNaN(parsed) && parsed > 0) {
+                height = parsed;
+              }
+            }
+          }
+
+          if (!height || height <= 0) return;
+
+          const existing = heightMap.get(height);
           if (!existing || (level.bitrate && level.bitrate > existing.bitrate)) {
-            heightMap.set(level.height, {
+            heightMap.set(height, {
               index,
               bitrate: level.bitrate || 0,
             });
@@ -335,35 +336,43 @@ export function WatchPlayer({
           qualityMap.set(label, heightMap.get(h)!.index);
         });
 
+        // "Auto" is an HLS automatic-quality option
         options.push("Auto");
         qualityMap.set("Auto", -1);
 
         qualityLevelsRef.current = qualityMap;
         setAvailableQualities(options);
 
-        // Determine default quality: 1080p if available, else highest <= 1080p, else lowest above
-        let defaultLabel = "Auto";
-        let defaultLevelIndex = -1;
+        // Determine quality:
+        // If user already chose a quality for this episode and it's valid, preserve it.
+        // Otherwise:
+        // 5. Make 1080p the default selected quality ONLY when an actual 1080p HLS level exists.
+        // 6. If 1080p does not exist, select the highest actual available quality instead. Never fabricate a 1080p option.
+        let targetLabel: string;
+        let targetLevelIndex: number;
 
-        if (sortedHeights.length > 0) {
-          if (sortedHeights.includes(1080)) {
-            defaultLabel = "1080p";
-            defaultLevelIndex = qualityMap.get("1080p") ?? -1;
-          } else {
-            const below1080 = sortedHeights.filter((h) => h < 1080);
-            if (below1080.length > 0) {
-              defaultLabel = `${below1080[0]}p`;
-              defaultLevelIndex = qualityMap.get(defaultLabel) ?? -1;
+        const userSelected = userSelectedQualityRef.current;
+        if (userSelected && qualityMap.has(userSelected)) {
+          targetLabel = userSelected;
+          targetLevelIndex = qualityMap.get(userSelected) ?? -1;
+        } else {
+          if (sortedHeights.length > 0) {
+            if (sortedHeights.includes(1080)) {
+              targetLabel = "1080p";
+              targetLevelIndex = qualityMap.get("1080p") ?? -1;
             } else {
-              defaultLabel = `${sortedHeights[sortedHeights.length - 1]}p`;
-              defaultLevelIndex = qualityMap.get(defaultLabel) ?? -1;
+              targetLabel = `${sortedHeights[0]}p`;
+              targetLevelIndex = qualityMap.get(targetLabel) ?? -1;
             }
+          } else {
+            targetLabel = "Auto";
+            targetLevelIndex = -1;
           }
         }
 
-        setQuality(defaultLabel);
-        if (defaultLevelIndex !== -1) {
-          hls.currentLevel = defaultLevelIndex;
+        setQuality(targetLabel);
+        if (targetLevelIndex !== -1) {
+          hls.currentLevel = targetLevelIndex;
         } else {
           hls.currentLevel = -1;
         }
@@ -371,6 +380,10 @@ export function WatchPlayer({
 
       hls.on(Hls.Events.MANIFEST_PARSED, applyQualityLevels);
       hls.on(Hls.Events.LEVELS_UPDATED, applyQualityLevels);
+
+      if (hls.levels && hls.levels.length > 0) {
+        applyQualityLevels();
+      }
 
       hls.on(
         Hls.Events.ERROR,
@@ -439,6 +452,19 @@ export function WatchPlayer({
     }
 
     /*
+     * Native HLS (fallback for platforms without MSE like iOS Safari)
+     */
+    else if (
+      activeStream.isHLS &&
+      video.canPlayType(
+        "application/vnd.apple.mpegurl"
+      )
+    ) {
+      video.src = source;
+      video.load();
+    }
+
+    /*
      * Normal video source.
      */
     else if (!activeStream.isHLS) {
@@ -474,6 +500,11 @@ export function WatchPlayer({
           hlsRef.current = null;
         }
       }
+
+      qualityLevelsRef.current.clear();
+      userSelectedQualityRef.current = null;
+      setAvailableQualities([]);
+      setQuality("");
 
       /*
        * Pause before removing source.
@@ -941,6 +972,7 @@ export function WatchPlayer({
    */
 
   const handleQualityChange = useCallback((newQuality: string) => {
+    userSelectedQualityRef.current = newQuality;
     setQuality(newQuality);
 
     const hls = hlsRef.current;
