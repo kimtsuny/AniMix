@@ -26,54 +26,95 @@ export function PlayerProgress({
   onSeek,
 }: PlayerProgressProps) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const hoverBarRef = useRef<HTMLDivElement>(null);
+  const hoverTimestampRef = useRef<HTMLDivElement>(null);
+
   const [isDragging, setIsDragging] = useState(false);
-  const [hoverPosition, setHoverPosition] = useState<number | null>(null);
-  const [hoverTime, setHoverTime] = useState<number | null>(null);
+  const isDraggingRef = useRef(false);
+  const durationRef = useRef(duration);
+  durationRef.current = duration;
+
+  const trackRectRef = useRef<DOMRect | null>(null);
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
+  const getTrackRect = useCallback((): DOMRect | null => {
+    if (!trackRectRef.current && trackRef.current) {
+      trackRectRef.current = trackRef.current.getBoundingClientRect();
+    }
+    return trackRectRef.current;
+  }, []);
+
   const getTimeFromPosition = useCallback(
     (clientX: number) => {
-      if (!trackRef.current || duration <= 0) return 0;
-      const rect = trackRef.current.getBoundingClientRect();
+      const rect = getTrackRect();
+      if (!rect || rect.width <= 0 || durationRef.current <= 0) return 0;
       const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-      return ratio * duration;
+      return ratio * durationRef.current;
     },
-    [duration]
+    [getTrackRect]
   );
+
+  /**
+   * Immediate synchronous DOM update with ZERO transition and ZERO animation delay.
+   * Directly sets CSS variables and content on the exact same frame as the mouse event.
+   */
+  const updateHoverImmediate = useCallback((clientX: number) => {
+    if (!trackRef.current || durationRef.current <= 0) return;
+    const rect = trackRectRef.current || trackRef.current.getBoundingClientRect();
+    trackRectRef.current = rect;
+    if (rect.width <= 0) return;
+
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const percent = ratio * 100;
+    const time = ratio * durationRef.current;
+
+    trackRef.current.style.setProperty("--hover-percent", `${percent}%`);
+
+    if (hoverTimestampRef.current) {
+      hoverTimestampRef.current.textContent = formatSeekTime(time);
+      hoverTimestampRef.current.style.opacity = "1";
+    }
+    if (hoverBarRef.current) {
+      hoverBarRef.current.style.opacity = "1";
+    }
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    if (trackRef.current) {
+      trackRectRef.current = trackRef.current.getBoundingClientRect();
+    }
+  }, []);
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (durationRef.current <= 0) return;
+      updateHoverImmediate(e.clientX);
+    },
+    [updateHoverImmediate]
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    trackRectRef.current = null;
+    if (!isDraggingRef.current) {
+      if (hoverBarRef.current) hoverBarRef.current.style.opacity = "0";
+      if (hoverTimestampRef.current) hoverTimestampRef.current.style.opacity = "0";
+    }
+  }, []);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       setIsDragging(true);
+      isDraggingRef.current = true;
+      if (trackRef.current) {
+        trackRectRef.current = trackRef.current.getBoundingClientRect();
+      }
       const time = getTimeFromPosition(e.clientX);
       onSeek(time);
-      if (trackRef.current) {
-        const rect = trackRef.current.getBoundingClientRect();
-        const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-        setHoverPosition(ratio * 100);
-        setHoverTime(time);
-      }
+      updateHoverImmediate(e.clientX);
     },
-    [getTimeFromPosition, onSeek]
+    [getTimeFromPosition, onSeek, updateHoverImmediate]
   );
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!trackRef.current || duration <= 0) return;
-      const rect = trackRef.current.getBoundingClientRect();
-      const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      setHoverPosition(ratio * 100);
-      setHoverTime(ratio * duration);
-    },
-    [duration]
-  );
-
-  const handleMouseLeave = useCallback(() => {
-    if (!isDragging) {
-      setHoverPosition(null);
-      setHoverTime(null);
-    }
-  }, [isDragging]);
 
   /* Touch handlers for mobile */
   const handleTouchStart = useCallback(
@@ -81,16 +122,15 @@ export function PlayerProgress({
       const touch = e.touches[0];
       if (!touch) return;
       setIsDragging(true);
+      isDraggingRef.current = true;
+      if (trackRef.current) {
+        trackRectRef.current = trackRef.current.getBoundingClientRect();
+      }
       const time = getTimeFromPosition(touch.clientX);
       onSeek(time);
-      if (trackRef.current) {
-        const rect = trackRef.current.getBoundingClientRect();
-        const ratio = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width));
-        setHoverPosition(ratio * 100);
-        setHoverTime(time);
-      }
+      updateHoverImmediate(touch.clientX);
     },
-    [getTimeFromPosition, onSeek]
+    [getTimeFromPosition, onSeek, updateHoverImmediate]
   );
 
   useEffect(() => {
@@ -99,17 +139,25 @@ export function PlayerProgress({
     const handleMove = (e: MouseEvent) => {
       const time = getTimeFromPosition(e.clientX);
       onSeek(time);
+      updateHoverImmediate(e.clientX);
+    };
+
+    const handleUp = (e: MouseEvent) => {
+      setIsDragging(false);
+      isDraggingRef.current = false;
       if (trackRef.current) {
         const rect = trackRef.current.getBoundingClientRect();
-        const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-        setHoverPosition(ratio * 100);
-        setHoverTime(time);
+        const isInside =
+          e.clientX >= rect.left &&
+          e.clientX <= rect.right &&
+          e.clientY >= rect.top &&
+          e.clientY <= rect.bottom;
+        if (!isInside) {
+          trackRectRef.current = null;
+          if (hoverBarRef.current) hoverBarRef.current.style.opacity = "0";
+          if (hoverTimestampRef.current) hoverTimestampRef.current.style.opacity = "0";
+        }
       }
-    };
-    const handleUp = () => {
-      setIsDragging(false);
-      setHoverPosition(null);
-      setHoverTime(null);
     };
 
     const handleTouchMove = (e: TouchEvent) => {
@@ -117,17 +165,15 @@ export function PlayerProgress({
       if (!touch) return;
       const time = getTimeFromPosition(touch.clientX);
       onSeek(time);
-      if (trackRef.current) {
-        const rect = trackRef.current.getBoundingClientRect();
-        const ratio = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width));
-        setHoverPosition(ratio * 100);
-        setHoverTime(time);
-      }
+      updateHoverImmediate(touch.clientX);
     };
+
     const handleTouchEnd = () => {
       setIsDragging(false);
-      setHoverPosition(null);
-      setHoverTime(null);
+      isDraggingRef.current = false;
+      trackRectRef.current = null;
+      if (hoverBarRef.current) hoverBarRef.current.style.opacity = "0";
+      if (hoverTimestampRef.current) hoverTimestampRef.current.style.opacity = "0";
     };
 
     window.addEventListener("mousemove", handleMove);
@@ -141,7 +187,7 @@ export function PlayerProgress({
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [isDragging, getTimeFromPosition, onSeek]);
+  }, [isDragging, getTimeFromPosition, onSeek, updateHoverImmediate]);
 
   return (
     <div
@@ -156,38 +202,41 @@ export function PlayerProgress({
       <div
         ref={trackRef}
         className="relative w-full h-7 flex items-center py-1.5"
+        onMouseEnter={handleMouseEnter}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         onTouchStart={handleTouchStart}
       >
-        {/* Hover timestamp preview */}
-        {hoverPosition !== null && hoverTime !== null && duration > 0 && (
-          <div
-            className="absolute bottom-full mb-1.5 px-2 py-0.5 rounded-md bg-black/85 backdrop-blur-md border border-white/15 text-white text-[11px] md:text-xs font-mono font-medium tracking-tight shadow-lg shadow-black/50 select-none pointer-events-none whitespace-nowrap animate-in fade-in duration-100"
-            style={{
-              left: `${hoverPosition}%`,
-              transform: `translateX(-${hoverPosition}%)`,
-            }}
-          >
-            {formatSeekTime(hoverTime)}
-          </div>
-        )}
+        {/* Hover timestamp preview — NO transition on position, updates synchronously with cursor */}
+        <div
+          ref={hoverTimestampRef}
+          className="absolute bottom-full mb-1.5 px-2 py-0.5 rounded-md bg-black/85 backdrop-blur-md border border-white/15 text-white text-[11px] md:text-xs font-mono font-medium tracking-tight shadow-lg shadow-black/50 select-none pointer-events-none whitespace-nowrap opacity-0"
+          style={{
+            left: "var(--hover-percent, 0%)",
+            transform: "translateX(calc(-1 * var(--hover-percent, 0%)))",
+            transition: "none",
+          }}
+        >
+          0:00
+        </div>
 
         {/* Track background */}
-        <div className="absolute w-full h-[5px] group-hover/progress:h-[7px] rounded-full bg-white/20 transition-all duration-150" />
+        <div className="absolute w-full h-[5px] group-hover/progress:h-[7px] rounded-full bg-white/20 transition-[height] duration-150" />
 
-        {/* Hover preview */}
-        {hoverPosition !== null && (
-          <div
-            className="absolute h-[5px] group-hover/progress:h-[7px] rounded-full bg-white/30 transition-all duration-150 pointer-events-none"
-            style={{ width: `${hoverPosition}%` }}
-          />
-        )}
-
-        {/* Played portion — red */}
+        {/* Hover preview — NO transition on width or position, strictly instantaneous */}
         <div
-          className="absolute h-[5px] group-hover/progress:h-[7px] rounded-full bg-[#e63946] transition-all duration-150 pointer-events-none shadow-[0_0_8px_rgba(230,57,70,0.4)]"
+          ref={hoverBarRef}
+          className="absolute h-[5px] group-hover/progress:h-[7px] rounded-full bg-white/30 pointer-events-none opacity-0"
+          style={{
+            width: "var(--hover-percent, 0%)",
+            transition: "none",
+          }}
+        />
+
+        {/* Played portion — red (tied purely to actual video playback currentTime) */}
+        <div
+          className="absolute h-[5px] group-hover/progress:h-[7px] rounded-full bg-[#e63946] transition-[height] duration-150 pointer-events-none shadow-[0_0_8px_rgba(230,57,70,0.4)]"
           style={{ width: `${progress}%` }}
         />
 
