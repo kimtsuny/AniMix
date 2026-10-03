@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useEpisodes } from "./useEpisodes";
 import { useStream } from "./useStream";
+import { useSubtitlePreference } from "./useSubtitlePreference";
 import type { Episode } from "../api/services/episode.service";
+import type { Subtitle } from "../api/services/stream.service";
+import type { SubtitlePreference } from "../utils/subtitles";
 
 interface UseWatchResult {
   anime: ReturnType<typeof useEpisodes>["anime"];
@@ -15,6 +18,12 @@ interface UseWatchResult {
   seasonNumber: number;
 
   stream: ReturnType<typeof useStream>["data"];
+  availableSubtitles: Subtitle[];
+  preferredSubtitle: SubtitlePreference;
+  activeSubtitle: Subtitle | null;
+  activeSubtitleIndex: number | null;
+  setPreferredSubtitle: (preference: SubtitlePreference) => void;
+  selectSubtitleByIndex: (index: number | null) => void;
 
   isEpisodesLoading: boolean;
   isStreamLoading: boolean;
@@ -109,6 +118,20 @@ export function useWatch(
     isLoading: isStreamLoading,
     error: streamError,
   } = useStream(selectedEpisode ?? episodeId);
+
+  const activeStream = stream?.streams?.[0] ?? null;
+  const availableSubtitles: Subtitle[] = useMemo(
+    () => activeStream?.subtitles ?? [],
+    [activeStream]
+  );
+
+  const {
+    preferredSubtitle,
+    activeSubtitle,
+    activeSubtitleIndex,
+    setPreferredSubtitle,
+    selectSubtitleByIndex,
+  } = useSubtitlePreference(availableSubtitles);
 
   const selectEpisode = useCallback(
     (target: Episode | number) => {
@@ -221,6 +244,12 @@ export function useWatch(
     seasonNumber,
 
     stream,
+    availableSubtitles,
+    preferredSubtitle,
+    activeSubtitle,
+    activeSubtitleIndex,
+    setPreferredSubtitle,
+    selectSubtitleByIndex,
 
     isEpisodesLoading,
     isStreamLoading,

@@ -29,6 +29,11 @@ export function WatchPageContent({
     selectedEpisodeNumber,
     seasonNumber: activeSeasonNumber,
     stream,
+    availableSubtitles,
+    preferredSubtitle,
+    activeSubtitleIndex,
+    setPreferredSubtitle,
+    selectSubtitleByIndex,
     isEpisodesLoading,
     isStreamLoading,
     episodesError,
@@ -106,6 +111,11 @@ export function WatchPageContent({
         onNextEpisode={
           handleNextEpisode
         }
+        availableSubtitles={availableSubtitles}
+        preferredSubtitle={preferredSubtitle}
+        activeSubtitleIndex={activeSubtitleIndex}
+        onSubtitleChange={selectSubtitleByIndex}
+        onPreferenceChange={setPreferredSubtitle}
       />
 
       {/* Episodes + You Might Like */}

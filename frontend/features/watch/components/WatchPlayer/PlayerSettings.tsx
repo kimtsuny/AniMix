@@ -53,7 +53,9 @@ interface PlayerSettingsProps {
   grouped?: boolean;
   subtitles?: Subtitle[];
   activeSubtitleIndex?: number | null;
+  preferredSubtitle?: string;
   onSubtitleChange?: (index: number | null) => void;
+  onPreferenceChange?: (preference: string) => void;
   audioTracks?: AudioTrack[];
   activeAudioTrackId?: string | number | null;
   onAudioTrackChange?: (id: string | number) => void;
@@ -72,7 +74,9 @@ export function PlayerSettings({
   grouped = false,
   subtitles,
   activeSubtitleIndex,
+  preferredSubtitle,
   onSubtitleChange,
+  onPreferenceChange,
   audioTracks,
   activeAudioTrackId,
   onAudioTrackChange,
@@ -397,10 +401,31 @@ export function PlayerSettings({
                 </div>
 
                 <div className="space-y-0.5 max-h-[260px] overflow-y-auto pr-0.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20">
+                  {/* Auto option */}
+                  {onPreferenceChange && (
+                    <LanguageMenuRow
+                      label="Auto"
+                      language={
+                        preferredSubtitle === "auto" &&
+                        activeSubtitleIndex !== null &&
+                        activeSubtitleIndex !== undefined &&
+                        subtitles[activeSubtitleIndex]
+                          ? subtitles[activeSubtitleIndex].label
+                          : undefined
+                      }
+                      isSelected={preferredSubtitle === "auto"}
+                      onClick={() => {
+                        onPreferenceChange("auto");
+                        setIsOpen(false);
+                        setActiveTab("main");
+                      }}
+                    />
+                  )}
+
                   {/* Off Option */}
                   <LanguageMenuRow
                     label="Off"
-                    isSelected={activeSubtitleIndex === null}
+                    isSelected={activeSubtitleIndex === null && preferredSubtitle !== "auto"}
                     onClick={() => {
                       onSubtitleChange?.(null);
                       setIsOpen(false);
@@ -414,7 +439,10 @@ export function PlayerSettings({
                       key={`${sub.language}-${idx}`}
                       label={sub.label}
                       language={sub.language}
-                      isSelected={activeSubtitleIndex === idx}
+                      isSelected={
+                        activeSubtitleIndex === idx &&
+                        preferredSubtitle !== "auto"
+                      }
                       onClick={() => {
                         onSubtitleChange?.(idx);
                         setIsOpen(false);

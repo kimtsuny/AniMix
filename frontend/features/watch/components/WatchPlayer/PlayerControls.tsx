@@ -28,6 +28,7 @@ interface PlayerControlsProps {
   playbackRate: number;
   subtitles: Subtitle[];
   activeSubtitleIndex: number | null;
+  preferredSubtitle?: string;
   onPlayPause: () => void;
   onPreviousEpisode: () => void;
   onNextEpisode: () => void;
@@ -39,6 +40,7 @@ interface PlayerControlsProps {
   onQualityChange: (quality: string) => void;
   onPlaybackRateChange: (rate: number) => void;
   onSubtitleChange: (index: number | null) => void;
+  onPreferenceChange?: (preference: string) => void;
 }
 
 function formatTime(seconds: number): string {
@@ -61,6 +63,7 @@ export function PlayerControls({
   playbackRate,
   subtitles,
   activeSubtitleIndex,
+  preferredSubtitle,
   onPlayPause,
   onPreviousEpisode,
   onNextEpisode,
@@ -72,6 +75,7 @@ export function PlayerControls({
   onQualityChange,
   onPlaybackRateChange,
   onSubtitleChange,
+  onPreferenceChange,
 }: PlayerControlsProps) {
   return (
     <div className="absolute bottom-0 left-0 right-0 z-20">
@@ -149,7 +153,9 @@ export function PlayerControls({
             <PlayerSubtitles
               subtitles={subtitles}
               activeSubtitleIndex={activeSubtitleIndex}
+              preferredSubtitle={preferredSubtitle}
               onSubtitleChange={onSubtitleChange}
+              onPreferenceChange={onPreferenceChange}
             />
 
             {/* Settings */}
@@ -161,7 +167,9 @@ export function PlayerControls({
               onPlaybackRateChange={onPlaybackRateChange}
               subtitles={subtitles}
               activeSubtitleIndex={activeSubtitleIndex}
+              preferredSubtitle={preferredSubtitle}
               onSubtitleChange={onSubtitleChange}
+              onPreferenceChange={onPreferenceChange}
             />
 
             {/* Picture in Picture — desktop only */}

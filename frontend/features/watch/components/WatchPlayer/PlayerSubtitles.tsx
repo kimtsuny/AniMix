@@ -31,13 +31,17 @@ function CcIcon({ className = "size-5" }: { className?: string }) {
 interface PlayerSubtitlesProps {
   subtitles: Subtitle[];
   activeSubtitleIndex: number | null;
+  preferredSubtitle?: string;
   onSubtitleChange: (index: number | null) => void;
+  onPreferenceChange?: (preference: string) => void;
 }
 
 export function PlayerSubtitles({
   subtitles,
   activeSubtitleIndex,
+  preferredSubtitle,
   onSubtitleChange,
+  onPreferenceChange,
 }: PlayerSubtitlesProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -122,10 +126,27 @@ export function PlayerSubtitles({
               </div>
 
               <div className="space-y-0.5 max-h-[260px] overflow-y-auto pr-0.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20">
+                {/* Auto option */}
+                {onPreferenceChange && (
+                  <LanguageMenuRow
+                    label="Auto"
+                    language={
+                      preferredSubtitle === "auto" && activeSubtitleIndex !== null && subtitles[activeSubtitleIndex]
+                        ? subtitles[activeSubtitleIndex].label
+                        : undefined
+                    }
+                    isSelected={preferredSubtitle === "auto"}
+                    onClick={() => {
+                      onPreferenceChange("auto");
+                      setIsOpen(false);
+                    }}
+                  />
+                )}
+
                 {/* Off option */}
                 <LanguageMenuRow
                   label="Off"
-                  isSelected={activeSubtitleIndex === null}
+                  isSelected={activeSubtitleIndex === null && preferredSubtitle !== "auto"}
                   onClick={() => {
                     onSubtitleChange(null);
                     setIsOpen(false);
@@ -138,7 +159,10 @@ export function PlayerSubtitles({
                     key={`${subtitle.language}-${index}`}
                     label={subtitle.label}
                     language={subtitle.language}
-                    isSelected={activeSubtitleIndex === index}
+                    isSelected={
+                      activeSubtitleIndex === index &&
+                      preferredSubtitle !== "auto"
+                    }
                     onClick={() => {
                       onSubtitleChange(index);
                       setIsOpen(false);

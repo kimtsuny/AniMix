@@ -10,6 +10,8 @@ import Hls from "hls.js";
 
 import { PlayerControls } from "./PlayerControls";
 import type { StreamResponse, Subtitle } from "../../api/services/stream.service";
+import { useSubtitlePreference } from "../../hooks/useSubtitlePreference";
+import type { SubtitlePreference } from "../../utils/subtitles";
 
 interface WatchPlayerProps {
   posterImage?: string;
@@ -19,6 +21,11 @@ interface WatchPlayerProps {
   error?: string | null;
   onPreviousEpisode?: () => void;
   onNextEpisode?: () => void;
+  availableSubtitles?: Subtitle[];
+  preferredSubtitle?: SubtitlePreference;
+  activeSubtitleIndex?: number | null;
+  onSubtitleChange?: (index: number | null) => void;
+  onPreferenceChange?: (preference: SubtitlePreference) => void;
 }
 
 type CenterAction = "play" | "pause" | null;
@@ -60,35 +67,6 @@ function destroyHlsInstance(instance: Hls | null) {
   }
 }
 
-/**
- * Detects whether a subtitle language or label represents English.
- */
-function findEnglishSubtitleIndex(subtitles: Subtitle[]): number | null {
-  if (!subtitles || subtitles.length === 0) return null;
-
-  const isEnglish = (val?: string | null): boolean => {
-    if (!val) return false;
-    const clean = val.trim().toLowerCase();
-    if (
-      clean === "en" ||
-      clean === "eng" ||
-      clean === "english" ||
-      clean.startsWith("en-") ||
-      clean.startsWith("en_") ||
-      clean.startsWith("english")
-    ) {
-      return true;
-    }
-    return /\b(en|eng|english)\b/i.test(val);
-  };
-
-  const idx = subtitles.findIndex(
-    (sub) => isEnglish(sub.language) || isEnglish(sub.label)
-  );
-
-  return idx !== -1 ? idx : null;
-}
-
 export function WatchPlayer({
   posterImage,
   stream,
@@ -97,6 +75,11 @@ export function WatchPlayer({
   error = null,
   onPreviousEpisode,
   onNextEpisode,
+  availableSubtitles: propAvailableSubtitles,
+  preferredSubtitle: propPreferredSubtitle,
+  activeSubtitleIndex: propActiveSubtitleIndex,
+  onSubtitleChange,
+  onPreferenceChange,
 }: WatchPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -140,14 +123,32 @@ export function WatchPlayer({
   const activeStream =
     stream?.streams?.[0] ?? null;
 
-  const subtitles: Subtitle[] =
+  const streamSubtitles: Subtitle[] =
     activeStream?.subtitles ?? [];
 
-  const hasSubtitles = subtitles.length > 0;
+  const availableSubtitles =
+    propAvailableSubtitles ?? streamSubtitles;
 
-  const [activeSubtitleIndex, setActiveSubtitleIndex] =
-    useState<number | null>(null);
+  // Internal subtitle preference hook if not provided via props
+  const internalSubtitlePref = useSubtitlePreference(availableSubtitles);
 
+  const preferredSubtitle =
+    propPreferredSubtitle !== undefined
+      ? propPreferredSubtitle
+      : internalSubtitlePref.preferredSubtitle;
+
+  const activeSubtitleIndex =
+    propActiveSubtitleIndex !== undefined
+      ? propActiveSubtitleIndex
+      : internalSubtitlePref.activeSubtitleIndex;
+
+  const handleSubtitleChange =
+    onSubtitleChange ?? internalSubtitlePref.selectSubtitleByIndex;
+
+  const handlePreferenceChange =
+    onPreferenceChange ?? internalSubtitlePref.setPreferredSubtitle;
+
+  const hasSubtitles = availableSubtitles.length > 0;
   const hasStream = Boolean(activeStream);
 
   /*
@@ -235,8 +236,16 @@ export function WatchPlayer({
     setAvailableQualities([]);
     setQuality("");
 
-    const defaultSubIndex = findEnglishSubtitleIndex(subtitles);
-    setActiveSubtitleIndex(defaultSubIndex);
+    // Safely disable all existing HTML5 TextTracks so previous episode tracks never remain enabled
+    if (video.textTracks) {
+      for (let i = 0; i < video.textTracks.length; i++) {
+        try {
+          video.textTracks[i].mode = "disabled";
+        } catch {
+          video.textTracks[i].mode = "hidden";
+        }
+      }
+    }
 
     clearCenterAction();
 
@@ -247,7 +256,6 @@ export function WatchPlayer({
       video.removeAttribute("src");
       video.load();
       setIsVideoLoading(false);
-      setActiveSubtitleIndex(null);
       return;
     }
 
@@ -1143,10 +1151,10 @@ export function WatchPlayer({
       for (let i = 0; i < tracks.length; i++) {
         const track = tracks[i];
 
-        if (track.kind !== "subtitles") continue;
+        if (track.kind !== "subtitles" && track.kind !== "captions") continue;
 
         track.mode =
-          activeSubtitleIndex === i
+          activeSubtitleIndex !== null && activeSubtitleIndex === i
             ? "showing"
             : "hidden";
       }
@@ -1190,7 +1198,7 @@ export function WatchPlayer({
         syncTracks
       );
     };
-  }, [activeSubtitleIndex, subtitles]);
+  }, [activeSubtitleIndex, availableSubtitles]);
 
   /*
    * --------------------------------------------------
@@ -1271,9 +1279,9 @@ export function WatchPlayer({
           controls={false}
           crossOrigin="anonymous"
         >
-          {subtitles.map((subtitle, index) => (
+          {availableSubtitles.map((subtitle, index) => (
             <track
-              key={`${subtitle.language}-${index}`}
+              key={`${activeStream?.url || "stream"}-${subtitle.url}-${index}`}
               kind="subtitles"
               src={subtitle.url}
               srcLang={subtitle.language}
@@ -1390,8 +1398,9 @@ export function WatchPlayer({
           quality={quality}
           availableQualities={availableQualities}
           playbackRate={playbackRate}
-          subtitles={subtitles}
+          subtitles={availableSubtitles}
           activeSubtitleIndex={activeSubtitleIndex}
+          preferredSubtitle={preferredSubtitle}
           onPlayPause={
             handlePlayPause
           }
@@ -1423,7 +1432,10 @@ export function WatchPlayer({
             handlePlaybackRateChange
           }
           onSubtitleChange={
-            setActiveSubtitleIndex
+            handleSubtitleChange
+          }
+          onPreferenceChange={
+            handlePreferenceChange
           }
         />
       </div>
