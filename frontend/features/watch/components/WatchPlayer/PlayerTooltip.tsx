@@ -50,9 +50,9 @@ export function PlayerTooltip({
             className={clsx(
               "px-2.5 py-1 rounded-md bg-[#131215]/95 backdrop-blur-md border border-white/15",
               "text-white text-[11px] md:text-xs font-medium tracking-tight whitespace-nowrap shadow-md shadow-black/60",
-              "opacity-0 translate-y-1",
-              "group-hover/tooltip:opacity-100 group-hover/tooltip:translate-y-0",
-              "transition-all duration-150 ease-out",
+              "opacity-0",
+              "group-hover/tooltip:opacity-100",
+              "transition-opacity duration-150 ease-out",
               className
             )}
           >

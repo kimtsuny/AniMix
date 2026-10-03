@@ -78,7 +78,7 @@ export function PlayerControls({
   onPreferenceChange,
 }: PlayerControlsProps) {
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-20">
+    <div className="relative w-full select-none">
       {/* Bottom gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent pointer-events-none" />
 

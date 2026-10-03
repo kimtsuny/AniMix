@@ -87,6 +87,8 @@ export function WatchPlayer({
 
   const controlsTimeoutRef =
     useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMouseInsideRef = useRef(false);
+  const isControlsHoveredRef = useRef(false);
 
   const centerActionTimeoutRef =
     useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -529,6 +531,101 @@ export function WatchPlayer({
 
   /*
    * --------------------------------------------------
+   * Controls visibility & inactivity lifecycle
+   * --------------------------------------------------
+   */
+
+  const clearControlsTimeout = useCallback(() => {
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+      controlsTimeoutRef.current = null;
+    }
+  }, []);
+
+  const scheduleControlsHide = useCallback(
+    (delay = 3000) => {
+      clearControlsTimeout();
+
+      // Never hide controls when video is paused
+      if (videoRef.current?.paused !== false) {
+        return;
+      }
+
+      // Never hide controls when user is directly hovering the controls area
+      if (isControlsHoveredRef.current) {
+        return;
+      }
+
+      controlsTimeoutRef.current = setTimeout(() => {
+        if (
+          videoRef.current?.paused === false &&
+          !isControlsHoveredRef.current
+        ) {
+          setShowControls(false);
+        }
+      }, delay);
+    },
+    [clearControlsTimeout]
+  );
+
+  const handlePlayerMouseEnter = useCallback(() => {
+    isMouseInsideRef.current = true;
+    setShowControls(true);
+    scheduleControlsHide(3000);
+  }, [scheduleControlsHide]);
+
+  const handlePlayerMouseMove = useCallback(() => {
+    isMouseInsideRef.current = true;
+    setShowControls(true);
+    scheduleControlsHide(3000);
+  }, [scheduleControlsHide]);
+
+  const handlePlayerMouseLeave = useCallback(
+    (event: React.MouseEvent) => {
+      // Ignore if pointer is moving to another element inside the player container
+      if (
+        event.relatedTarget &&
+        containerRef.current?.contains(event.relatedTarget as Node)
+      ) {
+        return;
+      }
+
+      isMouseInsideRef.current = false;
+      isControlsHoveredRef.current = false;
+
+      // Gracefully initiate hide according to player inactivity behavior
+      scheduleControlsHide(1000);
+    },
+    [scheduleControlsHide]
+  );
+
+  const handleControlsMouseEnter = useCallback(() => {
+    isControlsHoveredRef.current = true;
+    clearControlsTimeout();
+    setShowControls(true);
+  }, [clearControlsTimeout]);
+
+  const handleControlsMouseLeave = useCallback(
+    (event: React.MouseEvent) => {
+      // Ignore if pointer is moving within controls elements
+      const currentTarget = event.currentTarget as HTMLElement;
+      if (
+        event.relatedTarget &&
+        currentTarget.contains(event.relatedTarget as Node)
+      ) {
+        return;
+      }
+
+      isControlsHoveredRef.current = false;
+      if (isMouseInsideRef.current) {
+        scheduleControlsHide(3000);
+      }
+    },
+    [scheduleControlsHide]
+  );
+
+  /*
+   * --------------------------------------------------
    * Video events
    * --------------------------------------------------
    */
@@ -589,15 +686,20 @@ export function WatchPlayer({
 
     const handlePlay = () => {
       setIsPlaying(true);
+      scheduleControlsHide(3000);
     };
 
     const handlePause = () => {
       setIsPlaying(false);
+      clearControlsTimeout();
+      setShowControls(true);
     };
 
     const handleEnded = () => {
       setIsPlaying(false);
       setIsVideoLoading(false);
+      clearControlsTimeout();
+      setShowControls(true);
     };
 
     const handleError = () => {
@@ -814,33 +916,6 @@ export function WatchPlayer({
 
   /*
    * --------------------------------------------------
-   * Controls visibility
-   * --------------------------------------------------
-   */
-
-  const resetControlsTimeout =
-    useCallback(() => {
-      if (controlsTimeoutRef.current) {
-        clearTimeout(
-          controlsTimeoutRef.current
-        );
-      }
-
-      controlsTimeoutRef.current =
-        setTimeout(() => {
-          if (videoRef.current?.paused === false) {
-            setShowControls(false);
-          }
-        }, 3000);
-    }, []);
-
-  const handleMouseMove = useCallback(() => {
-    setShowControls(true);
-    resetControlsTimeout();
-  }, [resetControlsTimeout]);
-
-  /*
-   * --------------------------------------------------
    * Play / Pause
    * --------------------------------------------------
    */
@@ -860,6 +935,7 @@ export function WatchPlayer({
         .then(() => {
           setIsPlaying(true);
           showCenterAction("play");
+          scheduleControlsHide(3000);
         })
         .catch((error) => {
           if (
@@ -885,7 +961,9 @@ export function WatchPlayer({
 
     setIsPlaying(false);
     showCenterAction("pause");
-  }, [showCenterAction]);
+    clearControlsTimeout();
+    setShowControls(true);
+  }, [showCenterAction, scheduleControlsHide, clearControlsTimeout]);
 
   /*
    * --------------------------------------------------
@@ -1216,12 +1294,9 @@ export function WatchPlayer({
           ? "100vh"
           : "80vh",
       }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={() => {
-        if (videoRef.current?.paused === false) {
-          setShowControls(false);
-        }
-      }}
+      onMouseEnter={handlePlayerMouseEnter}
+      onMouseMove={handlePlayerMouseMove}
+      onMouseLeave={handlePlayerMouseLeave}
       onClick={(event) => {
         const target =
           event.target as HTMLElement;
@@ -1382,11 +1457,13 @@ export function WatchPlayer({
       {/* Bottom controls */}
       <div
         data-player-controls
-        className={`transition-opacity duration-300 ${
+        className={`absolute inset-x-0 bottom-0 z-20 transition-[opacity,visibility] duration-300 ease-out will-change-[opacity] ${
           showControls
-            ? "opacity-100"
-            : "opacity-0"
+            ? "opacity-100 visible pointer-events-auto"
+            : "opacity-0 invisible pointer-events-none"
         }`}
+        onMouseEnter={handleControlsMouseEnter}
+        onMouseLeave={handleControlsMouseLeave}
       >
         <PlayerControls
           isPlaying={isPlaying}

@@ -221,22 +221,22 @@ export function PlayerProgress({
           0:00
         </div>
 
-        {/* Track background — 9px normal, 11px hover */}
-        <div className="absolute w-full h-[9px] group-hover/progress:h-[11px] rounded-full bg-white/20 transition-[height] duration-150" />
+        {/* Track background — stable 9px */}
+        <div className="absolute w-full h-[9px] rounded-full bg-white/20" />
 
         {/* White hover preview bar — extends from 0% to mouse position with subtle 50ms linear follow */}
         <div
           ref={hoverBarRef}
-          className="absolute h-[9px] group-hover/progress:h-[11px] rounded-full bg-white/40 pointer-events-none opacity-0"
+          className="absolute h-[9px] rounded-full bg-white/40 pointer-events-none opacity-0"
           style={{
             width: "var(--hover-percent, 0%)",
-            transition: "width 50ms linear, height 150ms ease, opacity 100ms ease",
+            transition: "width 50ms linear, opacity 100ms ease",
           }}
         />
 
         {/* Played portion — red (tied purely to actual video playback currentTime) */}
         <div
-          className="absolute h-[9px] group-hover/progress:h-[11px] rounded-full bg-[#e63946] transition-[height] duration-150 pointer-events-none shadow-[0_0_10px_rgba(230,57,70,0.5)]"
+          className="absolute h-[9px] rounded-full bg-[#e63946] pointer-events-none shadow-[0_0_10px_rgba(230,57,70,0.5)]"
           style={{ width: `${progress}%` }}
         />
 
