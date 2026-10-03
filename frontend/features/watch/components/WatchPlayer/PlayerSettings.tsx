@@ -48,13 +48,15 @@ export function PlayerSettings({
   }, [isOpen, handleClickOutside]);
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className="relative flex items-center" ref={menuRef}>
       <button
         onClick={() => {
           setIsOpen(!isOpen);
           setActiveTab("main");
         }}
-        className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white flex items-center justify-center"
+        className={`w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0 ${
+          isOpen ? "bg-white/15 text-white" : ""
+        }`}
         aria-label="Settings"
         title="Settings"
       >
@@ -62,7 +64,7 @@ export function PlayerSettings({
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-full right-0 mb-2 w-48 rounded-lg bg-[#1a1a1a]/95 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden z-50">
+        <div className="absolute bottom-full right-0 mb-2 w-48 rounded-xl bg-[#141414]/95 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden z-50">
           {activeTab === "main" && (
             <div className="py-1">
               <button

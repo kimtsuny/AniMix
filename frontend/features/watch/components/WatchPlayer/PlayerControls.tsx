@@ -75,7 +75,7 @@ export function PlayerControls({
   return (
     <div className="absolute bottom-0 left-0 right-0 z-20">
       {/* Bottom gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent pointer-events-none" />
 
       <div className="relative">
         {/* Progress bar */}
@@ -86,63 +86,61 @@ export function PlayerControls({
         />
 
         {/* Controls row */}
-        <div className="flex items-center justify-between px-3 md:px-4 pb-3 pt-1.5 gap-2">
-          {/* ── Left controls ── */}
-          <div className="flex items-center gap-1 md:gap-1.5 min-w-0">
+        <div className="flex items-center justify-between px-3 md:px-5 pb-3.5 pt-2 gap-2">
+          {/* ── Left controls pill ── */}
+          <div className="inline-flex items-center h-9 md:h-[38px] px-1 md:px-1.5 rounded-lg border border-white/10 bg-black/40 backdrop-blur-md shadow-sm shadow-black/20 gap-0.5 md:gap-1">
             {/* Play / Pause */}
             <button
               onClick={onPlayPause}
-              className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white flex items-center justify-center"
+              className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
               aria-label={isPlaying ? "Pause" : "Play"}
               title={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? (
                 <Pause className="size-5 fill-white text-white" />
               ) : (
-                <Play className="size-5 fill-white text-white" />
+                <Play className="size-5 fill-white text-white translate-x-0.5" />
               )}
             </button>
 
-            {/* Previous + Next group */}
-            <div className="flex items-center gap-0.5">
-              <button
-                onClick={onPreviousEpisode}
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white flex items-center justify-center"
-                aria-label="Previous episode"
-                title="Previous episode"
-              >
-                <SkipBack className="size-5 fill-white text-white" />
-              </button>
-              <button
-                onClick={onNextEpisode}
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white flex items-center justify-center"
-                aria-label="Next episode"
-                title="Next episode"
-              >
-                <SkipForward className="size-5 fill-white text-white" />
-              </button>
-            </div>
+            {/* Previous episode */}
+            <button
+              onClick={onPreviousEpisode}
+              className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
+              aria-label="Previous episode"
+              title="Previous episode"
+            >
+              <SkipBack className="size-5 fill-white text-white" />
+            </button>
+
+            {/* Next episode */}
+            <button
+              onClick={onNextEpisode}
+              className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
+              aria-label="Next episode"
+              title="Next episode"
+            >
+              <SkipForward className="size-5 fill-white text-white" />
+            </button>
 
             {/* Volume */}
-            <div className="flex items-center">
-              <PlayerVolume
-                volume={volume}
-                muted={muted}
-                onVolumeChange={onVolumeChange}
-                onMuteToggle={onMuteToggle}
-              />
-            </div>
+            <PlayerVolume
+              volume={volume}
+              muted={muted}
+              onVolumeChange={onVolumeChange}
+              onMuteToggle={onMuteToggle}
+            />
 
             {/* Time display */}
-            <div className="flex items-center rounded-lg px-2 py-1 hidden sm:flex select-none">
-              <span className="text-white/90 text-xs md:text-sm font-normal tabular-nums whitespace-nowrap">
+            <div className="px-2 hidden sm:flex items-center justify-center select-none flex-shrink-0">
+              <span className="text-white/85 text-xs font-mono font-medium tracking-tight tabular-nums whitespace-nowrap">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </span>
             </div>
           </div>
 
-          {/* ── Right controls ── */}
-          <div className="flex items-center gap-0.5 md:gap-1 flex-shrink-0">
+          {/* ── Right controls pill ── */}
+          <div className="inline-flex items-center h-9 md:h-[38px] px-1 md:px-1.5 rounded-lg border border-white/10 bg-black/40 backdrop-blur-md shadow-sm shadow-black/20 gap-0.5 md:gap-1 flex-shrink-0">
             {/* Subtitles / CC */}
             <PlayerSubtitles
               subtitles={subtitles}
@@ -162,7 +160,7 @@ export function PlayerControls({
             {/* Picture in Picture — desktop only */}
             <button
               onClick={onPiPToggle}
-              className="hidden md:flex p-2 rounded-lg hover:bg-white/10 transition-colors text-white items-center justify-center"
+              className="hidden md:flex w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
               aria-label="Picture in Picture"
               title="Picture in Picture"
             >
@@ -172,7 +170,7 @@ export function PlayerControls({
             {/* Fullscreen */}
             <button
               onClick={onFullscreenToggle}
-              className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white flex items-center justify-center"
+              className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
               aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
               title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
             >

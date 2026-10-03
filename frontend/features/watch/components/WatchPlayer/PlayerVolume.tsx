@@ -52,7 +52,7 @@ export function PlayerVolume({
     >
       <button
         onClick={onMuteToggle}
-        className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white flex items-center justify-center"
+        className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
         aria-label={muted ? "Unmute" : "Mute"}
         title={muted ? "Unmute" : "Mute"}
       >
@@ -60,12 +60,12 @@ export function PlayerVolume({
       </button>
 
       <div
-        className="overflow-hidden transition-all duration-200"
-        style={{ width: isExpanded ? 80 : 0, opacity: isExpanded ? 1 : 0 }}
+        className="overflow-hidden transition-all duration-200 flex items-center"
+        style={{ width: isExpanded ? 72 : 0, opacity: isExpanded ? 1 : 0 }}
       >
         <div
           ref={sliderRef}
-          className="relative w-[80px] h-5 flex items-center cursor-pointer mr-1"
+          className="relative w-[60px] h-5 flex items-center cursor-pointer ml-1 mr-2"
           onMouseDown={(e) => {
             setIsDragging(true);
             onVolumeChange(getVolumeFromPosition(e.clientX));
@@ -77,7 +77,7 @@ export function PlayerVolume({
             style={{ width: `${displayVolume * 100}%` }}
           />
           <div
-            className="absolute w-2.5 h-2.5 rounded-full bg-white shadow-md -translate-x-1/2"
+            className="absolute w-2.5 h-2.5 rounded-full bg-white shadow-md shadow-black/40 -translate-x-1/2"
             style={{ left: `${displayVolume * 100}%` }}
           />
         </div>

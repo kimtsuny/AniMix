@@ -72,7 +72,7 @@ export function PlayerSubtitles({
   if (!hasSubtitles) {
     return (
       <button
-        className="p-2 rounded-lg transition-colors text-white/30 flex items-center justify-center cursor-not-allowed"
+        className="w-8 h-8 md:w-8.5 md:h-8.5 rounded-full flex items-center justify-center text-white/25 cursor-not-allowed flex-shrink-0"
         aria-label="Subtitles unavailable"
         title="No subtitles available"
         disabled
@@ -83,25 +83,27 @@ export function PlayerSubtitles({
   }
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className="relative flex items-center" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`p-2 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center ${
+        className={`relative w-8 h-8 md:w-8.5 md:h-8.5 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors flex-shrink-0 ${
+          isOpen ? "bg-white/15 text-white" : ""
+        } ${
           isActive
             ? "text-[#e63946]"
-            : "text-white"
+            : "text-white/90 hover:text-white"
         }`}
         aria-label="Subtitles"
         title="Subtitles"
       >
         <CcIcon className="size-5" />
         {isActive && (
-          <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#e63946]" />
+          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#e63946]" />
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-full right-0 mb-2 w-48 rounded-lg bg-[#1a1a1a]/95 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden z-50">
+        <div className="absolute bottom-full right-0 mb-2 w-48 rounded-xl bg-[#141414]/95 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden z-50">
           <div className="py-1">
             {/* Header */}
             <div className="px-4 py-2 text-xs text-white/50 font-medium uppercase tracking-wider">
