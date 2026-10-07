@@ -272,8 +272,12 @@ export interface FranchiseStructure {
 }
 
 /**
- * Lightweight franchise metadata discovery using AniList GraphQL only.
- * Fast: does not query AnimeParadise or fetch episodes.
+ * Builds the legacy full-franchise structure.
+ *
+ * IMPORTANT: this is intentionally kept for explicit full-franchise mapping only.
+ * It must NOT be used on the critical watch-page path because it recursively
+ * traverses PREQUEL/SEQUEL relations and can turn one anime request into a
+ * large graph walk.
  */
 export async function discoverFranchiseStructure(
   anilistId: number
@@ -287,6 +291,64 @@ export async function discoverFranchiseStructure(
     rootAnime,
     requestedAnime,
     franchiseEntries,
+    logicalGroups,
+  };
+}
+
+/**
+ * Resolves only the requested series/season boundary.
+ *
+ * The requested anime itself is always the first entry. We only inspect its
+ * direct TV/TV_SHORT/ONA SEQUEL relations; we never walk PREQUEL chains or
+ * recursively traverse the franchise graph. This preserves real season
+ * relationships such as Frieren S1 -> S2 while preventing franchise-sized
+ * graphs such as Dragon Ball from entering the watch-page critical path.
+ */
+export async function discoverRequestedSeriesStructure(
+  anilistId: number
+): Promise<FranchiseStructure> {
+  const requestedAnime = await getAnimeById(anilistId);
+
+  const entries: AniListAnime[] = [requestedAnime];
+  const seen = new Set<number>([requestedAnime.id]);
+
+  const directSequels = requestedAnime.relations.edges.filter(
+    (edge) =>
+      edge.relationType === "SEQUEL" &&
+      edge.node.type === "ANIME" &&
+      (edge.node.format === "TV" ||
+        edge.node.format === "TV_SHORT" ||
+        edge.node.format === "ONA" ||
+        edge.node.format === null)
+  );
+
+  // Direct relation nodes contain enough metadata for ranking. Fetch only the
+  // direct candidates; never recurse through their relations here.
+  for (const edge of directSequels) {
+    if (seen.has(edge.node.id)) continue;
+    try {
+      const sequel = await getAnimeById(edge.node.id);
+      if (!seen.has(sequel.id)) {
+        seen.add(sequel.id);
+        entries.push(sequel);
+      }
+    } catch {
+      // A failed optional sequel must never block the requested anime.
+    }
+  }
+
+  const logicalGroups = groupIntoLogicalSeasons(entries);
+  const targetGroup = logicalGroups.find(
+    (group) =>
+      group.primaryAnilistAnime.id === requestedAnime.id ||
+      group.relatedAnilistEntries.some((entry) => entry.id === requestedAnime.id)
+  );
+
+  return {
+    // The requested anime is the context/root for this bounded structure.
+    rootAnime: requestedAnime,
+    requestedAnime,
+    franchiseEntries: entries,
     logicalGroups,
   };
 }
