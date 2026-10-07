@@ -1,5 +1,5 @@
 import {
-  discoverFranchiseStructure,
+  resolveBoundedSeriesStructure,
   discoverCandidatesForSeason,
   planSeasonFromCandidates,
   type PlannedSeason,
@@ -42,30 +42,73 @@ export interface AnonymousAnimeResult {
   season: AnonymousSeasonDetail;
 }
 
+// In-flight request deduplication to prevent duplicate upstream requests for concurrent visitors
+const inFlightAnonymousResolutions = new Map<
+  string,
+  Promise<AnonymousAnimeResult | null>
+>();
+
 /**
  * Resolves anime catalog data, seasons, and episodes on-the-fly for anonymous visitors.
  *
  * CRITICAL ARCHITECTURE RULES:
  * - NO database reads (no Anime, AnimeSeason, Episode, or Mapping lookups)
  * - NO database writes (no upserts, inserts, or updates)
- * - NO caches (no Redis, memory Maps, TTL, LRU, or request cache)
- * - Full fresh resolution from AniList metadata & AniKoto/AnimeParadise providers
+ * - NO persistent caching of catalog
+ * - Request deduplication for simultaneous in-flight visitors
+ * - Bounded series resolution: only resolves genuine seasons of the requested logical series
  */
 export async function resolveAnonymousSeasonEpisodes(
   anilistId: number,
   seasonNumber: number
 ): Promise<AnonymousAnimeResult | null> {
-  // 1. Fresh franchise discovery via AniList relation graph
-  const franchiseStructure = await discoverFranchiseStructure(anilistId);
+  const cacheKey = `${anilistId}:${seasonNumber}`;
+  const existing = inFlightAnonymousResolutions.get(cacheKey);
+  if (existing) {
+    return existing;
+  }
 
-  if (!franchiseStructure || franchiseStructure.logicalGroups.length === 0) {
+  const promise = (async () => {
+    try {
+      return await doResolveAnonymousSeasonEpisodes(anilistId, seasonNumber);
+    } finally {
+      inFlightAnonymousResolutions.delete(cacheKey);
+    }
+  })();
+
+  inFlightAnonymousResolutions.set(cacheKey, promise);
+  return promise;
+}
+
+async function doResolveAnonymousSeasonEpisodes(
+  anilistId: number,
+  seasonNumber: number
+): Promise<AnonymousAnimeResult | null> {
+  // 1. Bounded series resolution (AniList relation graph bounded to genuine seasons)
+  const seriesStructure = await resolveBoundedSeriesStructure(anilistId);
+
+  if (!seriesStructure || seriesStructure.logicalGroups.length === 0) {
     return null;
   }
 
   // 2. Identify the requested logical season
-  const targetGroup = franchiseStructure.logicalGroups.find(
+  let targetGroup = seriesStructure.logicalGroups.find(
     (g) => g.logicalSeasonNumber === seasonNumber
   );
+
+  if (!targetGroup) {
+    targetGroup = seriesStructure.logicalGroups.find(
+      (g) =>
+        g.primaryAnilistAnime.id === seriesStructure.requestedAnime.id ||
+        g.relatedAnilistEntries.some(
+          (e) => e.id === seriesStructure.requestedAnime.id
+        )
+    );
+  }
+
+  if (!targetGroup) {
+    targetGroup = seriesStructure.logicalGroups[0];
+  }
 
   if (!targetGroup) {
     return null;
@@ -74,7 +117,7 @@ export async function resolveAnonymousSeasonEpisodes(
   // 3. Discover candidates and plan season (AniKoto primary, AnimeParadise emergency fallback)
   const anikotoCandidates = await discoverCandidatesForSeason(
     targetGroup,
-    franchiseStructure.rootAnime,
+    seriesStructure.seriesRootAnime,
     "anikoto"
   );
 
@@ -89,7 +132,7 @@ export async function resolveAnonymousSeasonEpisodes(
     );
     const apCandidates = await discoverCandidatesForSeason(
       targetGroup,
-      franchiseStructure.rootAnime,
+      seriesStructure.seriesRootAnime,
       "animeparadise"
     );
     plannedSeason = await planSeasonFromCandidates(targetGroup, apCandidates);
@@ -151,8 +194,8 @@ export async function resolveAnonymousSeasonEpisodes(
 
   episodes.sort((a, b) => a.number - b.number);
 
-  // 6. Build freshly discovered franchise season list
-  const seasons: AnonymousSeasonSummary[] = franchiseStructure.logicalGroups.map(
+  // 6. Build genuine series seasons list
+  const seasons: AnonymousSeasonSummary[] = seriesStructure.logicalGroups.map(
     (group) => {
       let epCount = group.primaryAnilistAnime.episodes ?? 0;
       if (group.logicalSeasonNumber === seasonNumber) {
@@ -167,7 +210,7 @@ export async function resolveAnonymousSeasonEpisodes(
     }
   );
 
-  const root = franchiseStructure.rootAnime;
+  const root = seriesStructure.seriesRootAnime;
   const rootTitle =
     root.title.english ?? root.title.romaji ?? root.title.native ?? "";
   const rootXl = root.coverImage?.extraLarge?.trim();
