@@ -106,22 +106,9 @@ export function buildSearchQueries(anime: AniListAnime): string[] {
     }
   }
 
-  // Include direct relation titles (PREQUEL, SEQUEL, PARENT)
-  if (anime.relations?.edges?.length) {
-    for (const edge of anime.relations.edges) {
-      if (
-        (edge.relationType === "PREQUEL" || edge.relationType === "SEQUEL" || edge.relationType === "PARENT") &&
-        edge.node?.title
-      ) {
-        if (edge.node.title.english) rawList.push(edge.node.title.english);
-        if (edge.node.title.romaji) rawList.push(edge.node.title.romaji);
-      }
-    }
-  }
-
-  // Include AniList synonyms
+  // Include AniList synonyms (limited to top 5)
   if (anime.synonyms && anime.synonyms.length > 0) {
-    for (const syn of anime.synonyms.slice(0, 8)) {
+    for (const syn of anime.synonyms.slice(0, 5)) {
       if (syn && syn.length > 2) {
         rawList.push(syn);
       }
