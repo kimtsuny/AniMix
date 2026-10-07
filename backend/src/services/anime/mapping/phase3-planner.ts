@@ -1,7 +1,9 @@
 import {
   getAnimeById,
   getAnimeBasicById,
+  getAnimeBasicByIds,
   type AniListAnime,
+  type AniListRelation,
 } from "../../anilist/anilist.service.js";
 import { animeParadiseProvider } from "../../streaming/providers/animeparadise.provider.js";
 import { aniKotoProvider } from "../../streaming/providers/anikoto.provider.js";
@@ -284,6 +286,8 @@ export interface BoundedSeriesStructure {
 }
 
 const MAX_RELATION_NODES_INSPECTED = 6;
+const MAX_BACKWARD_STEPS = 2;
+const MAX_FORWARD_STEPS = 4;
 const MAX_PROVIDER_CANDIDATE_RETRIES = 2;
 
 /**
@@ -293,6 +297,7 @@ const MAX_PROVIDER_CANDIDATE_RETRIES = 2;
  * - At most 4 forward steps through SEQUEL to find genuine seasons.
  * - Maximum 6 total relation nodes inspected.
  * - Never walk into spin-offs, movies, OVAs, or separate franchise eras.
+ * - Batches basic anime metadata requests when multiple candidate relation nodes need inspection.
  */
 export async function resolveBoundedSeriesStructure(
   anilistId: number
@@ -306,75 +311,165 @@ export async function resolveBoundedSeriesStructure(
   const backwardVisited = new Set<number>([requestedAnime.id]);
   let backwardSteps = 0;
 
-  while (backwardSteps < 2 && inspectedCount < MAX_RELATION_NODES_INSPECTED) {
-    const prequelEdge = (currentBackward.relations?.edges ?? []).find(
+  while (
+    backwardSteps < MAX_BACKWARD_STEPS &&
+    inspectedCount < MAX_RELATION_NODES_INSPECTED
+  ) {
+    const prequelEdges = (currentBackward.relations?.edges ?? []).filter(
       (e) => e.relationType === "PREQUEL" && e.node?.type === "ANIME"
     );
-    if (!prequelEdge || backwardVisited.has(prequelEdge.node.id)) break;
+    if (prequelEdges.length === 0) break;
 
-    inspectedCount++;
-    backwardVisited.add(prequelEdge.node.id);
-
-    // Check if prequel is genuine prior season of this series
-    const isSame = isSameLogicalSeriesSeason(
-      currentBackward,
-      prequelEdge.node,
-      "PREQUEL"
+    const unvisitedEdges = prequelEdges.filter(
+      (e) => !backwardVisited.has(e.node.id)
     );
-    if (!isSame) break;
+    if (unvisitedEdges.length === 0) break;
 
-    try {
-      const prequelAnime = await getAnimeBasicById(prequelEdge.node.id);
-      seriesRoot = prequelAnime;
-      currentBackward = prequelAnime;
-      backwardSteps++;
-    } catch {
-      break;
+    const validPrequelEdges: AniListRelation[] = [];
+    for (const edge of unvisitedEdges) {
+      if (inspectedCount >= MAX_RELATION_NODES_INSPECTED) break;
+      inspectedCount++;
+      backwardVisited.add(edge.node.id);
+
+      // Check if prequel is genuine prior season using ONLY edge.node metadata
+      const isSame = isSameLogicalSeriesSeason(
+        currentBackward,
+        edge.node,
+        "PREQUEL"
+      );
+      if (isSame) {
+        validPrequelEdges.push(edge);
+      }
     }
+
+    if (validPrequelEdges.length === 0) break;
+
+    // Batch fetch candidate basic metadata
+    const candidateIds = validPrequelEdges.map((e) => e.node.id);
+    const uniqueCandidateIds = Array.from(new Set(candidateIds));
+    const idsToFetch = uniqueCandidateIds.filter(
+      (id) => id !== requestedAnime.id
+    );
+
+    let fetchedMap = new Map<number, AniListAnime>();
+    if (idsToFetch.length > 0) {
+      try {
+        const fetched = await getAnimeBasicByIds(idsToFetch);
+        for (const a of fetched) {
+          fetchedMap.set(a.id, a);
+        }
+      } catch (err: any) {
+        console.warn(
+          `[BoundedResolver] Failed to batch fetch prequel anime IDs [${idsToFetch.join(
+            ", "
+          )}]: ${err.message}`
+        );
+        break;
+      }
+    }
+
+    const nextRootId = validPrequelEdges[0].node.id;
+    const nextRoot =
+      nextRootId === requestedAnime.id
+        ? requestedAnime
+        : fetchedMap.get(nextRootId);
+
+    if (!nextRoot) break;
+
+    seriesRoot = nextRoot;
+    currentBackward = nextRoot;
+    backwardSteps++;
   }
 
   // 2. Collect genuine seasons forward from seriesRoot (bounded forward walk through SEQUEL, max 4 steps)
   const seasonEntries: AniListAnime[] = [seriesRoot];
   const forwardVisited = new Set<number>([seriesRoot.id]);
-  let currentForward = seriesRoot;
+  let currentFrontier: AniListAnime[] = [seriesRoot];
   let forwardSteps = 0;
 
-  while (forwardSteps < 4 && inspectedCount < MAX_RELATION_NODES_INSPECTED) {
-    const sequelEdges = (currentForward.relations?.edges ?? []).filter(
-      (e) => e.relationType === "SEQUEL" && e.node?.type === "ANIME"
+  while (
+    forwardSteps < MAX_FORWARD_STEPS &&
+    currentFrontier.length > 0 &&
+    inspectedCount < MAX_RELATION_NODES_INSPECTED
+  ) {
+    const candidateEdgesToFetch: Array<{
+      parent: AniListAnime;
+      edge: AniListRelation;
+    }> = [];
+
+    for (const parentAnime of currentFrontier) {
+      const sequelEdges = (parentAnime.relations?.edges ?? []).filter(
+        (e) => e.relationType === "SEQUEL" && e.node?.type === "ANIME"
+      );
+
+      for (const edge of sequelEdges) {
+        if (forwardVisited.has(edge.node.id)) continue;
+        if (inspectedCount >= MAX_RELATION_NODES_INSPECTED) break;
+
+        inspectedCount++;
+        forwardVisited.add(edge.node.id);
+
+        // Check if sequel is genuine season using ONLY edge.node metadata
+        const isSame = isSameLogicalSeriesSeason(
+          parentAnime,
+          edge.node,
+          "SEQUEL"
+        );
+        if (isSame) {
+          candidateEdgesToFetch.push({ parent: parentAnime, edge });
+        }
+      }
+
+      if (inspectedCount >= MAX_RELATION_NODES_INSPECTED) break;
+    }
+
+    if (candidateEdgesToFetch.length === 0) break;
+
+    // Deduplicate candidate IDs to fetch
+    const candidateIds = candidateEdgesToFetch.map((c) => c.edge.node.id);
+    const uniqueCandidateIds = Array.from(new Set(candidateIds));
+    const idsToFetch = uniqueCandidateIds.filter(
+      (id) => id !== requestedAnime.id
     );
 
-    let nextSeasonFound = false;
-    for (const edge of sequelEdges) {
-      if (forwardVisited.has(edge.node.id)) continue;
-      if (inspectedCount >= MAX_RELATION_NODES_INSPECTED) break;
+    let fetchedMap = new Map<number, AniListAnime>();
+    if (idsToFetch.length > 0) {
+      try {
+        const fetched = await getAnimeBasicByIds(idsToFetch);
+        for (const a of fetched) {
+          fetchedMap.set(a.id, a);
+        }
+      } catch (err: any) {
+        console.warn(
+          `[BoundedResolver] Failed to batch fetch sequel anime IDs [${idsToFetch.join(
+            ", "
+          )}]: ${err.message}`
+        );
+      }
+    }
 
-      inspectedCount++;
-      forwardVisited.add(edge.node.id);
+    const nextFrontier: AniListAnime[] = [];
 
-      const isSame = isSameLogicalSeriesSeason(
-        currentForward,
-        edge.node,
-        "SEQUEL"
-      );
-      if (isSame) {
-        try {
-          const nextAnime =
-            edge.node.id === requestedAnime.id
-              ? requestedAnime
-              : await getAnimeBasicById(edge.node.id);
-          seasonEntries.push(nextAnime);
-          currentForward = nextAnime;
-          forwardSteps++;
-          nextSeasonFound = true;
-          break;
-        } catch {
-          // ignore error fetching node
+    for (const { edge } of candidateEdgesToFetch) {
+      const anime =
+        edge.node.id === requestedAnime.id
+          ? requestedAnime
+          : fetchedMap.get(edge.node.id);
+
+      if (anime) {
+        if (!seasonEntries.some((e) => e.id === anime.id)) {
+          seasonEntries.push(anime);
+        }
+        if (!nextFrontier.some((e) => e.id === anime.id)) {
+          nextFrontier.push(anime);
         }
       }
     }
 
-    if (!nextSeasonFound) break;
+    if (nextFrontier.length === 0) break;
+
+    currentFrontier = nextFrontier;
+    forwardSteps++;
   }
 
   // Ensure requested anime is always present
