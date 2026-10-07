@@ -246,7 +246,7 @@ export async function getSeasonEpisodes(
           console.log(
             `[Anime Controller] Season ${season.number} (id: ${season.id}) has unmapped provider. Lazily resolving season...`
           );
-          await mapRequestedSeason(anime.anilistId, season.number);
+          await mapRequestedSeason(season.anilistId ?? anime.anilistId, season.number);
         }
 
         episodes = await prisma.episode.findMany({

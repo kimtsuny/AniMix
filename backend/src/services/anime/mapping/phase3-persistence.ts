@@ -2,6 +2,7 @@ import prisma from "../../../config/prisma.js";
 import {
   planFranchiseMapping,
   discoverFranchiseStructure,
+  resolveBoundedSeriesStructure,
   planSingleSeason,
   type PlannedSeason,
   type FranchisePlan,
@@ -296,16 +297,16 @@ export async function persistRequestedSeason(
   );
   const tTotalStart = performance.now();
 
-  // 1. Lightweight Franchise Discovery (AniList GraphQL only)
+  // 1. Bounded Series Resolution (AniList GraphQL only, bounded to genuine seasons)
   const tLookupStart = performance.now();
-  const structure = await discoverFranchiseStructure(anilistId);
-  const { rootAnime, requestedAnime, logicalGroups } = structure;
+  const structure = await resolveBoundedSeriesStructure(anilistId);
+  const { seriesRootAnime: rootAnime, requestedAnime, logicalGroups } = structure;
   console.log(
-    `[Performance] franchise discovery: ${(performance.now() - tLookupStart).toFixed(1)} ms`
+    `[Performance] bounded series resolution: ${(performance.now() - tLookupStart).toFixed(1)} ms`
   );
 
   console.log(
-    `[Anime Mapping] Discovered ${logicalGroups.length} logical seasons for root anime #${rootAnime.id} ("${rootAnime.title.english || rootAnime.title.romaji}")`
+    `[Anime Mapping] Resolved ${logicalGroups.length} logical seasons for series root #${rootAnime.id} ("${rootAnime.title.english || rootAnime.title.romaji}")`
   );
 
   // 2. Root Anime & Season Skeletons Persistence
