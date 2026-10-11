@@ -2,14 +2,73 @@ import { resolveBoundedSeriesStructure, discoverFranchiseStructure } from "../ma
 import { resolveAnonymousSeasonEpisodes } from "../anonymous-anime.service.js";
 import { aniKotoProvider } from "../../streaming/providers/anikoto.provider.js";
 import { animeParadiseProvider } from "../../streaming/providers/animeparadise.provider.js";
+import { clearAniListCache } from "../../anilist/anilist.service.js";
 
-async function benchmarkCase(name: string, anilistId: number, seasonNumber: number) {
+interface BoundedResolutionBenchmarkResult {
+  name: string;
+  anilistId: number;
+  totalMs: number;
+  anilistFullRequests: number;
+  anilistBatchRequests: number;
+  anilistSequentialBasicRequests: number;
+  totalAniListRequests: number;
+  seasonsFound: number;
+  seasonIds: number[];
+}
+
+async function benchmarkBoundedResolution(
+  name: string,
+  anilistId: number
+): Promise<BoundedResolutionBenchmarkResult> {
+  clearAniListCache();
+  let anilistFullRequests = 0;
+  let anilistBatchRequests = 0;
+  let anilistSequentialBasicRequests = 0;
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (url: any, options: any) => {
+    const urlStr = typeof url === "string" ? url : url.toString();
+    if (urlStr.includes("anilist.co")) {
+      const body = JSON.parse(options?.body || "{}");
+      if (body.query?.includes("AnimeById")) anilistFullRequests++;
+      else if (body.query?.includes("AnimeBasicBatch")) anilistBatchRequests++;
+      else if (body.query?.includes("AnimeBasicById")) anilistSequentialBasicRequests++;
+      else anilistFullRequests++;
+    }
+    return originalFetch(url, options);
+  }) as any;
+
+  const tStart = performance.now();
+  const structure = await resolveBoundedSeriesStructure(anilistId);
+  const totalMs = performance.now() - tStart;
+
+  globalThis.fetch = originalFetch;
+
+  return {
+    name,
+    anilistId,
+    totalMs: parseFloat(totalMs.toFixed(1)),
+    anilistFullRequests,
+    anilistBatchRequests,
+    anilistSequentialBasicRequests,
+    totalAniListRequests:
+      anilistFullRequests + anilistBatchRequests + anilistSequentialBasicRequests,
+    seasonsFound: structure.seasons.length,
+    seasonIds: structure.seasons.map((s) => s.anilistId),
+  };
+}
+
+async function benchmarkFullWatchPath(
+  name: string,
+  anilistId: number,
+  seasonNumber: number
+) {
+  clearAniListCache();
   let anilistFetchCount = 0;
   let anikotoRequestCount = 0;
   let apRequestCount = 0;
   let episodeFetchCount = 0;
 
-  // Spy on global fetch for AniList and providers
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async (url: any, options: any) => {
     const urlStr = typeof url === "string" ? url : url.toString();
@@ -57,25 +116,48 @@ async function benchmarkCase(name: string, anilistId: number, seasonNumber: numb
 }
 
 async function runBenchmark() {
-  console.log("=== RUNNING PERFORMANCE BENCHMARK ===");
+  console.log("=== BOUNDED RESOLUTION BENCHMARK (ANILIST REQUEST PROFILING) ===");
 
-  // 1. Dragon Ball (AniList ID 223, Season 1) - Stress test
-  const dbMetrics = await benchmarkCase("Dragon Ball (1986)", 223, 1);
-  console.log("\n[Metrics: Dragon Ball 223]");
-  console.dir(dbMetrics);
+  // 1. Dragon Ball (223) - Stress Case
+  const dbBounded = await benchmarkBoundedResolution("Dragon Ball (1986)", 223);
+  console.log("\n[Bounded: Dragon Ball 223]");
+  console.dir(dbBounded);
 
-  // 2. Dragon Ball Z (AniList ID 813, Season 1) - Independent Series test
-  const dbzMetrics = await benchmarkCase("Dragon Ball Z (1989)", 813, 1);
-  console.log("\n[Metrics: Dragon Ball Z 813]");
-  console.dir(dbzMetrics);
+  // 2. Frieren (154587) - Multi-Season Correctness Case
+  const frierenBounded = await benchmarkBoundedResolution("Frieren", 154587);
+  console.log("\n[Bounded: Frieren 154587]");
+  console.dir(frierenBounded);
 
-  // 3. Frieren (AniList ID 154587, Season 1) - Multi-season test
-  const frierenMetrics = await benchmarkCase("Frieren Season 1", 154587, 1);
-  console.log("\n[Metrics: Frieren 154587]");
-  console.dir(frierenMetrics);
+  // 3. Attack on Titan (16498) - Multi-Season Split-Branch Case
+  const aotBounded = await benchmarkBoundedResolution("Attack on Titan", 16498);
+  console.log("\n[Bounded: Attack on Titan 16498]");
+  console.dir(aotBounded);
 
-  // Compare with old franchise traversal for Dragon Ball (measuring relation nodes)
-  console.log("\n[Measuring Old Franchise Traversal for Dragon Ball (223)]");
+  // 4. One Piece (21) - Vast Relation Graph Case
+  const opBounded = await benchmarkBoundedResolution("One Piece", 21);
+  console.log("\n[Bounded: One Piece 21]");
+  console.dir(opBounded);
+
+  console.log("\n=== FULL ANONYMOUS RESOLUTION BENCHMARK ===");
+  // Full watch path resolution for the 4 core cases
+  const dbWatch = await benchmarkFullWatchPath("Dragon Ball S1", 223, 1);
+  console.log("\n[Watch: Dragon Ball 223]");
+  console.dir(dbWatch);
+
+  const frierenWatch = await benchmarkFullWatchPath("Frieren S1", 154587, 1);
+  console.log("\n[Watch: Frieren 154587]");
+  console.dir(frierenWatch);
+
+  const aotWatch = await benchmarkFullWatchPath("Attack on Titan S1", 16498, 1);
+  console.log("\n[Watch: Attack on Titan 16498]");
+  console.dir(aotWatch);
+
+  const opWatch = await benchmarkFullWatchPath("One Piece S1", 21, 1);
+  console.log("\n[Watch: One Piece 21]");
+  console.dir(opWatch);
+
+  // Franchise Traversal comparison for Dragon Ball (223)
+  console.log("\n[Old Franchise Traversal Comparison for Dragon Ball (223)]");
   let oldFranchiseNodes = 0;
   const oldFetch = globalThis.fetch;
   globalThis.fetch = (async (url: any, options: any) => {
@@ -97,3 +179,4 @@ async function runBenchmark() {
 }
 
 runBenchmark().catch(console.error);
+

@@ -126,36 +126,30 @@ const ANIME_BASIC_BATCH_QUERY = `
     Page(page: 1, perPage: 50) {
       media(id_in: $ids, type: ANIME) {
         id
-
-        title {
-          english
-          romaji
-          native
-        }
-
-        description
-
-        coverImage {
-          extraLarge
-          large
-        }
-
-        bannerImage
-
-        episodes
-        duration
+        type
         format
         status
         season
         seasonYear
+        episodes
+        duration
         startDate {
           year
           month
           day
         }
+        title {
+          english
+          romaji
+          native
+        }
+        coverImage {
+          extraLarge
+          large
+        }
+        bannerImage
         synonyms
         genres
-
         relations {
           edges {
             relationType
@@ -256,6 +250,13 @@ const animeBasicCache = new Map<number, CachedEntry<AniListAnime>>();
 // In-flight request deduplication maps
 const inFlightRequests = new Map<number, Promise<AniListAnime>>();
 const inFlightBasicRequests = new Map<number, Promise<AniListAnime>>();
+
+export function clearAniListCache(): void {
+  animeCache.clear();
+  animeBasicCache.clear();
+  inFlightRequests.clear();
+  inFlightBasicRequests.clear();
+}
 
 interface Deferred<T> {
   promise: Promise<T>;
@@ -399,6 +400,8 @@ export async function getAnimeBasicByIds(
     } else {
       idsToFetch.push(id);
       const deferred = createDeferred<AniListAnime>();
+      // Prevent unhandled rejection if an error occurs while in-flight
+      deferred.promise.catch(() => {});
       deferredMap.set(id, deferred);
       inFlightBasicRequests.set(id, deferred.promise);
     }
@@ -414,7 +417,16 @@ export async function getAnimeBasicByIds(
         );
         const fetchTime = Date.now();
         const mediaMap = new Map<number, AniListAnime>();
-        for (const anime of batchMedia) {
+        for (const raw of batchMedia) {
+          const anime: AniListAnime = {
+            ...raw,
+            description: (raw as any).description ?? null,
+            coverImage: raw.coverImage ?? { extraLarge: null, large: null },
+            bannerImage: raw.bannerImage ?? null,
+            genres: raw.genres ?? [],
+            synonyms: raw.synonyms ?? [],
+            relations: raw.relations ?? { edges: [] },
+          };
           animeBasicCache.set(anime.id, { data: anime, timestamp: fetchTime });
           mediaMap.set(anime.id, anime);
         }

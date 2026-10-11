@@ -131,6 +131,57 @@ describe("Bounded Series Resolution & Performance Optimization", () => {
       if (urlStr.includes("anilist.co")) {
         fetchCount++;
         const body = JSON.parse(options?.body || "{}");
+
+        if (body.variables?.ids) {
+          const ids = body.variables.ids as number[];
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              data: {
+                Page: {
+                  media: ids.map((id: number) => ({
+                    id,
+                    title: {
+                      english: `Runaway Series Season ${id}`,
+                      romaji: `Runaway Series Season ${id}`,
+                      native: `Runaway Series Season ${id}`,
+                    },
+                    format: "TV",
+                    type: "ANIME",
+                    status: "FINISHED",
+                    seasonYear: 2020 + (id - 9000),
+                    startDate: { year: 2020 + (id - 9000) },
+                    episodes: 12,
+                    coverImage: { extraLarge: "https://example.com/cover.jpg", large: "https://example.com/cover.jpg" },
+                    bannerImage: null,
+                    relations: {
+                      edges: [
+                        {
+                          relationType: "SEQUEL",
+                          node: {
+                            id: id + 1,
+                            type: "ANIME",
+                            format: "TV",
+                            status: "FINISHED",
+                            seasonYear: 2021 + (id - 9000),
+                            startDate: { year: 2021 + (id - 9000) },
+                            title: {
+                              english: `Runaway Series Season ${id + 1}`,
+                              romaji: `Runaway Series Season ${id + 1}`,
+                              native: `Runaway Series Season ${id + 1}`,
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  })),
+                },
+              },
+            }),
+          } as any;
+        }
+
         const currentId = body.variables?.id ?? 9000;
         const nextId = currentId + 1;
 
@@ -316,8 +367,13 @@ describe("Bounded Series Resolution & Performance Optimization", () => {
   it("Test 8: Already-resolved DB season skips provider mapping and episode sync", async () => {
     let candidateResolutionCalled = false;
 
-    // Spy on prisma.animeSeason to simulate an already-mapped season with episodes
+    // Spy on prisma models to simulate an already-mapped season with episodes without DB dependency
     const originalFindUnique = prisma.animeSeason.findUnique;
+    const originalAnimeUpsert = prisma.anime.upsert;
+    const originalSeasonUpsert = prisma.animeSeason.upsert;
+
+    prisma.anime.upsert = (async () => ({ id: 1000 })) as any;
+    prisma.animeSeason.upsert = (async () => ({})) as any;
     prisma.animeSeason.findUnique = (async (args: any) => {
       return {
         id: 77777,
@@ -338,6 +394,8 @@ describe("Bounded Series Resolution & Performance Optimization", () => {
       assert.strictEqual(result.season.providerId, "existing-koto-id");
     } finally {
       prisma.animeSeason.findUnique = originalFindUnique;
+      prisma.anime.upsert = originalAnimeUpsert;
+      prisma.animeSeason.upsert = originalSeasonUpsert;
     }
   });
 
@@ -356,5 +414,264 @@ describe("Bounded Series Resolution & Performance Optimization", () => {
     assert.strictEqual(r1.season.number, r2.season.number);
     assert.strictEqual(r1.season.episodes.length, r2.season.episodes.length);
     assert.strictEqual(r2.season.episodes.length, r3.season.episodes.length);
+  });
+
+  // ============================================================
+  // TEST A — Batch Fetching: Multiple basic anime IDs in one batch query
+  // ============================================================
+  it("Test A: Multiple basic anime IDs are fetched through one batch request rather than multiple sequential requests", async () => {
+    anilistService.clearAniListCache();
+    const originalFetch = globalThis.fetch;
+    const fetchCalls: any[] = [];
+
+    globalThis.fetch = (async (url: any, options: any) => {
+      const urlStr = typeof url === "string" ? url : url.toString();
+      if (urlStr.includes("anilist.co")) {
+        const body = JSON.parse(options?.body || "{}");
+        fetchCalls.push(body);
+        const ids: number[] = body.variables?.ids ?? [];
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            data: {
+              Page: {
+                media: ids.map((id) => ({
+                  id,
+                  title: { english: `Anime ${id}`, romaji: `Anime ${id}`, native: null },
+                  format: "TV",
+                  type: "ANIME",
+                  status: "FINISHED",
+                  seasonYear: 2022,
+                  startDate: { year: 2022, month: 1, day: 1 },
+                  episodes: 12,
+                  coverImage: { extraLarge: null, large: null },
+                  bannerImage: null,
+                  relations: { edges: [] },
+                })),
+              },
+            },
+          }),
+        } as any;
+      }
+      return originalFetch(url, options);
+    }) as any;
+
+    try {
+      const results = await anilistService.getAnimeBasicByIds([301, 302, 303]);
+      assert.strictEqual(fetchCalls.length, 1, "Must make EXACTLY ONE upstream batch fetch");
+      assert.deepStrictEqual(fetchCalls[0].variables.ids, [301, 302, 303]);
+      assert.strictEqual(results.length, 3);
+      assert.strictEqual(results[0].id, 301);
+      assert.strictEqual(results[1].id, 302);
+      assert.strictEqual(results[2].id, 303);
+    } finally {
+      globalThis.fetch = originalFetch;
+      anilistService.clearAniListCache();
+    }
+  });
+
+  // ============================================================
+  // TEST B — Deduplication: [123, 456, 123, 789] -> [123, 456, 789]
+  // ============================================================
+  it("Test B: Deduplication produces only [123, 456, 789] upstream", async () => {
+    anilistService.clearAniListCache();
+    const originalFetch = globalThis.fetch;
+    let requestedIdsUpstream: number[] = [];
+
+    globalThis.fetch = (async (url: any, options: any) => {
+      const urlStr = typeof url === "string" ? url : url.toString();
+      if (urlStr.includes("anilist.co")) {
+        const body = JSON.parse(options?.body || "{}");
+        requestedIdsUpstream = body.variables?.ids ?? [];
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            data: {
+              Page: {
+                media: requestedIdsUpstream.map((id) => ({
+                  id,
+                  title: { english: `Anime ${id}`, romaji: `Anime ${id}`, native: null },
+                  format: "TV",
+                  type: "ANIME",
+                  status: "FINISHED",
+                  seasonYear: 2020,
+                  startDate: { year: 2020, month: 1, day: 1 },
+                  episodes: 12,
+                  coverImage: { extraLarge: null, large: null },
+                  bannerImage: null,
+                  relations: { edges: [] },
+                })),
+              },
+            },
+          }),
+        } as any;
+      }
+      return originalFetch(url, options);
+    }) as any;
+
+    try {
+      const results = await anilistService.getAnimeBasicByIds([123, 456, 123, 789]);
+      assert.deepStrictEqual(
+        requestedIdsUpstream,
+        [123, 456, 789],
+        "Upstream request must deduplicate input IDs and preserve order"
+      );
+      assert.strictEqual(results.length, 3);
+    } finally {
+      globalThis.fetch = originalFetch;
+      anilistService.clearAniListCache();
+    }
+  });
+
+  // ============================================================
+  // TEST C — Relation Metadata: Classified without unnecessary basic fetch
+  // ============================================================
+  it("Test C: Relation metadata classifies non-season relations without unnecessary basic fetch", async () => {
+    anilistService.clearAniListCache();
+    const originalFetch = globalThis.fetch;
+    let basicBatchFetchCount = 0;
+
+    globalThis.fetch = (async (url: any, options: any) => {
+      const urlStr = typeof url === "string" ? url : url.toString();
+      if (urlStr.includes("anilist.co")) {
+        const body = JSON.parse(options?.body || "{}");
+        if (body.query?.includes("AnimeBasicBatch")) {
+          basicBatchFetchCount++;
+        }
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            data: {
+              Media: {
+                id: 5000,
+                title: { english: "Test Show", romaji: "Test Show", native: null },
+                format: "TV",
+                type: "ANIME",
+                status: "FINISHED",
+                seasonYear: 2020,
+                startDate: { year: 2020, month: 1, day: 1 },
+                episodes: 12,
+                coverImage: { extraLarge: null, large: null },
+                bannerImage: null,
+                relations: {
+                  edges: [
+                    {
+                      relationType: "SEQUEL",
+                      node: {
+                        id: 5001,
+                        type: "ANIME",
+                        format: "MOVIE", // Non-episodic format
+                        status: "FINISHED",
+                        seasonYear: 2021,
+                        startDate: { year: 2021 },
+                        title: { english: "Test Show Movie", romaji: "Test Show Movie", native: null },
+                      },
+                    },
+                    {
+                      relationType: "SEQUEL",
+                      node: {
+                        id: 5002,
+                        type: "ANIME",
+                        format: "TV",
+                        status: "FINISHED",
+                        seasonYear: 2022,
+                        startDate: { year: 2022 },
+                        title: { english: "Test Show: Alternative", romaji: "Test Show: Alternative", native: null }, // Franchise spin-off
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          }),
+        } as any;
+      }
+      return originalFetch(url, options);
+    }) as any;
+
+    try {
+      const structure = await resolveBoundedSeriesStructure(5000);
+      assert.strictEqual(structure.seasons.length, 1);
+      assert.strictEqual(
+        basicBatchFetchCount,
+        0,
+        "Nodes filtered by relation metadata must NOT trigger any basic fetches"
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+      anilistService.clearAniListCache();
+    }
+  });
+
+  // ============================================================
+  // TEST G — Failure Isolation: Batch AniList failure is non-fatal
+  // ============================================================
+  it("Test G: Batch AniList request failure allows requested anime to remain resolvable", async () => {
+    anilistService.clearAniListCache();
+    const originalFetch = globalThis.fetch;
+
+    globalThis.fetch = (async (url: any, options: any) => {
+      const urlStr = typeof url === "string" ? url : url.toString();
+      if (urlStr.includes("anilist.co")) {
+        const body = JSON.parse(options?.body || "{}");
+        if (body.variables?.ids) {
+          throw new Error("Upstream AniList connection error / timeout");
+        }
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            data: {
+              Media: {
+                id: 7000,
+                title: { english: "Solo Series", romaji: "Solo Series", native: null },
+                format: "TV",
+                type: "ANIME",
+                status: "FINISHED",
+                seasonYear: 2023,
+                startDate: { year: 2023, month: 1, day: 1 },
+                episodes: 12,
+                coverImage: { extraLarge: null, large: null },
+                bannerImage: null,
+                relations: {
+                  edges: [
+                    {
+                      relationType: "SEQUEL",
+                      node: {
+                        id: 7001,
+                        type: "ANIME",
+                        format: "TV",
+                        status: "FINISHED",
+                        seasonYear: 2024,
+                        startDate: { year: 2024 },
+                        title: { english: "Solo Series Season 2", romaji: "Solo Series Season 2", native: null },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          }),
+        } as any;
+      }
+      return originalFetch(url, options);
+    }) as any;
+
+    try {
+      const structure = await resolveBoundedSeriesStructure(7000);
+      assert.ok(structure, "Structure must resolve despite batch failure");
+      assert.strictEqual(structure.seriesRootAnime.id, 7000);
+      assert.strictEqual(structure.requestedAnime.id, 7000);
+      assert.ok(
+        structure.seasons.some((s) => s.anilistId === 7000),
+        "Requested anime must remain in seasons"
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+      anilistService.clearAniListCache();
+    }
   });
 });
