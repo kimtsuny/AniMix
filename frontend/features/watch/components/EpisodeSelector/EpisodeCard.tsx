@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Image from "next/image";
 import { Play } from "lucide-react";
 import type { Episode } from "@/features/watch/api/services/episode.service";
@@ -11,7 +12,7 @@ interface EpisodeCardProps {
   onSelect: (episode: Episode) => void;
 }
 
-export function EpisodeCard({
+export const EpisodeCard = memo(function EpisodeCard({
   episode,
   isSelected,
   onSelect,
@@ -64,4 +65,4 @@ export function EpisodeCard({
       </div>
     </button>
   );
-}
+});

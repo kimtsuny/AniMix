@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { EpisodeCard } from "./EpisodeCard";
 import type { Episode } from "@/features/watch/api/services/episode.service";
+import { getEpisodeKey } from "@/features/watch/utils/episodeBatching";
 
 interface EpisodeListProps {
   episodes: Episode[];
@@ -71,7 +72,7 @@ export function EpisodeList({
         <div className="flex gap-3 md:gap-3.5">
           {episodes.map((episode) => (
             <div
-              key={episode.id}
+              key={getEpisodeKey(episode)}
               className="shrink-0 min-w-0 basis-[58%] sm:basis-[38%] md:basis-[28%] lg:basis-[calc((100%-3.5rem)/5)]"
             >
               <EpisodeCard
