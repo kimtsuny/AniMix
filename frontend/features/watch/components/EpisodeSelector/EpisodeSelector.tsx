@@ -8,6 +8,7 @@ import {
   calculateEpisodeBatches,
   findBatchIndexForEpisode,
   DEFAULT_BATCH_SIZE,
+  shouldShowEpisodeRangeSelector,
 } from "@/features/watch/utils/episodeBatching";
 
 import type {
@@ -96,8 +97,10 @@ export function EpisodeSelector({
     return episodes.slice(currentBatch.startIndex, currentBatch.endIndex);
   }, [episodes, currentBatch, batches.length]);
 
-  const showRangeSelector =
-    !isLoading && episodes && episodes.length > DEFAULT_BATCH_SIZE;
+  const showRangeSelector = shouldShowEpisodeRangeSelector(
+    episodes?.length ?? 0,
+    isLoading
+  );
 
   return (
     <section className="py-5 md:py-6" aria-label="Episodes section">
@@ -112,7 +115,7 @@ export function EpisodeSelector({
         </div>
       )}
 
-      {/* 2. Episode Range Selector (only when episodes.length > 50) */}
+      {/* 2. Episode Range Selector (only when episodes.length > 100) */}
       {showRangeSelector && (
         <EpisodeRangeSelector
           batches={batches}

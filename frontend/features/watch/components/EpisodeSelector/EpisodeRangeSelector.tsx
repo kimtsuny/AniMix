@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { EpisodeBatch } from "@/features/watch/utils/episodeBatching";
+import { DEFAULT_BATCH_SIZE } from "@/features/watch/utils/episodeBatching";
 import { cn } from "@/shared/lib/utils";
 
 export interface EpisodeRangeSelectorProps {
@@ -38,7 +39,10 @@ export function EpisodeRangeSelector({
     }
   }, [activeBatchIndex]);
 
-  if (!batches || batches.length <= 1) {
+  // Hide range selector completely whenever episodes.length <= 100 or when at most 1 batch exists.
+  // Must return null so it leaves no empty space, borders, or placeholder elements.
+  const totalEpisodes = batches?.reduce((sum, b) => sum + b.count, 0) ?? 0;
+  if (!batches || batches.length <= 1 || totalEpisodes <= DEFAULT_BATCH_SIZE) {
     return null;
   }
 
@@ -47,7 +51,7 @@ export function EpisodeRangeSelector({
       ref={containerRef}
       role="tablist"
       aria-label="Episode range selector"
-      className="relative w-full overflow-x-auto scrollbar-hide py-1 -mx-0.5 px-0.5 mb-3"
+      className="relative w-full max-w-full min-w-0 overflow-x-auto scrollbar-hide py-1 -mx-0.5 px-0.5 mb-3 overscroll-x-contain"
     >
       <div className="flex items-center gap-1.5 sm:gap-2 w-max">
         {batches.map((batch) => {

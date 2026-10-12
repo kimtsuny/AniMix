@@ -1,6 +1,17 @@
 import type { Episode } from "../api/services/episode.service";
 
-export const DEFAULT_BATCH_SIZE = 50;
+export const DEFAULT_BATCH_SIZE = 100;
+
+/**
+ * Determines whether the episode range selector should be displayed.
+ * Only shown when not loading and total episodes exceed the batch size threshold (100).
+ */
+export function shouldShowEpisodeRangeSelector(
+  episodeCount: number,
+  isLoading: boolean = false
+): boolean {
+  return !isLoading && episodeCount > DEFAULT_BATCH_SIZE;
+}
 
 export interface EpisodeBatch {
   index: number;
