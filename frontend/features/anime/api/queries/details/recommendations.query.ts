@@ -2,11 +2,15 @@ export const RECOMMENDATIONS_QUERY = `
   query AnimeRecommendations($id: Int!) {
     Media(id: $id, type: ANIME) {
       id
-      recommendations(sort: [RATING_DESC], perPage: 15) {
+      isAdult
+      genres
+      recommendations(sort: [RATING_DESC], perPage: 25) {
         nodes {
           rating
           mediaRecommendation {
             id
+            isAdult
+            genres
             title {
               english
               romaji
@@ -16,9 +20,43 @@ export const RECOMMENDATIONS_QUERY = `
             }
             episodes
             format
+            averageScore
+            season
+            seasonYear
+            startDate {
+              year
+            }
+          }
+        }
+      }
+      relations {
+        edges {
+          relationType(version: 2)
+          node {
+            id
+            isAdult
+            genres
+            type
+            title {
+              english
+              romaji
+            }
+            coverImage {
+              large
+            }
+            format
+            status
+            episodes
+            averageScore
+            season
+            seasonYear
+            startDate {
+              year
+            }
           }
         }
       }
     }
   }
 `;
+

@@ -23,6 +23,8 @@ export type RawSectionMedia = {
   seasonYear: number | null;
 
   status: string | null;
+  genres?: string[] | null;
+  isAdult?: boolean | null;
 };
 
 export type SectionMediaResponse = {

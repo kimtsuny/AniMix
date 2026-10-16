@@ -13,6 +13,8 @@ import { Staff } from "@/features/anime/types/staff";
 import { Relation } from "@/features/anime/types/relation";
 import { Recommendation } from "@/features/anime/types/recommendation";
 
+import { isAnimeAllowed } from "@/shared/lib/content-filter";
+
 export interface AnimeDetailsPageData {
   details: AnimeDetails | null;
   characters: Character[];
@@ -26,7 +28,7 @@ export async function getAnimeDetailsPage(id: string | number): Promise<AnimeDet
   try {
     const data = await graphqlClient.request(ANIME_DETAILS_PAGE_QUERY, { id: Number(id) });
     
-    if (!data || !data.Media || data.Media.isAdult) {
+    if (!data || !data.Media || !isAnimeAllowed(data.Media)) {
       return null;
     }
 

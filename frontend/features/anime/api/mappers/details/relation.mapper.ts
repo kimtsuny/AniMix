@@ -1,10 +1,11 @@
 import { Relation } from "@/features/anime/types/relation";
+import { isAnimeAllowed } from "@/shared/lib/content-filter";
 
 export function mapRelations(data: any): Relation[] {
   if (!data?.Media?.relations?.edges) return [];
 
   return data.Media.relations.edges
-    .filter((edge: any) => edge.node)
+    .filter((edge: any) => edge?.node && isAnimeAllowed(edge.node))
     .map((edge: any) => ({
       id: edge.node.id,
       title: edge.node.title?.english || edge.node.title?.romaji || "Unknown Title",

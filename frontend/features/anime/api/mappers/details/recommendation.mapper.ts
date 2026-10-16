@@ -1,10 +1,11 @@
 import { Recommendation } from "@/features/anime/types/recommendation";
+import { isAnimeAllowed } from "@/shared/lib/content-filter";
 
 export function mapRecommendations(data: any): Recommendation[] {
   if (!data?.Media?.recommendations?.nodes) return [];
 
   return data.Media.recommendations.nodes
-    .filter((node: any) => node.mediaRecommendation)
+    .filter((node: any) => node?.mediaRecommendation && isAnimeAllowed(node.mediaRecommendation))
     .map((node: any) => ({
       id: node.mediaRecommendation.id,
       title: node.mediaRecommendation.title?.english || node.mediaRecommendation.title?.romaji || "Unknown Title",

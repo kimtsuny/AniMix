@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useState } from "react";
 import Image from "next/image";
 import { Play } from "lucide-react";
 import type { Episode } from "@/features/watch/api/services/episode.service";
@@ -19,6 +19,14 @@ export const EpisodeCard = memo(function EpisodeCard({
 }: EpisodeCardProps) {
   const title = episode.title || `Episode ${episode.number}`;
 
+  // Track load/error per thumbnail URL so a changed src resets state
+  // without an effect. Failed images fall back to the icon placeholder.
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const thumbnail = episode.thumbnail || null;
+  const hasThumbnail = thumbnail !== null && failedSrc !== thumbnail;
+  const isThumbnailLoaded = hasThumbnail && loadedSrc === thumbnail;
+
   return (
     <button
       type="button"
@@ -33,14 +41,27 @@ export const EpisodeCard = memo(function EpisodeCard({
       aria-current={isSelected ? "true" : undefined}
     >
       {/* Thumbnail image */}
-      {episode.thumbnail ? (
-        <Image
-          src={episode.thumbnail}
-          alt={title}
-          fill
-          sizes="(max-width: 640px) 60vw, (max-width: 768px) 38vw, (max-width: 1024px) 28vw, 20vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+      {hasThumbnail ? (
+        <>
+          {!isThumbnailLoaded && (
+            <div
+              className="absolute inset-0 bg-white/[0.04] animate-pulse"
+              aria-hidden="true"
+            />
+          )}
+          <Image
+            src={thumbnail}
+            alt={title}
+            fill
+            sizes="(max-width: 640px) 60vw, (max-width: 768px) 38vw, (max-width: 1024px) 28vw, 20vw"
+            onLoad={() => setLoadedSrc(thumbnail)}
+            onError={() => setFailedSrc(thumbnail)}
+            className={cn(
+              "object-cover transition-[transform,opacity] duration-300 group-hover:scale-105",
+              isThumbnailLoaded ? "opacity-100" : "opacity-0"
+            )}
+          />
+        </>
       ) : (
         <div className="absolute inset-0 bg-neutral-900 flex items-center justify-center">
           <Play className="size-6 text-white/20" />

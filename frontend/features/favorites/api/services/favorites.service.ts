@@ -3,6 +3,7 @@ import { graphqlClient } from "@/shared/api/graphql-client";
 import { getFavorites } from "../get-favorites";
 
 import { FAVORITES_ANIME_QUERY } from "../queries/favorites.query";
+import { filterAllowedAnime } from "@/shared/lib/content-filter";
 
 import type { FavoriteAnime } from "../../types/favorite.types";
 
@@ -28,7 +29,7 @@ export async function getFavoriteAnime(): Promise<FavoriteAnime[]> {
       }
     );
 
-    const animeList = data.Page.media;
+    const animeList = filterAllowedAnime(data.Page.media || []);
 
     return animeList.map((anime: any) => {
       const favorite = favorites.find(

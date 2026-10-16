@@ -72,11 +72,13 @@ export const ANIME_DETAILS_PAGE_QUERY = `
           }
         }
       }
-      recommendations(sort: [RATING_DESC], perPage: 15) {
+      recommendations(sort: [RATING_DESC], perPage: 25) {
         nodes {
           rating
           mediaRecommendation {
             id
+            isAdult
+            genres
             title {
               english
               romaji
@@ -94,6 +96,9 @@ export const ANIME_DETAILS_PAGE_QUERY = `
           relationType(version: 2)
           node {
             id
+            isAdult
+            genres
+            type
             title {
               english
               romaji
@@ -113,6 +118,8 @@ export const ANIME_DETAILS_PAGE_QUERY = `
                 relationType(version: 2)
                 node {
                   id
+                  isAdult
+                  genres
                   title {
                     english
                     romaji
@@ -132,6 +139,8 @@ export const ANIME_DETAILS_PAGE_QUERY = `
                       relationType(version: 2)
                       node {
                         id
+                        isAdult
+                        genres
                         title {
                           english
                           romaji

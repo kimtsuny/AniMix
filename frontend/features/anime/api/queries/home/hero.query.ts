@@ -2,13 +2,15 @@ import { gql } from "graphql-request";
 
 export const HERO_ANIME_QUERY = gql`
   query HeroAnime {
-    Page(page: 1, perPage: 5) {
+    Page(page: 1, perPage: 10) {
       media(
         type: ANIME
         sort: POPULARITY_DESC
         isAdult: false
+        genre_not_in: ["Ecchi", "Harem"]
       ) {
         id
+        isAdult
 
         title {
           english

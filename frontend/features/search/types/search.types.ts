@@ -41,6 +41,7 @@ export interface RawSearchMedia {
   season: string | null;
   seasonYear: number | null;
   genres: string[] | null;
+  isAdult?: boolean | null;
   description: string | null;
 }
 

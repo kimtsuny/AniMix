@@ -21,4 +21,8 @@ export const SECTION_MEDIA_FIELDS = `
   seasonYear
 
   status
+
+  genres
+
+  isAdult
 `;

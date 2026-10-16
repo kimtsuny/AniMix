@@ -1,13 +1,13 @@
 import { graphqlClient } from "@/shared/api/graphql-client";
 import { HERO_ANIME_QUERY } from "../../queries/home/hero.query";
 import type { HeroAnime } from "../../../types/hero";
-
-
+import { filterAllowedAnime } from "@/shared/lib/content-filter";
 
 type HeroAnimeResponse = {
   Page: {
     media: Array<{
       id: number;
+      isAdult?: boolean | null;
 
       title: {
         english: string | null;
@@ -47,7 +47,9 @@ export async function getHeroAnime(): Promise<HeroAnime[]> {
     HERO_ANIME_QUERY
   );
 
-  return response.Page.media.map((anime) => ({
+  const allowedMedia = filterAllowedAnime(response.Page.media).slice(0, 5);
+
+  return allowedMedia.map((anime) => ({
     id: anime.id,
 
     title: anime.title.english ?? anime.title.romaji,

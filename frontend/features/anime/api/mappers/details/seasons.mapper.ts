@@ -1,5 +1,6 @@
 import { Relation } from "@/features/anime/types/relation";
 import { AnimeDetails } from "@/features/anime/types/anime-details";
+import { isAnimeAllowed } from "@/shared/lib/content-filter";
 
 export function mapSeasons(data: any, details?: AnimeDetails | null): Relation[] {
   if (!data?.Media?.relations?.edges) return [];
@@ -17,6 +18,7 @@ export function mapSeasons(data: any, details?: AnimeDetails | null): Relation[]
     for (const edge of neighbors) {
       const node = edge.node;
       if (!node) continue;
+      if (!isAnimeAllowed(node)) continue;
       
       const id = node.id;
       visitedNodes.add(id);

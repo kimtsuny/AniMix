@@ -25,7 +25,6 @@ export function WatchPageContent({
     anime,
     seasons,
     episodes,
-    selectedEpisode,
     selectedEpisodeNumber,
     seasonNumber: activeSeasonNumber,
     stream,
@@ -137,8 +136,16 @@ export function WatchPageContent({
 
         <div className="border-t border-white/5" />
 
+        {/*
+          Recommendations come from AniList and usually resolve before the
+          provider-backed episode list. Hold the cards in their skeleton state
+          until the first episode load for this anime has settled so the page
+          fills in top-to-bottom. Once episodes have loaded once (anime is
+          known), later season switches don't hide recommendations again.
+        */}
         <YouMightLike
-          recommendations={[]}
+          animeId={animeIdNumber}
+          isDeferred={isEpisodesLoading && anime === null}
         />
       </div>
     </div>
