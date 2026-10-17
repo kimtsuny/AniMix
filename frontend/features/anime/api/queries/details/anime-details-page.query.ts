@@ -113,54 +113,6 @@ export const ANIME_DETAILS_PAGE_QUERY = `
               month
               day
             }
-            relations {
-              edges {
-                relationType(version: 2)
-                node {
-                  id
-                  isAdult
-                  genres
-                  title {
-                    english
-                    romaji
-                  }
-                  coverImage {
-                    large
-                  }
-                  format
-                  status
-                  startDate {
-                    year
-                    month
-                    day
-                  }
-                  relations {
-                    edges {
-                      relationType(version: 2)
-                      node {
-                        id
-                        isAdult
-                        genres
-                        title {
-                          english
-                          romaji
-                        }
-                        coverImage {
-                          large
-                        }
-                        format
-                        status
-                        startDate {
-                          year
-                          month
-                          day
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
           }
         }
       }

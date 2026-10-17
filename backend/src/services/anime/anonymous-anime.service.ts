@@ -20,12 +20,15 @@ export interface AnonymousSeasonSummary {
   number: number;
   title: string;
   episodeCount: number;
+  anilistId: number;
+  anilistIds?: number[];
 }
 
 export interface AnonymousSeasonDetail {
   id: null;
   number: number;
   title: string;
+  anilistId?: number;
   episodes: AnonymousEpisode[];
 }
 
@@ -92,9 +95,12 @@ async function doResolveAnonymousSeasonEpisodes(
   }
 
   // 2. Identify the requested logical season
-  let targetGroup = seriesStructure.logicalGroups.find(
-    (g) => g.logicalSeasonNumber === seasonNumber
-  );
+  let targetGroup =
+    seasonNumber > 0
+      ? seriesStructure.logicalGroups.find(
+          (g) => g.logicalSeasonNumber === seasonNumber
+        )
+      : undefined;
 
   if (!targetGroup) {
     targetGroup = seriesStructure.logicalGroups.find(
@@ -198,7 +204,7 @@ async function doResolveAnonymousSeasonEpisodes(
   const seasons: AnonymousSeasonSummary[] = seriesStructure.logicalGroups.map(
     (group) => {
       let epCount = group.primaryAnilistAnime.episodes ?? 0;
-      if (group.logicalSeasonNumber === seasonNumber) {
+      if (group.logicalSeasonNumber === targetGroup.logicalSeasonNumber) {
         epCount = episodes.length > 0 ? episodes.length : epCount;
       }
       return {
@@ -206,6 +212,11 @@ async function doResolveAnonymousSeasonEpisodes(
         number: group.logicalSeasonNumber,
         title: group.displayTitle,
         episodeCount: epCount,
+        anilistId: group.primaryAnilistAnime.id,
+        anilistIds: [
+          group.primaryAnilistAnime.id,
+          ...group.relatedAnilistEntries.map((e) => e.id),
+        ],
       };
     }
   );
@@ -233,6 +244,7 @@ async function doResolveAnonymousSeasonEpisodes(
       id: null,
       number: targetGroup.logicalSeasonNumber,
       title: targetGroup.displayTitle,
+      anilistId: targetGroup.primaryAnilistAnime.id,
       episodes,
     },
   };

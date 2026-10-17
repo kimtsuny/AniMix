@@ -20,7 +20,7 @@ export async function getSeasonEpisodes(
       !Number.isInteger(anilistId) ||
       anilistId <= 0 ||
       !Number.isInteger(seasonNumber) ||
-      seasonNumber <= 0
+      seasonNumber < 0
     ) {
       res.status(400).json({
         message: "Invalid anime ID or season number",
@@ -142,17 +142,35 @@ export async function getSeasonEpisodes(
     // 3. Find requested season
     // ============================================================
 
-    let season = await prisma.animeSeason.findUnique({
-      where: {
-        animeId_number: {
-          animeId: anime.id,
-          number: seasonNumber,
+    let targetSeasonNumber = seasonNumber;
+    let season = null;
+
+    if (targetSeasonNumber > 0) {
+      season = await prisma.animeSeason.findUnique({
+        where: {
+          animeId_number: {
+            animeId: anime.id,
+            number: targetSeasonNumber,
+          },
         },
-      },
-    });
+      });
+    }
 
     if (!season && seasonByAnilistId && seasonByAnilistId.animeId === anime.id) {
       season = seasonByAnilistId;
+      targetSeasonNumber = season.number;
+    }
+
+    if (!season) {
+      season = await prisma.animeSeason.findFirst({
+        where: {
+          animeId: anime.id,
+          anilistId,
+        },
+      });
+      if (season) {
+        targetSeasonNumber = season.number;
+      }
     }
 
     // ============================================================
@@ -162,20 +180,21 @@ export async function getSeasonEpisodes(
 
     if (!season) {
       console.log(
-        `[Anime Controller] Season ${seasonNumber} for Anime #${anilistId} not found. Resolving requested season...`
+        `[Anime Controller] Season ${targetSeasonNumber} for Anime #${anilistId} not found. Resolving requested season...`
       );
 
-      await mapRequestedSeason(anime.anilistId, seasonNumber);
+      await mapRequestedSeason(anime.anilistId, targetSeasonNumber);
 
-      // Re-query AnimeSeason from database
-      season = await prisma.animeSeason.findUnique({
-        where: {
-          animeId_number: {
-            animeId: anime.id,
-            number: seasonNumber,
+      if (targetSeasonNumber > 0) {
+        season = await prisma.animeSeason.findUnique({
+          where: {
+            animeId_number: {
+              animeId: anime.id,
+              number: targetSeasonNumber,
+            },
           },
-        },
-      });
+        });
+      }
 
       if (!season) {
         season = await prisma.animeSeason.findFirst({
@@ -285,6 +304,7 @@ export async function getSeasonEpisodes(
         id: true,
         number: true,
         title: true,
+        anilistId: true,
 
         _count: {
           select: {
@@ -317,12 +337,15 @@ export async function getSeasonEpisodes(
         number: item.number,
         title: item.title,
         episodeCount: item._count.episodes,
+        anilistId: item.anilistId ?? (item.number === 1 ? anime.anilistId : null),
+        anilistIds: item.anilistId ? [item.anilistId] : (item.number === 1 ? [anime.anilistId] : []),
       })),
 
       season: {
         id: season.id,
         number: season.number,
         title: season.title,
+        anilistId: season.anilistId ?? (season.number === 1 ? anime.anilistId : null),
         episodes,
       },
     });

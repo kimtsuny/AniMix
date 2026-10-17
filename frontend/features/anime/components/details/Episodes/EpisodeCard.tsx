@@ -10,11 +10,11 @@ interface EpisodeCardProps {
 export function EpisodeCard({ episode }: EpisodeCardProps) {
   // Try to parse episode number from title (e.g. "Episode 1 - The Beginning")
   const titleParts = episode.title?.split('-') || [];
-  const epPrefix = titleParts.length > 1 ? titleParts[0].trim() : "Episode";
+  const epPrefix = titleParts.length > 1 ? titleParts[0].trim() : (episode.number ? `Episode ${episode.number}` : "Episode");
   const titleBody = titleParts.length > 1 ? titleParts.slice(1).join('-').trim() : episode.title;
 
   return (
-    <Link href={episode.url || "#"} target="_blank" rel="noopener noreferrer" className="group block w-[280px] md:w-[320px] shrink-0">
+    <Link href={episode.url || "#"} className="group block w-[280px] md:w-[320px] shrink-0">
       <div className="relative aspect-video rounded-lg overflow-hidden mb-3 bg-muted ring-1 ring-border/50 group-hover:ring-primary/50 transition-all">
         {episode.thumbnail ? (
           <Image

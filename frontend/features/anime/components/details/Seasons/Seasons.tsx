@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Relation } from "@/features/anime/types/relation";
 import { SectionContainer } from "../common/SectionContainer";
 import { SectionHeader } from "../common/SectionHeader";
 
 interface SeasonsProps {
-  seasons: Relation[];
+  seasons: (Relation & { number?: number })[];
   activeSeasonId: number;
   onSeasonSelect: (id: number) => void;
 }
@@ -40,7 +40,7 @@ export function Seasons({ seasons, activeSeasonId, onSeasonSelect }: SeasonsProp
 
         {seasons.map((season, index) => {
           const isActive = season.id === activeSeasonId;
-          const seasonNumber = index + 1;
+          const seasonNumber = season.number ?? index + 1;
 
           return (
             <button

@@ -5,8 +5,6 @@ import { mapCharacters } from "../../mappers/details/character.mapper";
 import { mapStaff } from "../../mappers/details/staff.mapper";
 import { mapRelations } from "../../mappers/details/relation.mapper";
 import { mapRecommendations } from "../../mappers/details/recommendation.mapper";
-import { mapSeasons } from "../../mappers/details/seasons.mapper";
-
 import { AnimeDetails } from "@/features/anime/types/anime-details";
 import { Character } from "@/features/anime/types/character";
 import { Staff } from "@/features/anime/types/staff";
@@ -40,7 +38,7 @@ export async function getAnimeDetailsPage(id: string | number): Promise<AnimeDet
       staff: mapStaff(data),
       relations: mapRelations(data),
       recommendations: mapRecommendations(data),
-      seasons: mapSeasons(data, details),
+      seasons: [],
     };
   } catch (error) {
     console.error("Failed to fetch anime details page data:", error);

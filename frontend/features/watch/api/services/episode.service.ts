@@ -14,6 +14,8 @@ export interface Season {
   number: number;
   title: string | null;
   episodeCount: number;
+  anilistId?: number | null;
+  anilistIds?: number[];
 }
 
 export interface Anime {
@@ -32,6 +34,7 @@ export interface GetSeasonEpisodesResponse {
     id: number | null;
     number: number;
     title: string | null;
+    anilistId?: number | null;
     episodes: Episode[];
   };
 }

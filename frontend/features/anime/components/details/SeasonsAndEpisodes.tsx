@@ -10,13 +10,20 @@ import { Episode } from "@/features/anime/types/episode";
 import { Loader2 } from "lucide-react";
 
 interface SeasonsAndEpisodesProps {
-  seasons: Relation[];
+  seasons: (Relation & { number?: number })[];
   initialEpisodes: Episode[];
   initialSeasonId: number;
   fallbackImage: string | null;
+  rootAnimeId?: number;
 }
 
-export function SeasonsAndEpisodes({ seasons, initialEpisodes, initialSeasonId, fallbackImage }: SeasonsAndEpisodesProps) {
+export function SeasonsAndEpisodes({
+  seasons,
+  initialEpisodes,
+  initialSeasonId,
+  fallbackImage,
+  rootAnimeId,
+}: SeasonsAndEpisodesProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -28,7 +35,7 @@ export function SeasonsAndEpisodes({ seasons, initialEpisodes, initialSeasonId, 
   const urlSeasonId = urlSeasonParam ? parseInt(urlSeasonParam, 10) : initialSeasonId;
 
   const [activeSeasonId, setActiveSeasonId] = useState<number>(urlSeasonId);
-  const [episodes, setEpisodes] = useState<Episode[]>(episodesCache.current[urlSeasonId] || initialEpisodes);
+  const [episodes, setEpisodes] = useState<Episode[]>(initialEpisodes);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -38,20 +45,29 @@ export function SeasonsAndEpisodes({ seasons, initialEpisodes, initialSeasonId, 
         setActiveSeasonId(urlSeasonId);
       } else {
         setIsLoading(true);
-        fetchSeasonEpisodes(urlSeasonId).then((newEpisodes) => {
-          episodesCache.current[urlSeasonId] = newEpisodes;
-          // Ensure the user hasn't navigated away while we were fetching
-          const currentUrlSeason = parseInt(new URLSearchParams(window.location.search).get("season") || initialSeasonId.toString(), 10);
-          if (currentUrlSeason === urlSeasonId) {
-            setEpisodes(newEpisodes);
-            setActiveSeasonId(urlSeasonId);
-          }
-        }).finally(() => {
-          setIsLoading(false);
-        });
+        const targetSeason = seasons.find((s) => s.id === urlSeasonId);
+        const targetSeasonNumber = targetSeason?.number ?? 0;
+
+        fetchSeasonEpisodes(urlSeasonId, rootAnimeId, targetSeasonNumber)
+          .then((newEpisodes) => {
+            episodesCache.current[urlSeasonId] = newEpisodes;
+            // Ensure the user hasn't navigated away while we were fetching
+            const currentUrlSeason = parseInt(
+              new URLSearchParams(window.location.search).get("season") ||
+                initialSeasonId.toString(),
+              10
+            );
+            if (currentUrlSeason === urlSeasonId) {
+              setEpisodes(newEpisodes);
+              setActiveSeasonId(urlSeasonId);
+            }
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
       }
     }
-  }, [urlSeasonId, activeSeasonId, initialSeasonId]);
+  }, [urlSeasonId, activeSeasonId, initialSeasonId, seasons, rootAnimeId]);
 
   const handleSeasonSelect = (id: number) => {
     if (id === activeSeasonId) return;
