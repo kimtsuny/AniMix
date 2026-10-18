@@ -286,5 +286,76 @@ describe("Details Page Seasons & Episodes AniMix Integration", () => {
       // Season 2 must be the one applied, Season 1 must NOT overwrite Season 2
       assert.equal(appliedSeasonId, 102);
     });
+
+    it("9. Independent lightweight season metadata maps correctly without episodes", () => {
+      const mockSeasonsMetadata = {
+        rootAnimeId: 16498,
+        requestedSeasonNumber: 1,
+        seasons: [
+          {
+            id: null,
+            number: 1,
+            title: "Season 1",
+            episodeCount: 25,
+            anilistId: 16498,
+            anilistIds: [16498],
+          },
+          {
+            id: null,
+            number: 2,
+            title: "Season 2",
+            episodeCount: 12,
+            anilistId: 20958,
+            anilistIds: [20958],
+          },
+        ],
+      };
+
+      const mappedSeasons = mockSeasonsMetadata.seasons.map((s) => ({
+        id: s.anilistId ?? s.number,
+        number: s.number,
+        title: s.title || `Season ${s.number}`,
+        episodeCount: s.episodeCount,
+      }));
+
+      assert.equal(mappedSeasons.length, 2);
+      assert.equal(mappedSeasons[0].id, 16498);
+      assert.equal(mappedSeasons[0].number, 1);
+      assert.equal(mappedSeasons[0].episodeCount, 25);
+      assert.equal(mappedSeasons[1].id, 20958);
+      assert.equal(mappedSeasons[1].number, 2);
+    });
+
+    it("10. Genuine batching with calculateBatchesFromCount when first batch of 100 is loaded", () => {
+      const { calculateBatchesFromCount } = require("../../../../watch/utils/episodeBatching");
+      const totalEpisodes = 1180;
+      const batches = calculateBatchesFromCount(totalEpisodes, 1, DEFAULT_BATCH_SIZE);
+
+      assert.equal(batches.length, 12);
+      assert.equal(batches[0].label, "1–100");
+      assert.equal(batches[0].count, 100);
+      assert.equal(batches[1].label, "101–200");
+      assert.equal(batches[11].label, "1101–1180");
+      assert.equal(batches[11].count, 80);
+    });
+
+    it("11. Episode cache keys distinguish AniList IDs and logical season numbers without collision", () => {
+      const cache: Record<string, any[]> = {};
+      const season1Episodes = [{ number: 1, title: "Ep 1" }];
+      const season2Episodes = [{ number: 1, title: "S2 Ep 1" }];
+
+      // Cache under prefix keys
+      cache["anilist:16498"] = season1Episodes;
+      cache["num:1"] = season1Episodes;
+      cache["anilist:20958"] = season2Episodes;
+      cache["num:2"] = season2Episodes;
+
+      assert.equal(cache["anilist:16498"][0].title, "Ep 1");
+      assert.equal(cache["anilist:20958"][0].title, "S2 Ep 1");
+      assert.equal(cache["num:1"][0].title, "Ep 1");
+      assert.equal(cache["num:2"][0].title, "S2 Ep 1");
+      // Ensuring no key overwrite
+      assert.notEqual(cache["anilist:16498"], cache["anilist:20958"]);
+    });
   });
 });

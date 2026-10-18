@@ -62,6 +62,42 @@ export function calculateEpisodeBatches(
 }
 
 /**
+ * Calculates episode batches from a known total count and start episode number.
+ * Useful when only the first batch of episodes has been loaded from the backend.
+ */
+export function calculateBatchesFromCount(
+  totalCount: number,
+  startEpisodeNumber: number = 1,
+  batchSize: number = DEFAULT_BATCH_SIZE
+): EpisodeBatch[] {
+  if (totalCount <= 0 || batchSize <= 0) {
+    return [];
+  }
+
+  const batches: EpisodeBatch[] = [];
+  const totalBatches = Math.ceil(totalCount / batchSize);
+
+  for (let i = 0; i < totalBatches; i++) {
+    const startIndex = i * batchSize;
+    const endIndex = Math.min(startIndex + batchSize, totalCount);
+    const startNum = startEpisodeNumber + startIndex;
+    const endNum = startEpisodeNumber + endIndex - 1;
+
+    batches.push({
+      index: i,
+      startIndex,
+      endIndex,
+      startEpisodeNumber: startNum,
+      endEpisodeNumber: endNum,
+      label: `${startNum}–${endNum}`,
+      count: endIndex - startIndex,
+    });
+  }
+
+  return batches;
+}
+
+/**
  * Determines the batch index containing the selected episode based on its
  * actual index within the complete episodes array.
  * Falls back to 0 if the episode is not found.

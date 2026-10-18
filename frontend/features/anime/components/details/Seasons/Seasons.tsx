@@ -4,16 +4,27 @@ import { useRef } from "react";
 import { Relation } from "@/features/anime/types/relation";
 import { SectionContainer } from "../common/SectionContainer";
 import { SectionHeader } from "../common/SectionHeader";
+import { SeasonsSkeleton } from "./SeasonsSkeleton";
 
 interface SeasonsProps {
   seasons: (Relation & { number?: number })[];
   activeSeasonId: number;
   onSeasonSelect: (id: number) => void;
+  isLoading?: boolean;
 }
 
-export function Seasons({ seasons, activeSeasonId, onSeasonSelect }: SeasonsProps) {
+export function Seasons({
+  seasons,
+  activeSeasonId,
+  onSeasonSelect,
+  isLoading = false,
+}: SeasonsProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef<HTMLButtonElement>(null);
+
+  if (isLoading && (!seasons || seasons.length === 0)) {
+    return <SeasonsSkeleton />;
+  }
 
   if (!seasons || seasons.length === 0) {
     return null;

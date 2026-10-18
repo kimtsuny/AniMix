@@ -3,6 +3,8 @@ import {
   discoverCandidatesForSeason,
   planSeasonFromCandidates,
   type PlannedSeason,
+  type BoundedSeriesStructure,
+  type LogicalSeasonDefinition,
 } from "./mapping/phase3-planner.js";
 import { parseEpisodeNumberFromTitle } from "./episode.service.js";
 
@@ -45,6 +47,144 @@ export interface AnonymousAnimeResult {
   season: AnonymousSeasonDetail;
 }
 
+export interface AnonymousSeasonsMetadata {
+  rootAnimeId: number;
+  requestedSeasonNumber: number;
+  anime: {
+    id: null;
+    anilistId: number;
+    title: string;
+    description: string | null;
+    coverImage: string | null;
+    bannerImage: string | null;
+  };
+  seasons: AnonymousSeasonSummary[];
+}
+
+// Bounded in-memory TTL cache for lightweight series structures
+interface CachedSeriesStructure {
+  data: BoundedSeriesStructure;
+  timestamp: number;
+}
+const seriesStructureCache = new Map<number, CachedSeriesStructure>();
+const STRUCTURE_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const MAX_STRUCTURE_CACHE_ENTRIES = 500;
+const inFlightSeriesStructures = new Map<
+  number,
+  Promise<BoundedSeriesStructure | null>
+>();
+
+// Bounded in-memory TTL cache for anonymous season episode results
+interface CachedAnonymousResult {
+  data: AnonymousAnimeResult;
+  timestamp: number;
+}
+const anonymousResultCache = new Map<string, CachedAnonymousResult>();
+const ANONYMOUS_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_ANONYMOUS_CACHE_ENTRIES = 500;
+
+// Periodic cleanup timer every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, item] of seriesStructureCache.entries()) {
+    if (now - item.timestamp > STRUCTURE_CACHE_TTL_MS) {
+      seriesStructureCache.delete(id);
+    }
+  }
+  for (const [key, item] of anonymousResultCache.entries()) {
+    if (now - item.timestamp > ANONYMOUS_CACHE_TTL_MS) {
+      anonymousResultCache.delete(key);
+    }
+  }
+}, 5 * 60 * 1000).unref();
+
+async function getCachedBoundedSeriesStructure(
+  anilistId: number
+): Promise<BoundedSeriesStructure | null> {
+  const now = Date.now();
+  const cached = seriesStructureCache.get(anilistId);
+  if (cached && now - cached.timestamp < STRUCTURE_CACHE_TTL_MS) {
+    return cached.data;
+  }
+
+  const existingInFlight = inFlightSeriesStructures.get(anilistId);
+  if (existingInFlight) {
+    return existingInFlight;
+  }
+
+  const promise = (async () => {
+    try {
+      const structure = await resolveBoundedSeriesStructure(anilistId);
+      if (structure) {
+        if (seriesStructureCache.size >= MAX_STRUCTURE_CACHE_ENTRIES) {
+          const firstKey = seriesStructureCache.keys().next().value;
+          if (firstKey !== undefined) seriesStructureCache.delete(firstKey);
+        }
+        seriesStructureCache.set(anilistId, {
+          data: structure,
+          timestamp: Date.now(),
+        });
+      }
+      return structure;
+    } finally {
+      inFlightSeriesStructures.delete(anilistId);
+    }
+  })();
+
+  inFlightSeriesStructures.set(anilistId, promise);
+  return promise;
+}
+
+/**
+ * Resolves lightweight seasons metadata on-the-fly for anonymous visitors.
+ * Fast, bounded AniList relations lookup with zero provider episode discovery.
+ */
+export async function resolveAnonymousSeasons(
+  anilistId: number
+): Promise<AnonymousSeasonsMetadata | null> {
+  const seriesStructure = await getCachedBoundedSeriesStructure(anilistId);
+  if (!seriesStructure || seriesStructure.logicalGroups.length === 0) {
+    return null;
+  }
+
+  const root = seriesStructure.seriesRootAnime;
+  const rootTitle =
+    root.title.english ?? root.title.romaji ?? root.title.native ?? "";
+  const rootXl = root.coverImage?.extraLarge?.trim();
+  const rootLg = root.coverImage?.large?.trim();
+  const rootCover =
+    (rootXl && rootXl.length > 0 ? rootXl : null) ??
+    (rootLg && rootLg.length > 0 ? rootLg : null);
+
+  const seasons: AnonymousSeasonSummary[] = seriesStructure.logicalGroups.map(
+    (group: LogicalSeasonDefinition) => ({
+      id: null,
+      number: group.logicalSeasonNumber,
+      title: group.displayTitle,
+      episodeCount: group.primaryAnilistAnime.episodes ?? 0,
+      anilistId: group.primaryAnilistAnime.id,
+      anilistIds: [
+        group.primaryAnilistAnime.id,
+        ...group.relatedAnilistEntries.map((e) => e.id),
+      ],
+    })
+  );
+
+  return {
+    rootAnimeId: root.id,
+    requestedSeasonNumber: seriesStructure.requestedSeasonNumber,
+    anime: {
+      id: null,
+      anilistId: root.id,
+      title: rootTitle,
+      description: root.description ?? null,
+      coverImage: rootCover,
+      bannerImage: root.bannerImage ?? null,
+    },
+    seasons,
+  };
+}
+
 // In-flight request deduplication to prevent duplicate upstream requests for concurrent visitors
 const inFlightAnonymousResolutions = new Map<
   string,
@@ -66,6 +206,14 @@ export async function resolveAnonymousSeasonEpisodes(
   seasonNumber: number
 ): Promise<AnonymousAnimeResult | null> {
   const cacheKey = `${anilistId}:${seasonNumber}`;
+
+  // Check TTL cache
+  const cached = anonymousResultCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < ANONYMOUS_CACHE_TTL_MS) {
+    // Return cloned object to protect against mutable modifications
+    return JSON.parse(JSON.stringify(cached.data));
+  }
+
   const existing = inFlightAnonymousResolutions.get(cacheKey);
   if (existing) {
     return existing;
@@ -73,7 +221,21 @@ export async function resolveAnonymousSeasonEpisodes(
 
   const promise = (async () => {
     try {
-      return await doResolveAnonymousSeasonEpisodes(anilistId, seasonNumber);
+      const result = await doResolveAnonymousSeasonEpisodes(
+        anilistId,
+        seasonNumber
+      );
+      if (result) {
+        if (anonymousResultCache.size >= MAX_ANONYMOUS_CACHE_ENTRIES) {
+          const firstKey = anonymousResultCache.keys().next().value;
+          if (firstKey !== undefined) anonymousResultCache.delete(firstKey);
+        }
+        anonymousResultCache.set(cacheKey, {
+          data: JSON.parse(JSON.stringify(result)),
+          timestamp: Date.now(),
+        });
+      }
+      return result;
     } finally {
       inFlightAnonymousResolutions.delete(cacheKey);
     }
@@ -88,7 +250,7 @@ async function doResolveAnonymousSeasonEpisodes(
   seasonNumber: number
 ): Promise<AnonymousAnimeResult | null> {
   // 1. Bounded series resolution (AniList relation graph bounded to genuine seasons)
-  const seriesStructure = await resolveBoundedSeriesStructure(anilistId);
+  const seriesStructure = await getCachedBoundedSeriesStructure(anilistId);
 
   if (!seriesStructure || seriesStructure.logicalGroups.length === 0) {
     return null;

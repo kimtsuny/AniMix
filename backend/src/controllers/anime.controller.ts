@@ -5,7 +5,150 @@ import {
   mapRequestedSeason,
 } from "../services/anime/anime-mapping.service.js";
 import { syncSeasonEpisodes } from "../services/anime/episode.service.js";
-import { resolveAnonymousSeasonEpisodes } from "../services/anime/anonymous-anime.service.js";
+import {
+  resolveAnonymousSeasonEpisodes,
+  resolveAnonymousSeasons,
+} from "../services/anime/anonymous-anime.service.js";
+
+export async function getAnimeSeasons(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const reqStart = performance.now();
+  try {
+    const anilistId = Number(req.params.animeId);
+
+    if (!Number.isInteger(anilistId) || anilistId <= 0) {
+      res.status(400).json({
+        message: "Invalid anime ID",
+      });
+      return;
+    }
+
+    const isAuthenticated = !!req.user;
+
+    // 1. Anonymous mode: zero DB queries, resolve lightweight bounded series metadata
+    if (!isAuthenticated) {
+      const metadata = await resolveAnonymousSeasons(anilistId);
+      if (!metadata) {
+        res.status(404).json({
+          message: `[Anime Controller] Seasons for Anime #${anilistId} could not be resolved.`,
+        });
+        return;
+      }
+
+      console.log(
+        `[Performance] total anonymous getAnimeSeasons time: ${(
+          performance.now() - reqStart
+        ).toFixed(1)} ms`
+      );
+
+      res.status(200).json(metadata);
+      return;
+    }
+
+    // 2. Authenticated mode: check database first
+    let anime = await prisma.anime.findUnique({
+      where: { anilistId },
+      select: {
+        id: true,
+        anilistId: true,
+        title: true,
+        description: true,
+        coverImage: true,
+        bannerImage: true,
+      },
+    });
+
+    if (!anime) {
+      const seasonByAnilistId = await prisma.animeSeason.findFirst({
+        where: { anilistId },
+        select: {
+          anime: {
+            select: {
+              id: true,
+              anilistId: true,
+              title: true,
+              description: true,
+              coverImage: true,
+              bannerImage: true,
+            },
+          },
+        },
+      });
+      if (seasonByAnilistId) {
+        anime = seasonByAnilistId.anime;
+      }
+    }
+
+    if (anime) {
+      const seasons = await prisma.animeSeason.findMany({
+        where: { animeId: anime.id },
+        orderBy: { number: "asc" },
+        select: {
+          id: true,
+          number: true,
+          title: true,
+          anilistId: true,
+          _count: {
+            select: {
+              episodes: true,
+            },
+          },
+        },
+      });
+
+      if (seasons.length > 0) {
+        const matchingSeason = seasons.find((s) => s.anilistId === anilistId);
+        const requestedSeasonNumber = matchingSeason?.number ?? 1;
+
+        res.status(200).json({
+          rootAnimeId: anime.anilistId,
+          requestedSeasonNumber,
+          anime: {
+            id: anime.id,
+            anilistId: anime.anilistId,
+            title: anime.title,
+            description: anime.description,
+            coverImage: anime.coverImage,
+            bannerImage: anime.bannerImage,
+          },
+          seasons: seasons.map((item) => ({
+            id: item.id,
+            number: item.number,
+            title: item.title,
+            episodeCount: item._count.episodes,
+            anilistId:
+              item.anilistId ?? (item.number === 1 ? anime.anilistId : null),
+            anilistIds: item.anilistId
+              ? [item.anilistId]
+              : item.number === 1
+              ? [anime.anilistId]
+              : [],
+          })),
+        });
+        return;
+      }
+    }
+
+    // Fallback: If not in DB yet for authenticated user, use lightweight resolver
+    const metadata = await resolveAnonymousSeasons(anilistId);
+    if (!metadata) {
+      res.status(404).json({
+        message: `[Anime Controller] Seasons for Anime #${anilistId} could not be resolved.`,
+      });
+      return;
+    }
+
+    res.status(200).json(metadata);
+  } catch (error: unknown) {
+    console.error("[Anime Controller] Failed to get anime seasons:", error);
+    res.status(500).json({
+      message:
+        error instanceof Error ? error.message : "Internal server error",
+    });
+  }
+}
 
 export async function getSeasonEpisodes(
   req: Request,
@@ -26,6 +169,36 @@ export async function getSeasonEpisodes(
         message: "Invalid anime ID or season number",
       });
       return;
+    }
+
+    const query = req.query || {};
+    let offset: number | undefined;
+    let limit: number | undefined;
+
+    if (query.offset !== undefined) {
+      const parsedOffset = Number(query.offset);
+      if (!Number.isInteger(parsedOffset) || parsedOffset < 0) {
+        res.status(400).json({
+          message: "Invalid offset parameter. Must be a non-negative integer.",
+        });
+        return;
+      }
+      offset = parsedOffset;
+    }
+
+    if (query.limit !== undefined) {
+      const parsedLimit = Number(query.limit);
+      if (
+        !Number.isInteger(parsedLimit) ||
+        parsedLimit <= 0 ||
+        parsedLimit > 100
+      ) {
+        res.status(400).json({
+          message: "Invalid limit parameter. Must be between 1 and 100.",
+        });
+        return;
+      }
+      limit = parsedLimit;
     }
 
     const isAuthenticated = !!req.user;
@@ -58,6 +231,31 @@ export async function getSeasonEpisodes(
           performance.now() - reqStart
         ).toFixed(1)} ms`
       );
+
+      if (limit !== undefined) {
+        const start = offset ?? 0;
+        const total = result.season.episodes.length;
+        const paginatedEpisodes = result.season.episodes.slice(
+          start,
+          start + limit
+        );
+
+        res.status(200).json({
+          anime: result.anime,
+          seasons: result.seasons,
+          season: {
+            ...result.season,
+            episodes: paginatedEpisodes,
+          },
+          pagination: {
+            offset: start,
+            limit,
+            total,
+            hasMore: start + limit < total,
+          },
+        });
+        return;
+      }
 
       res.status(200).json(result);
       return;
@@ -217,6 +415,9 @@ export async function getSeasonEpisodes(
     // 5. Check episodes
     // ============================================================
 
+    const isPaginated = limit !== undefined;
+    const paginationOffset = offset ?? 0;
+
     let episodes = await prisma.episode.findMany({
       where: {
         seasonId: season.id,
@@ -232,6 +433,13 @@ export async function getSeasonEpisodes(
       orderBy: {
         number: "asc",
       },
+
+      ...(isPaginated
+        ? {
+            skip: paginationOffset,
+            take: limit,
+          }
+        : {}),
     });
 
     // ============================================================
@@ -283,6 +491,13 @@ export async function getSeasonEpisodes(
           orderBy: {
             number: "asc",
           },
+
+          ...(isPaginated
+            ? {
+                skip: paginationOffset,
+                take: limit,
+              }
+            : {}),
         });
       }
     }
@@ -322,7 +537,7 @@ export async function getSeasonEpisodes(
     // 8. Return watch data
     // ============================================================
 
-    res.status(200).json({
+    const responsePayload: any = {
       anime: {
         id: anime.id,
         anilistId: anime.anilistId,
@@ -348,7 +563,23 @@ export async function getSeasonEpisodes(
         anilistId: season.anilistId ?? (season.number === 1 ? anime.anilistId : null),
         episodes,
       },
-    });
+    };
+
+    if (isPaginated && limit !== undefined) {
+      const currentSeasonSummary = seasons.find((s) => s.id === season.id);
+      const totalCount =
+        currentSeasonSummary?._count.episodes ??
+        (await prisma.episode.count({ where: { seasonId: season.id } }));
+
+      responsePayload.pagination = {
+        offset: paginationOffset,
+        limit,
+        total: totalCount,
+        hasMore: paginationOffset + limit < totalCount,
+      };
+    }
+
+    res.status(200).json(responsePayload);
   } catch (error: unknown) {
     console.error(
       "[Anime Controller] Failed to get season episodes:",

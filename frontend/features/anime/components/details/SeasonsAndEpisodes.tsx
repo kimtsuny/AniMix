@@ -2,17 +2,26 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getSeasonEpisodes } from "@/features/watch/api/services/episode.service";
+import {
+  getAnimeSeasons,
+  getSeasonEpisodes,
+} from "@/features/watch/api/services/episode.service";
 import { Seasons } from "./Seasons/Seasons";
-import { Episodes } from "./Episodes";
+import { Episodes, EpisodesSkeleton } from "./Episodes";
 import { Relation } from "@/features/anime/types/relation";
 import { Episode } from "@/features/anime/types/episode";
-import { Loader2 } from "lucide-react";
+import { DEFAULT_BATCH_SIZE } from "@/features/watch/utils/episodeBatching";
+
+type SeasonItem = Relation & {
+  number?: number;
+  anilistId?: number | null;
+  episodeCount?: number;
+};
 
 interface SeasonsAndEpisodesProps {
   initialSeasonId: number;
   fallbackImage: string | null;
-  initialSeasons?: (Relation & { number?: number })[];
+  initialSeasons?: SeasonItem[];
   initialEpisodes?: Episode[];
   rootAnimeId?: number;
 }
@@ -27,10 +36,15 @@ export function SeasonsAndEpisodes({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Cache for episodes keyed by season ID (AniList ID or season number)
-  const episodesCache = useRef<Record<number | string, Episode[]>>(
+  // Cache for episodes keyed by structured keys: `anilist:${id}`, `num:${seasonNumber}`, `batch:${season}:${batch}`
+  const episodesCache = useRef<Record<string, Episode[]>>(
     initialEpisodes && initialEpisodes.length > 0
-      ? { [initialSeasonId]: initialEpisodes }
+      ? {
+          [`anilist:${initialSeasonId}`]: initialEpisodes,
+          [`id:${initialSeasonId}`]: initialEpisodes,
+          [`num:1`]: initialEpisodes,
+          [`batch:1:0`]: initialEpisodes,
+        }
       : {}
   );
 
@@ -41,19 +55,29 @@ export function SeasonsAndEpisodes({
     : initialSeasonId;
 
   const [activeSeasonId, setActiveSeasonId] = useState<number>(urlSeasonId);
-  const [seasons, setSeasons] = useState<(Relation & { number?: number })[]>(
+  const [seasons, setSeasons] = useState<SeasonItem[]>(
     initialSeasons ?? []
   );
   const [episodes, setEpisodes] = useState<Episode[]>(initialEpisodes ?? []);
+  const [totalEpisodes, setTotalEpisodes] = useState<number | undefined>(
+    initialEpisodes?.length
+  );
+  const [activeBatchIndex, setActiveBatchIndex] = useState<number>(0);
   const [rootAnimeId, setRootAnimeId] = useState<number>(
     propRootAnimeId ?? initialSeasonId
   );
-  const [isLoading, setIsLoading] = useState<boolean>(
+
+  // Independent loading states
+  const [isLoadingSeasons, setIsLoadingSeasons] = useState<boolean>(
+    !initialSeasons || initialSeasons.length === 0
+  );
+  const [isLoadingEpisodes, setIsLoadingEpisodes] = useState<boolean>(
     !initialEpisodes || initialEpisodes.length === 0
   );
+  const [isLoadingBatch, setIsLoadingBatch] = useState<boolean>(false);
 
-  const activeRequestIdRef = useRef<number>(0);
-  const initialFetchInitiatedRef = useRef<boolean>(false);
+  const activeEpisodeRequestIdRef = useRef<number>(0);
+  const initialMountFetchDoneRef = useRef<boolean>(false);
 
   // Helper to map AniMix backend episodes to Episode format
   const mapEpisodes = useCallback(
@@ -88,9 +112,10 @@ export function SeasonsAndEpisodes({
         id: number | null;
         number: number;
         title: string | null;
+        episodeCount?: number;
         anilistId?: number | null;
       }>
-    ): (Relation & { number?: number })[] => {
+    ): SeasonItem[] => {
       return rawSeasons.map((s) => ({
         id: s.anilistId ?? s.id ?? s.number,
         number: s.number,
@@ -100,153 +125,248 @@ export function SeasonsAndEpisodes({
         format: "TV",
         status: null,
         startDate: null,
+        anilistId: s.anilistId,
+        episodeCount: s.episodeCount,
       }));
     },
     []
   );
 
-  // 1. Initial season & episodes resolution (when not provided by server SSR)
+  // 1. Initial independent concurrent fetches (seasons metadata + first episode batch)
   useEffect(() => {
-    if (
-      initialSeasons &&
-      initialSeasons.length > 0 &&
-      initialEpisodes &&
-      initialEpisodes.length > 0
-    ) {
-      return;
+    if (initialMountFetchDoneRef.current) return;
+    initialMountFetchDoneRef.current = true;
+
+    // A. Lightweight season metadata request
+    if (!initialSeasons || initialSeasons.length === 0) {
+      setIsLoadingSeasons(true);
+      getAnimeSeasons(initialSeasonId)
+        .then((data) => {
+          if (data.rootAnimeId) {
+            setRootAnimeId(data.rootAnimeId);
+          }
+          if (data.seasons && data.seasons.length > 0) {
+            const mapped = mapSeasons(data.seasons);
+            setSeasons(mapped);
+          }
+        })
+        .catch((err) => {
+          console.warn("Failed to load anime seasons metadata:", err);
+        })
+        .finally(() => {
+          setIsLoadingSeasons(false);
+        });
     }
-    if (initialFetchInitiatedRef.current) return;
-    initialFetchInitiatedRef.current = true;
 
-    const currentRequestId = ++activeRequestIdRef.current;
-    setIsLoading(true);
+    // B. Initial episode request (first 100 episodes)
+    if (!initialEpisodes || initialEpisodes.length === 0) {
+      const currentRequestId = ++activeEpisodeRequestIdRef.current;
+      setIsLoadingEpisodes(true);
 
-    getSeasonEpisodes(initialSeasonId, 0)
-      .then((data) => {
-        if (currentRequestId !== activeRequestIdRef.current) return;
+      // If user came with ?season=X, resolve that season, otherwise resolve default (0)
+      const targetSeasonParam = urlSeasonParam ? urlSeasonId : 0;
 
-        const resolvedRootId = data.anime?.anilistId || initialSeasonId;
-        setRootAnimeId(resolvedRootId);
-
-        const mappedSeasons = mapSeasons(data.seasons || []);
-        setSeasons(mappedSeasons);
-
-        const currentSeasonNum = data.season?.number || 1;
-        const currentSeasonAnilistId =
-          data.season?.anilistId ?? initialSeasonId;
-
-        const mappedEpisodes = mapEpisodes(
-          data.season?.episodes || [],
-          resolvedRootId,
-          currentSeasonNum
-        );
-
-        // Populate cache
-        episodesCache.current[currentSeasonAnilistId] = mappedEpisodes;
-        episodesCache.current[currentSeasonNum] = mappedEpisodes;
-        episodesCache.current[initialSeasonId] = mappedEpisodes;
-
-        // If the URL requests this season (or default season), set active episodes
-        if (
-          urlSeasonId === currentSeasonAnilistId ||
-          urlSeasonId === initialSeasonId
-        ) {
-          setEpisodes(mappedEpisodes);
-          setActiveSeasonId(currentSeasonAnilistId);
-          setIsLoading(false);
-        } else {
-          // If the user arrived with a specific ?season= that is different from initial
-          const targetSeason = mappedSeasons.find((s) => s.id === urlSeasonId);
-          const targetSeasonNumber = targetSeason?.number ?? 1;
-
-          getSeasonEpisodes(resolvedRootId, targetSeasonNumber)
-            .then((targetData) => {
-              if (currentRequestId !== activeRequestIdRef.current) return;
-              const targetEpisodes = mapEpisodes(
-                targetData.season?.episodes || [],
-                resolvedRootId,
-                targetSeasonNumber
-              );
-              episodesCache.current[urlSeasonId] = targetEpisodes;
-              episodesCache.current[targetSeasonNumber] = targetEpisodes;
-              setEpisodes(targetEpisodes);
-              setActiveSeasonId(urlSeasonId);
-            })
-            .catch((err) => {
-              console.warn("Failed to load requested season episodes:", err);
-            })
-            .finally(() => {
-              if (currentRequestId === activeRequestIdRef.current) {
-                setIsLoading(false);
-              }
-            });
-        }
+      getSeasonEpisodes(initialSeasonId, targetSeasonParam, {
+        offset: 0,
+        limit: DEFAULT_BATCH_SIZE,
       })
-      .catch((err) => {
-        if (currentRequestId !== activeRequestIdRef.current) return;
-        console.warn("Failed to fetch AniMix season episodes:", err);
-        setIsLoading(false);
-      });
+        .then((data) => {
+          if (currentRequestId !== activeEpisodeRequestIdRef.current) return;
+
+          const resolvedRootId = data.anime?.anilistId || initialSeasonId;
+          setRootAnimeId(resolvedRootId);
+
+          const resolvedSeasonNum = data.season?.number || 1;
+          const resolvedSeasonAnilistId =
+            data.season?.anilistId ?? initialSeasonId;
+
+          const mappedEpisodes = mapEpisodes(
+            data.season?.episodes || [],
+            resolvedRootId,
+            resolvedSeasonNum
+          );
+
+          const total =
+            data.pagination?.total ??
+            data.season?.episodes?.length ??
+            mappedEpisodes.length;
+          setTotalEpisodes(total);
+
+          // Populate cache
+          episodesCache.current[`anilist:${resolvedSeasonAnilistId}`] =
+            mappedEpisodes;
+          episodesCache.current[`num:${resolvedSeasonNum}`] = mappedEpisodes;
+          episodesCache.current[`id:${resolvedSeasonAnilistId}`] =
+            mappedEpisodes;
+          episodesCache.current[`batch:${resolvedSeasonNum}:0`] =
+            mappedEpisodes;
+
+          setEpisodes(mappedEpisodes);
+          setActiveSeasonId(resolvedSeasonAnilistId);
+          setActiveBatchIndex(0);
+        })
+        .catch((err) => {
+          if (currentRequestId !== activeEpisodeRequestIdRef.current) return;
+          console.warn("Failed to fetch initial anime episodes:", err);
+          setEpisodes([]);
+        })
+        .finally(() => {
+          if (currentRequestId === activeEpisodeRequestIdRef.current) {
+            setIsLoadingEpisodes(false);
+          }
+        });
+    }
   }, [
     initialSeasonId,
     initialSeasons,
     initialEpisodes,
     urlSeasonId,
+    urlSeasonParam,
     mapEpisodes,
     mapSeasons,
   ]);
 
   // 2. Season switching effect
   useEffect(() => {
-    // Skip if still in initial uninitialized state
+    // Skip if seasons are not loaded yet or activeSeasonId matches urlSeasonId already
     if (seasons.length === 0) return;
+    if (activeSeasonId === urlSeasonId && episodes.length > 0) return;
 
-    if (episodesCache.current[urlSeasonId]) {
-      setEpisodes(episodesCache.current[urlSeasonId]);
+    const targetSeason = seasons.find(
+      (s) => s.id === urlSeasonId || s.number === urlSeasonId
+    );
+    const targetSeasonNumber = targetSeason?.number ?? (urlSeasonId < 100 ? urlSeasonId : 1);
+    const targetAnilistId =
+      targetSeason?.anilistId ?? (urlSeasonId > 100 ? urlSeasonId : undefined);
+
+    // Check cache
+    const cached =
+      (targetAnilistId
+        ? episodesCache.current[`anilist:${targetAnilistId}`]
+        : undefined) ??
+      episodesCache.current[`num:${targetSeasonNumber}`] ??
+      episodesCache.current[`id:${urlSeasonId}`];
+
+    if (cached) {
+      setEpisodes(cached);
       setActiveSeasonId(urlSeasonId);
-      setIsLoading(false);
+      setActiveBatchIndex(0);
+      setIsLoadingEpisodes(false);
       return;
     }
 
-    const currentRequestId = ++activeRequestIdRef.current;
-    setIsLoading(true);
+    const currentRequestId = ++activeEpisodeRequestIdRef.current;
+    setActiveSeasonId(urlSeasonId);
+    setActiveBatchIndex(0);
+    setIsLoadingEpisodes(true);
+    setEpisodes([]); // Clear previous season episodes to prevent showing stale cards under new button
 
-    const targetSeason = seasons.find((s) => s.id === urlSeasonId);
-    const targetSeasonNumber = targetSeason?.number ?? 1;
     const targetAnimeId = rootAnimeId || initialSeasonId;
 
-    getSeasonEpisodes(targetAnimeId, targetSeasonNumber)
+    getSeasonEpisodes(targetAnimeId, targetSeasonNumber, {
+      offset: 0,
+      limit: DEFAULT_BATCH_SIZE,
+    })
       .then((data) => {
-        if (currentRequestId !== activeRequestIdRef.current) return;
+        if (currentRequestId !== activeEpisodeRequestIdRef.current) return;
 
         const resolvedRootId = data.anime?.anilistId || targetAnimeId;
         const resolvedSeasonNum = data.season?.number || targetSeasonNumber;
+        const resolvedSeasonAnilistId =
+          data.season?.anilistId ?? targetAnilistId ?? urlSeasonId;
+
         const newEpisodes = mapEpisodes(
           data.season?.episodes || [],
           resolvedRootId,
           resolvedSeasonNum
         );
 
-        episodesCache.current[urlSeasonId] = newEpisodes;
-        episodesCache.current[resolvedSeasonNum] = newEpisodes;
+        const total =
+          data.pagination?.total ??
+          data.season?.episodes?.length ??
+          newEpisodes.length;
+        setTotalEpisodes(total);
+
+        // Populate cache
+        episodesCache.current[`anilist:${resolvedSeasonAnilistId}`] =
+          newEpisodes;
+        episodesCache.current[`num:${resolvedSeasonNum}`] = newEpisodes;
+        episodesCache.current[`id:${urlSeasonId}`] = newEpisodes;
+        episodesCache.current[`batch:${resolvedSeasonNum}:0`] = newEpisodes;
 
         setEpisodes(newEpisodes);
-        setActiveSeasonId(urlSeasonId);
       })
       .catch((err) => {
-        if (currentRequestId !== activeRequestIdRef.current) return;
+        if (currentRequestId !== activeEpisodeRequestIdRef.current) return;
         console.warn("Failed to load season episodes:", err);
+        setEpisodes([]);
       })
       .finally(() => {
-        if (currentRequestId === activeRequestIdRef.current) {
-          setIsLoading(false);
+        if (currentRequestId === activeEpisodeRequestIdRef.current) {
+          setIsLoadingEpisodes(false);
         }
       });
-  }, [urlSeasonId, seasons, rootAnimeId, initialSeasonId, mapEpisodes]);
+  }, [
+    urlSeasonId,
+    seasons,
+    activeSeasonId,
+    episodes.length,
+    rootAnimeId,
+    initialSeasonId,
+    mapEpisodes,
+  ]);
 
   const handleSeasonSelect = (id: number) => {
     if (id === activeSeasonId) return;
     router.push(`?season=${id}`, { scroll: false });
+  };
+
+  const handleBatchChange = (batchIndex: number) => {
+    setActiveBatchIndex(batchIndex);
+
+    const targetSeason = seasons.find(
+      (s) => s.id === activeSeasonId || s.number === activeSeasonId
+    );
+    const targetSeasonNumber = targetSeason?.number ?? 1;
+
+    const batchKey = `batch:${targetSeasonNumber}:${batchIndex}`;
+    const cachedBatch = episodesCache.current[batchKey];
+
+    if (cachedBatch) {
+      setEpisodes(cachedBatch);
+      return;
+    }
+
+    setIsLoadingBatch(true);
+    const currentRequestId = ++activeEpisodeRequestIdRef.current;
+    const targetAnimeId = rootAnimeId || initialSeasonId;
+
+    getSeasonEpisodes(targetAnimeId, targetSeasonNumber, {
+      offset: batchIndex * DEFAULT_BATCH_SIZE,
+      limit: DEFAULT_BATCH_SIZE,
+    })
+      .then((data) => {
+        if (currentRequestId !== activeEpisodeRequestIdRef.current) return;
+
+        const resolvedRootId = data.anime?.anilistId || targetAnimeId;
+        const mappedBatch = mapEpisodes(
+          data.season?.episodes || [],
+          resolvedRootId,
+          targetSeasonNumber
+        );
+
+        episodesCache.current[batchKey] = mappedBatch;
+        setEpisodes(mappedBatch);
+      })
+      .catch((err) => {
+        if (currentRequestId !== activeEpisodeRequestIdRef.current) return;
+        console.warn("Failed to load episode batch:", err);
+      })
+      .finally(() => {
+        if (currentRequestId === activeEpisodeRequestIdRef.current) {
+          setIsLoadingBatch(false);
+        }
+      });
   };
 
   return (
@@ -255,23 +375,23 @@ export function SeasonsAndEpisodes({
         seasons={seasons}
         activeSeasonId={activeSeasonId}
         onSeasonSelect={handleSeasonSelect}
+        isLoading={isLoadingSeasons}
       />
 
-      <div
-        className={`transition-opacity duration-300 relative min-h-[200px] ${
-          isLoading ? "opacity-50 pointer-events-none" : "opacity-100"
-        }`}
-      >
-        {isLoading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+      <div className="relative min-h-[200px]">
+        {isLoadingEpisodes ? (
+          <EpisodesSkeleton count={5} />
+        ) : (
+          <Episodes
+            episodes={episodes}
+            fallbackImage={fallbackImage}
+            seasonId={activeSeasonId}
+            totalEpisodes={totalEpisodes}
+            activeBatchIndex={activeBatchIndex}
+            onBatchChange={handleBatchChange}
+            isLoadingBatch={isLoadingBatch}
+          />
         )}
-        <Episodes
-          episodes={episodes}
-          fallbackImage={fallbackImage}
-          seasonId={activeSeasonId}
-        />
       </div>
     </div>
   );

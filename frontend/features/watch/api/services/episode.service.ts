@@ -27,6 +27,18 @@ export interface Anime {
   bannerImage: string | null;
 }
 
+export interface PaginationParams {
+  offset?: number;
+  limit?: number;
+}
+
+export interface PaginationMetadata {
+  offset: number;
+  limit: number;
+  total: number;
+  hasMore: boolean;
+}
+
 export interface GetSeasonEpisodesResponse {
   anime: Anime;
   seasons: Season[];
@@ -37,13 +49,37 @@ export interface GetSeasonEpisodesResponse {
     anilistId?: number | null;
     episodes: Episode[];
   };
+  pagination?: PaginationMetadata;
+}
+
+export interface GetAnimeSeasonsResponse {
+  rootAnimeId: number;
+  requestedSeasonNumber: number;
+  anime?: Anime;
+  seasons: Season[];
+}
+
+export async function getAnimeSeasons(
+  animeId: number
+): Promise<GetAnimeSeasonsResponse> {
+  return httpClient<GetAnimeSeasonsResponse>(`/anime/${animeId}/seasons`);
 }
 
 export async function getSeasonEpisodes(
   animeId: number,
-  seasonNumber: number
+  seasonNumber: number,
+  pagination?: PaginationParams
 ): Promise<GetSeasonEpisodesResponse> {
-  return httpClient<GetSeasonEpisodesResponse>(
-    `/anime/${animeId}/seasons/${seasonNumber}/episodes`
-  );
+  const query = new URLSearchParams();
+  if (pagination?.offset !== undefined) {
+    query.set("offset", String(pagination.offset));
+  }
+  if (pagination?.limit !== undefined) {
+    query.set("limit", String(pagination.limit));
+  }
+  const queryString = query.toString();
+  const endpoint = `/anime/${animeId}/seasons/${seasonNumber}/episodes${
+    queryString ? `?${queryString}` : ""
+  }`;
+  return httpClient<GetSeasonEpisodesResponse>(endpoint);
 }
