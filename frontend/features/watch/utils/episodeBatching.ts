@@ -28,7 +28,7 @@ export interface EpisodeBatch {
  * Does not assume 1-based or contiguous numbering.
  */
 export function calculateEpisodeBatches(
-  episodes: Episode[],
+  episodes: Array<{ number?: number }>,
   batchSize: number = DEFAULT_BATCH_SIZE
 ): EpisodeBatch[] {
   if (!episodes || episodes.length === 0 || batchSize <= 0) {
@@ -44,13 +44,16 @@ export function calculateEpisodeBatches(
     const firstEpisode = episodes[startIndex];
     const lastEpisode = episodes[endIndex - 1];
 
+    const startNum = firstEpisode.number ?? startIndex + 1;
+    const endNum = lastEpisode.number ?? endIndex;
+
     batches.push({
       index: i,
       startIndex,
       endIndex,
-      startEpisodeNumber: firstEpisode.number,
-      endEpisodeNumber: lastEpisode.number,
-      label: `${firstEpisode.number}–${lastEpisode.number}`,
+      startEpisodeNumber: startNum,
+      endEpisodeNumber: endNum,
+      label: `${startNum}–${endNum}`,
       count: endIndex - startIndex,
     });
   }
@@ -64,7 +67,7 @@ export function calculateEpisodeBatches(
  * Falls back to 0 if the episode is not found.
  */
 export function findBatchIndexForEpisode(
-  episodes: Episode[],
+  episodes: Array<{ number?: number }>,
   selectedEpisodeNumber: number,
   batchSize: number = DEFAULT_BATCH_SIZE
 ): number {
@@ -98,11 +101,11 @@ export function getEpisodeKey(episode: Episode): string {
 /**
  * Slices the complete episode list to only the episodes belonging to the requested batch.
  */
-export function getBatchEpisodes(
-  episodes: Episode[],
+export function getBatchEpisodes<T = Episode>(
+  episodes: T[],
   batchIndex: number,
   batchSize: number = DEFAULT_BATCH_SIZE
-): Episode[] {
+): T[] {
   if (!episodes || episodes.length === 0) {
     return [];
   }

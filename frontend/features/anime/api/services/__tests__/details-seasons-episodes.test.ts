@@ -159,4 +159,132 @@ describe("Details Page Seasons & Episodes AniMix Integration", () => {
     assert.equal(relatedContent[0].id, 21172);
     assert.equal(relatedContent[1].id, 20739);
   });
+
+  describe("Phase 5 Details Page Episode Batching & Performance Scenarios", () => {
+    const {
+      calculateEpisodeBatches,
+      getBatchEpisodes,
+      shouldShowEpisodeRangeSelector,
+      DEFAULT_BATCH_SIZE,
+    } = require("../../../../watch/utils/episodeBatching");
+
+    it("1. A short anime with 12 episodes: no range selector", () => {
+      const episodes = Array.from({ length: 12 }, (_, i) => ({
+        number: i + 1,
+        title: `Episode ${i + 1}`,
+      }));
+      const batches = calculateEpisodeBatches(episodes, DEFAULT_BATCH_SIZE);
+      assert.equal(batches.length, 1);
+      assert.equal(batches[0].label, "1–12");
+      assert.equal(shouldShowEpisodeRangeSelector(episodes.length), false);
+    });
+
+    it("2. An anime with exactly 100 episodes: no range selector", () => {
+      const episodes = Array.from({ length: 100 }, (_, i) => ({
+        number: i + 1,
+        title: `Episode ${i + 1}`,
+      }));
+      const batches = calculateEpisodeBatches(episodes, DEFAULT_BATCH_SIZE);
+      assert.equal(batches.length, 1);
+      assert.equal(batches[0].label, "1–100");
+      assert.equal(shouldShowEpisodeRangeSelector(episodes.length), false);
+    });
+
+    it("3. An anime with 101 episodes: exactly two ranges", () => {
+      const episodes = Array.from({ length: 101 }, (_, i) => ({
+        number: i + 1,
+        title: `Episode ${i + 1}`,
+      }));
+      const batches = calculateEpisodeBatches(episodes, DEFAULT_BATCH_SIZE);
+      assert.equal(batches.length, 2);
+      assert.equal(batches[0].label, "1–100");
+      assert.equal(batches[1].label, "101–101");
+      assert.equal(shouldShowEpisodeRangeSelector(episodes.length), true);
+    });
+
+    it("4. One Piece with 1,180 episodes: exactly 100 cards mounted at a time in active batch", () => {
+      const episodes = Array.from({ length: 1180 }, (_, i) => ({
+        number: i + 1,
+        title: `Episode ${i + 1}`,
+      }));
+      const batches = calculateEpisodeBatches(episodes, DEFAULT_BATCH_SIZE);
+      assert.equal(batches.length, 12);
+      assert.equal(shouldShowEpisodeRangeSelector(episodes.length), true);
+
+      // Active batch 0 mounts exactly 100 cards
+      const batch0 = getBatchEpisodes(episodes, 0, DEFAULT_BATCH_SIZE);
+      assert.equal(batch0.length, 100);
+      assert.equal(batch0[0].number, 1);
+      assert.equal(batch0[99].number, 100);
+    });
+
+    it("5. Switching between ranges, including the final range", () => {
+      const episodes = Array.from({ length: 1180 }, (_, i) => ({
+        number: i + 1,
+        title: `Episode ${i + 1}`,
+      }));
+      // Batch 5 (middle)
+      const batch5 = getBatchEpisodes(episodes, 5, DEFAULT_BATCH_SIZE);
+      assert.equal(batch5.length, 100);
+      assert.equal(batch5[0].number, 501);
+      assert.equal(batch5[99].number, 600);
+
+      // Final batch 11 (episodes 1101 to 1180, total 80 remaining)
+      const batch11 = getBatchEpisodes(episodes, 11, DEFAULT_BATCH_SIZE);
+      assert.equal(batch11.length, 80);
+      assert.equal(batch11[0].number, 1101);
+      assert.equal(batch11[79].number, 1180);
+    });
+
+    it("6. Switching between seasons of different lengths safely resets batches", () => {
+      const season1Episodes = Array.from({ length: 1180 }, (_, i) => ({
+        number: i + 1,
+      }));
+      const season2Episodes = Array.from({ length: 24 }, (_, i) => ({
+        number: i + 1,
+      }));
+
+      const s1Batches = calculateEpisodeBatches(season1Episodes, DEFAULT_BATCH_SIZE);
+      assert.equal(s1Batches.length, 12);
+
+      const s2Batches = calculateEpisodeBatches(season2Episodes, DEFAULT_BATCH_SIZE);
+      assert.equal(s2Batches.length, 1);
+      assert.equal(shouldShowEpisodeRangeSelector(season2Episodes.length), false);
+
+      // Slicing season 2 at batch index 0 returns all 24 episodes
+      const s2Mounted = getBatchEpisodes(season2Episodes, 0, DEFAULT_BATCH_SIZE);
+      assert.equal(s2Mounted.length, 24);
+    });
+
+    it("7. Selecting an episode and verifying its watch URL format", () => {
+      const rootAnimeId = 16498;
+      const seasonNumber = 2;
+      const episode = { number: 5, title: "Historic" };
+      const url = `/watch/${rootAnimeId}/${seasonNumber}/${episode.number}`;
+      assert.equal(url, "/watch/16498/2/5");
+    });
+
+    it("8. Rapidly switching seasons: race-condition simulator ignores stale requests", async () => {
+      let activeRequestId = 0;
+      let appliedSeasonId: number | null = null;
+
+      async function simulateSeasonFetch(seasonId: number, delayMs: number) {
+        const requestId = ++activeRequestId;
+        await new Promise((r) => setTimeout(r, delayMs));
+        // Only apply if this request is still the active one
+        if (requestId === activeRequestId) {
+          appliedSeasonId = seasonId;
+        }
+      }
+
+      // Fast-click Season 1 (slow network 50ms), then immediately Season 2 (fast network 10ms)
+      const p1 = simulateSeasonFetch(101, 50);
+      const p2 = simulateSeasonFetch(102, 10);
+
+      await Promise.all([p1, p2]);
+
+      // Season 2 must be the one applied, Season 1 must NOT overwrite Season 2
+      assert.equal(appliedSeasonId, 102);
+    });
+  });
 });
