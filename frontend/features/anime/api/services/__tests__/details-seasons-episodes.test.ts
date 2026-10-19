@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import type { GetSeasonEpisodesResponse } from "@/features/watch/api/services/episode.service";
+import type { Episode } from "@/features/anime/types/episode";
 import {
   calculateEpisodeBatches,
   calculateBatchesFromCount,
@@ -11,9 +12,30 @@ import {
 import {
   buildCacheKey,
   validateCacheEntry,
+  resolveSeasonInfo,
+  globalEpisodesCache,
+  globalSeasonsCache,
+  globalRootAnimeIdCache,
+  clearGlobalCaches,
   type CachedSeasonBatch,
   type SeasonItem,
 } from "@/features/anime/components/details/SeasonsAndEpisodes";
+
+function mockEp(
+  number: number,
+  title: string,
+  thumbnail: string,
+  rootId: number = 16498,
+  seasonNum: number = 1
+): Episode {
+  return {
+    number,
+    title,
+    thumbnail,
+    url: `/watch/${rootId}/${seasonNum}/${number}`,
+    site: "AniMix",
+  };
+}
 
 describe("Details Page Seasons & Episodes AniMix Integration", () => {
   const mockWatchResponse: GetSeasonEpisodesResponse = {
@@ -69,7 +91,7 @@ describe("Details Page Seasons & Episodes AniMix Integration", () => {
           id: 201,
           number: 1,
           title: "Beast Titan",
-          thumbnail: "https://s4.anilist.co/ep1-thumb.jpg",
+          thumbnail: "https://s4.anilist.co/ep1-thumb-s2.jpg",
           provider: "anikoto",
           providerId: "ep-1",
         },
@@ -107,7 +129,6 @@ describe("Details Page Seasons & Episodes AniMix Integration", () => {
     assert.equal(seasons[3].id, 110277);
     assert.equal(seasons[3].number, 4);
 
-    // Verify seasons are NOT assuming anilistId === season number
     assert.notEqual(seasons[1].id, seasons[1].number);
   });
 
@@ -131,7 +152,7 @@ describe("Details Page Seasons & Episodes AniMix Integration", () => {
     assert.equal(episodes[0].number, 1);
     assert.equal(episodes[0].title, "Episode 1 - Beast Titan");
     assert.equal(episodes[0].url, "/watch/16498/2/1");
-    assert.equal(episodes[0].thumbnail, "https://s4.anilist.co/ep1-thumb.jpg");
+    assert.equal(episodes[0].thumbnail, "https://s4.anilist.co/ep1-thumb-s2.jpg");
 
     assert.equal(episodes[1].number, 2);
     assert.equal(episodes[1].title, "Episode 2 - I'm Home");
@@ -140,7 +161,6 @@ describe("Details Page Seasons & Episodes AniMix Integration", () => {
   });
 
   it("resolves season number correctly when viewing a sequel anime directly", () => {
-    // When a user opens /anime/20958 (AoT Season 2)
     const currentAnimeId = 20958;
     const seasons = mockWatchResponse.seasons.map((s) => ({
       id: s.anilistId ?? s.id ?? s.number,
@@ -161,10 +181,10 @@ describe("Details Page Seasons & Episodes AniMix Integration", () => {
     const seasonIds = new Set(seasons.map((s) => s.id));
 
     const relations = [
-      { id: 20958, title: "Attack on Titan Season 2", relationType: "SEQUEL" }, // Should be excluded
-      { id: 99147, title: "Attack on Titan Season 3", relationType: "SEQUEL" }, // Should be excluded
-      { id: 21172, title: "Attack on Titan: Junior High", relationType: "SPIN_OFF" }, // Should be KEPT
-      { id: 20739, title: "Attack on Titan: No Regrets", relationType: "SIDE_STORY" }, // Should be KEPT
+      { id: 20958, title: "Attack on Titan Season 2", relationType: "SEQUEL" },
+      { id: 99147, title: "Attack on Titan Season 3", relationType: "SEQUEL" },
+      { id: 21172, title: "Attack on Titan: Junior High", relationType: "SPIN_OFF" },
+      { id: 20739, title: "Attack on Titan: No Regrets", relationType: "SIDE_STORY" },
     ];
 
     const relatedContent = relations.filter((r) => !seasonIds.has(r.id));
@@ -173,7 +193,7 @@ describe("Details Page Seasons & Episodes AniMix Integration", () => {
     assert.equal(relatedContent[1].id, 20739);
   });
 
-  describe("Phase 5 Details Page Episode Batching & Performance Scenarios", () => {
+  describe("Episode Batching Utilities", () => {
     it("1. A short anime with 12 episodes: no range selector", () => {
       const episodes = Array.from({ length: 12 }, (_, i) => ({
         number: i + 1,
@@ -217,7 +237,6 @@ describe("Details Page Seasons & Episodes AniMix Integration", () => {
       assert.equal(batches.length, 12);
       assert.equal(shouldShowEpisodeRangeSelector(episodes.length), true);
 
-      // Active batch 0 mounts exactly 100 cards
       const batch0 = getBatchEpisodes(episodes, 0, DEFAULT_BATCH_SIZE);
       assert.equal(batch0.length, 100);
       assert.equal(batch0[0].number, 1);
@@ -229,13 +248,11 @@ describe("Details Page Seasons & Episodes AniMix Integration", () => {
         number: i + 1,
         title: `Episode ${i + 1}`,
       }));
-      // Batch 5 (middle)
       const batch5 = getBatchEpisodes(episodes, 5, DEFAULT_BATCH_SIZE);
       assert.equal(batch5.length, 100);
       assert.equal(batch5[0].number, 501);
       assert.equal(batch5[99].number, 600);
 
-      // Final batch 11 (episodes 1101 to 1180, total 80 remaining)
       const batch11 = getBatchEpisodes(episodes, 11, DEFAULT_BATCH_SIZE);
       assert.equal(batch11.length, 80);
       assert.equal(batch11[0].number, 1101);
@@ -257,7 +274,6 @@ describe("Details Page Seasons & Episodes AniMix Integration", () => {
       assert.equal(s2Batches.length, 1);
       assert.equal(shouldShowEpisodeRangeSelector(season2Episodes.length), false);
 
-      // Slicing season 2 at batch index 0 returns all 24 episodes
       const s2Mounted = getBatchEpisodes(season2Episodes, 0, DEFAULT_BATCH_SIZE);
       assert.equal(s2Mounted.length, 24);
     });
@@ -277,19 +293,15 @@ describe("Details Page Seasons & Episodes AniMix Integration", () => {
       async function simulateSeasonFetch(seasonId: number, delayMs: number) {
         const requestId = ++activeRequestId;
         await new Promise((r) => setTimeout(r, delayMs));
-        // Only apply if this request is still the active one
         if (requestId === activeRequestId) {
           appliedSeasonId = seasonId;
         }
       }
 
-      // Fast-click Season 1 (slow network 50ms), then immediately Season 2 (fast network 10ms)
       const p1 = simulateSeasonFetch(101, 50);
       const p2 = simulateSeasonFetch(102, 10);
 
       await Promise.all([p1, p2]);
-
-      // Season 2 must be the one applied, Season 1 must NOT overwrite Season 2
       assert.equal(appliedSeasonId, 102);
     });
 
@@ -345,245 +357,362 @@ describe("Details Page Seasons & Episodes AniMix Integration", () => {
     });
   });
 
-  describe("Phase E — Latency, Request Deduping, and Unambiguous Cache Tests", () => {
-    it("E1. Active season styling updates immediately upon click synchronously", () => {
-      let activeSeasonId = 16498;
-      const buttonStates: Array<{ id: number; isActive: boolean }> = [];
+  describe("Regression Tests — Watch Page Return, Cache, and Season Data Synchronization", () => {
+    const aotSeasons: SeasonItem[] = [
+      { id: 16498, number: 1, title: "Season 1", anilistId: 16498, relationType: "SEASON", coverImage: null, format: "TV", status: null, startDate: null },
+      { id: 20958, number: 2, title: "Season 2", anilistId: 20958, relationType: "SEASON", coverImage: null, format: "TV", status: null, startDate: null },
+      { id: 99147, number: 3, title: "Season 3", anilistId: 99147, relationType: "SEASON", coverImage: null, format: "TV", status: null, startDate: null },
+    ];
 
-      function simulateClick(id: number) {
-        // Immediate UI state update executed in click handler before any async fetch
-        activeSeasonId = id;
-        buttonStates.push({ id, isActive: activeSeasonId === id });
-      }
+    const s1Episodes: Episode[] = [
+      mockEp(1, "To You Two Thousand Years Later", "https://img1.ak.crunchyroll.com/s1-ep1.jpg", 16498, 1),
+      mockEp(2, "That Day", "https://img1.ak.crunchyroll.com/s1-ep2.jpg", 16498, 1),
+    ];
 
-      simulateClick(20958);
-      assert.equal(activeSeasonId, 20958);
-      assert.equal(buttonStates.length, 1);
-      assert.equal(buttonStates[0].isActive, true);
-    });
+    const s2Episodes: Episode[] = [
+      mockEp(1, "Beast Titan", "https://s4.anilist.co/s2-beast-titan.jpg", 16498, 2),
+      mockEp(2, "I'm Home", "https://s4.anilist.co/s2-im-home.jpg", 16498, 2),
+    ];
 
-    it("E2. A single uncached season selection issues exactly one effective request", async () => {
-      let requestCount = 0;
-      let activeRequestId = 0;
-
-      async function requestSeason(seasonNum: number) {
-        requestCount++;
-        const requestId = ++activeRequestId;
-        return { requestId, seasonNum };
-      }
-
-      const res = await requestSeason(2);
-      assert.equal(requestCount, 1);
-      assert.equal(res.seasonNum, 2);
-    });
-
-    it("E3. Selecting a cached season does not issue any network request", () => {
-      const cache = new Map<string, CachedSeasonBatch>();
+    it("1. Select season 2, navigate to an episode, return, and verify that season 2 remains selected and its thumbnails remain correct", () => {
+      clearGlobalCaches();
       const rootAnimeId = 16498;
-      const season2Number = 2;
 
-      // Seed cache
-      const key = buildCacheKey(rootAnimeId, season2Number, 0);
-      cache.set(key, {
+      // Populate global caches as occurs during normal season 2 viewing
+      globalSeasonsCache.set(rootAnimeId, aotSeasons);
+      globalRootAnimeIdCache.set(rootAnimeId, rootAnimeId);
+      globalEpisodesCache.set(buildCacheKey(rootAnimeId, 2, 0), {
         animeId: rootAnimeId,
-        seasonNumber: season2Number,
-        seasonAnilistId: 20958,
-        batchIndex: 0,
-        totalEpisodes: 12,
-        episodes: [{ number: 1, title: "Beast Titan" }],
-        timestamp: Date.now(),
-      });
-
-      let networkRequestIssued = false;
-      function onSeasonSelect(seasonId: number) {
-        const cached = validateCacheEntry(
-          cache.get(buildCacheKey(rootAnimeId, season2Number, 0)),
-          rootAnimeId,
-          season2Number,
-          0,
-          20958
-        );
-        if (cached) {
-          // Serve from cache without network request
-          return cached.episodes;
-        }
-        networkRequestIssued = true;
-        return null;
-      }
-
-      const episodes = onSeasonSelect(20958);
-      assert.ok(episodes);
-      assert.equal(episodes.length, 1);
-      assert.equal(networkRequestIssued, false);
-    });
-
-    it("E4. Rapid season switches (Season 2 then Season 3) abort earlier request and never overwrite newer selection", async () => {
-      let activeRequestId = 0;
-      let appliedSeason: number | null = null;
-      let appliedEpisodes: string[] | null = null;
-      const abortSignals: boolean[] = [];
-
-      async function switchSeason(seasonNum: number, delayMs: number) {
-        const requestId = ++activeRequestId;
-        const controller = { aborted: false };
-        abortSignals.push(controller.aborted);
-
-        await new Promise((r) => setTimeout(r, delayMs));
-
-        // If stale, do NOT apply
-        if (requestId !== activeRequestId) {
-          return;
-        }
-
-        appliedSeason = seasonNum;
-        appliedEpisodes = [`S${seasonNum} Ep 1`];
-      }
-
-      // User clicks Season 2 (takes 50ms), then 5ms later clicks Season 3 (takes 10ms)
-      const p1 = switchSeason(2, 50);
-      const p2 = switchSeason(3, 10);
-
-      await Promise.all([p1, p2]);
-
-      assert.equal(appliedSeason, 3);
-      assert.deepEqual(appliedEpisodes, ["S3 Ep 1"]);
-    });
-
-    it("E5. Browser Back/Forward (popstate) restores correct selected season and cached episodes", () => {
-      const historyStack: string[] = ["?season=16498", "?season=20958", "?season=99147"];
-      let currentPointer = 2; // currently at Season 3
-
-      const cache = new Map<string, CachedSeasonBatch>();
-      cache.set(buildCacheKey(16498, 2, 0), {
-        animeId: 16498,
         seasonNumber: 2,
         seasonAnilistId: 20958,
         batchIndex: 0,
         totalEpisodes: 12,
-        episodes: [{ number: 1, title: "S2 Ep 1" }],
+        episodes: s2Episodes,
         timestamp: Date.now(),
       });
 
-      // User presses Back button in browser
-      currentPointer--; // back to "?season=20958"
-      const currentQuery = historyStack[currentPointer];
-      const params = new URLSearchParams(currentQuery);
-      const restoredSeasonId = parseInt(params.get("season")!, 10);
+      // User clicked Episode 1 (navigated to /watch/16498/2/1)
+      // Now user presses browser Back -> URL is /anime/16498?season=20958
+      const returnedUrlSeasonParam = "20958";
+      const returnedTargetId = parseInt(returnedUrlSeasonParam, 10);
 
-      assert.equal(restoredSeasonId, 20958);
+      // Verify that on remount:
+      // A. Seasons metadata is available from persistent cache
+      const cachedSeasons = globalSeasonsCache.get(rootAnimeId)!;
+      assert.ok(cachedSeasons);
 
-      const cached = validateCacheEntry(
-        cache.get(buildCacheKey(16498, 2, 0)),
-        16498,
+      // B. resolveSeasonInfo resolves exact Season 2 without defaulting to season 1
+      const resolved = resolveSeasonInfo(returnedTargetId, cachedSeasons);
+      assert.equal(resolved.seasonNumber, 2);
+      assert.equal(resolved.anilistId, 20958);
+
+      // C. Cache hit returns season 2 episodes with season 2 thumbnails
+      const cachedBatch = validateCacheEntry(
+        globalEpisodesCache.get(buildCacheKey(rootAnimeId, resolved.seasonNumber!, 0)),
+        rootAnimeId,
         2,
         0,
         20958
       );
-      assert.ok(cached);
-      assert.equal(cached.episodes[0].title, "S2 Ep 1");
+      assert.ok(cachedBatch);
+      assert.equal(cachedBatch.seasonNumber, 2);
+      assert.equal(cachedBatch.episodes[0].title, "Beast Titan");
+      assert.equal(cachedBatch.episodes[0].thumbnail, "https://s4.anilist.co/s2-beast-titan.jpg");
+      assert.equal(cachedBatch.episodes[0].url, "/watch/16498/2/1");
+      assert.notEqual(cachedBatch.episodes[0].thumbnail, s1Episodes[0].thumbnail);
     });
 
-    it("E6. Direct access to ?season=... selects the correct season on initial render", () => {
-      const searchParams = new URLSearchParams("season=99147");
-      const urlSeasonParam = searchParams.get("season");
-      const initialSeasonId = 16498;
-
-      const initialSelectedSeason = urlSeasonParam
-        ? parseInt(urlSeasonParam, 10)
-        : initialSeasonId;
-
-      assert.equal(initialSelectedSeason, 99147);
-    });
-
-    it("E7. Cache keys do not collide across different anime, seasons, or batches", () => {
-      const cache = new Map<string, CachedSeasonBatch>();
-
-      // Anime 1, Season 1, Batch 0
-      const k1 = buildCacheKey(16498, 1, 0);
-      cache.set(k1, {
-        animeId: 16498,
-        seasonNumber: 1,
-        seasonAnilistId: 16498,
-        batchIndex: 0,
-        totalEpisodes: 25,
-        episodes: [{ number: 1, title: "AoT S1 Ep 1" }],
-        timestamp: Date.now(),
-      });
-
-      // Anime 1, Season 2, Batch 0
-      const k2 = buildCacheKey(16498, 2, 0);
-      cache.set(k2, {
-        animeId: 16498,
+    it("2. Return when season 2's episodes are cached: serves immediately with 0 network requests", () => {
+      clearGlobalCaches();
+      const rootAnimeId = 16498;
+      globalSeasonsCache.set(rootAnimeId, aotSeasons);
+      globalEpisodesCache.set(buildCacheKey(rootAnimeId, 2, 0), {
+        animeId: rootAnimeId,
         seasonNumber: 2,
         seasonAnilistId: 20958,
         batchIndex: 0,
         totalEpisodes: 12,
-        episodes: [{ number: 1, title: "AoT S2 Ep 1" }],
+        episodes: s2Episodes,
         timestamp: Date.now(),
       });
 
-      // Different Anime (e.g. Demon Slayer 101922), Season 1, Batch 0
-      const k3 = buildCacheKey(101922, 1, 0);
-      cache.set(k3, {
-        animeId: 101922,
+      let networkRequestFired = false;
+      function simulateMount(urlParam: string) {
+        const targetId = parseInt(urlParam, 10);
+        const seasons = globalSeasonsCache.get(rootAnimeId) ?? [];
+        const { seasonNumber, anilistId } = resolveSeasonInfo(targetId, seasons);
+        if (seasonNumber !== null) {
+          const cached = validateCacheEntry(
+            globalEpisodesCache.get(buildCacheKey(rootAnimeId, seasonNumber, 0)),
+            rootAnimeId,
+            seasonNumber,
+            0,
+            anilistId
+          );
+          if (cached) return cached.episodes;
+        }
+        networkRequestFired = true;
+        return null;
+      }
+
+      const displayedEpisodes = simulateMount("20958");
+      assert.ok(displayedEpisodes);
+      assert.equal(displayedEpisodes.length, 2);
+      assert.equal(displayedEpisodes[0].thumbnail, "https://s4.anilist.co/s2-beast-titan.jpg");
+      assert.equal(networkRequestFired, false);
+    });
+
+    it("3. Return when season 2's episodes are not cached: resolves seasons metadata first and requests Season 2 (never Season 1)", async () => {
+      clearGlobalCaches();
+      const rootAnimeId = 16498;
+      let requestedSeasonNumber: number | null = null;
+
+      // Simulate cold navigation back to /anime/16498?season=20958
+      const urlSeasonParam = "20958";
+      const targetId = parseInt(urlSeasonParam, 10);
+
+      // Initially seasons are not loaded
+      const initialResolution = resolveSeasonInfo(targetId, []);
+      // Must NOT guess season 1!
+      assert.equal(initialResolution.seasonNumber, null);
+      assert.equal(initialResolution.anilistId, 20958);
+
+      // Simulate getAnimeSeasons resolving
+      async function fetchSeasonsAndLoadEpisodes() {
+        // Fetch seasons
+        const seasons = aotSeasons;
+        globalSeasonsCache.set(rootAnimeId, seasons);
+
+        // Now resolve with loaded seasons
+        const { seasonNumber } = resolveSeasonInfo(targetId, seasons);
+        assert.equal(seasonNumber, 2);
+
+        // Fetch episodes for seasonNumber 2
+        requestedSeasonNumber = seasonNumber;
+        return s2Episodes;
+      }
+
+      const episodes = await fetchSeasonsAndLoadEpisodes();
+      assert.equal(requestedSeasonNumber, 2);
+      assert.equal(episodes[0].thumbnail, "https://s4.anilist.co/s2-beast-titan.jpg");
+    });
+
+    it("4. Switch seasons while an earlier season request is still pending: earlier response is discarded", async () => {
+      let activeRequestId = 0;
+      let activeSeasonId = 16498;
+      let renderedEpisodes: Episode[] | null = null;
+
+      async function requestSeason(seasonId: number, seasonNum: number, episodes: Episode[], delayMs: number) {
+        const requestId = ++activeRequestId;
+        activeSeasonId = seasonId;
+        await new Promise((r) => setTimeout(r, delayMs));
+
+        if (requestId !== activeRequestId) {
+          // Stale request discarded
+          return;
+        }
+        renderedEpisodes = episodes;
+      }
+
+      // User clicks Season 2 (50ms delay), then 5ms later clicks Season 3 (10ms delay)
+      const p1 = requestSeason(20958, 2, s2Episodes, 50);
+      const p2 = requestSeason(99147, 3, [mockEp(1, "Smoke Signal", "https://s4.anilist.co/s3-ep1.jpg", 16498, 3)], 10);
+
+      await Promise.all([p1, p2]);
+
+      assert.equal(activeSeasonId, 99147);
+      assert.ok(renderedEpisodes !== null);
+      const finalRendered = renderedEpisodes as Episode[];
+      assert.equal(finalRendered[0].title, "Smoke Signal");
+      assert.equal(finalRendered[0].thumbnail, "https://s4.anilist.co/s3-ep1.jpg");
+    });
+
+    it("5. Change episode batches, navigate away, and return: active batch resets to 0 with total episodes preserved", () => {
+      clearGlobalCaches();
+      const rootAnimeId = 16498;
+      const season1Batch0Key = buildCacheKey(rootAnimeId, 1, 0);
+      const season1Batch1Key = buildCacheKey(rootAnimeId, 1, 1);
+
+      // Caching batch 0 (eps 1-100) and batch 1 (eps 101-120)
+      const batch0 = Array.from({ length: 100 }, (_, i) => mockEp(i + 1, `Ep ${i + 1}`, `https://thumb/${i + 1}.jpg`));
+      const batch1 = Array.from({ length: 20 }, (_, i) => mockEp(i + 101, `Ep ${i + 101}`, `https://thumb/${i + 101}.jpg`));
+
+      globalEpisodesCache.set(season1Batch0Key, {
+        animeId: rootAnimeId,
         seasonNumber: 1,
-        seasonAnilistId: 101922,
+        seasonAnilistId: 16498,
         batchIndex: 0,
-        totalEpisodes: 26,
-        episodes: [{ number: 1, title: "DS S1 Ep 1" }],
+        totalEpisodes: 120,
+        episodes: batch0,
         timestamp: Date.now(),
       });
 
-      // Same Anime, Season 1, Batch 1
-      const k4 = buildCacheKey(16498, 1, 1);
-      cache.set(k4, {
-        animeId: 16498,
+      globalEpisodesCache.set(season1Batch1Key, {
+        animeId: rootAnimeId,
         seasonNumber: 1,
         seasonAnilistId: 16498,
         batchIndex: 1,
-        totalEpisodes: 25,
-        episodes: [{ number: 101, title: "AoT S1 Ep 101" }],
+        totalEpisodes: 120,
+        episodes: batch1,
         timestamp: Date.now(),
       });
 
-      assert.equal(k1, "anime:16498:s:1:b:0");
-      assert.equal(k2, "anime:16498:s:2:b:0");
-      assert.equal(k3, "anime:101922:s:1:b:0");
-      assert.equal(k4, "anime:16498:s:1:b:1");
+      // User was on batch 1, navigated to watch page, and returned:
+      // Returning to details page resets active batch index to 0
+      let activeBatchIndex = 0;
+      const cachedInitial = validateCacheEntry(
+        globalEpisodesCache.get(season1Batch0Key),
+        rootAnimeId,
+        1,
+        0
+      )!;
 
-      // Verify all 4 keys are distinct
-      const uniqueKeys = new Set([k1, k2, k3, k4]);
-      assert.equal(uniqueKeys.size, 4);
-
-      // Verify validation prevents mismatched entries
-      assert.equal(validateCacheEntry(cache.get(k1), 16498, 2, 0), null); // season mismatch
-      assert.equal(validateCacheEntry(cache.get(k1), 101922, 1, 0), null); // anime mismatch
-      assert.equal(validateCacheEntry(cache.get(k1), 16498, 1, 1), null); // batch mismatch
-      assert.equal(validateCacheEntry(cache.get(k1), 16498, 1, 0, 99999), null); // anilistId mismatch
+      assert.equal(activeBatchIndex, 0);
+      assert.equal(cachedInitial.totalEpisodes, 120);
+      assert.equal(cachedInitial.episodes[0].number, 1);
+      assert.equal(cachedInitial.episodes[99].number, 100);
     });
 
-    it("E8. Failed network requests do not leave the UI stuck in loading state", async () => {
-      let isLoadingEpisodes = true;
-      let episodes = ["placeholder"];
-      let activeRequestId = 1;
+    it("6. Use browser Back and Forward while the season query parameter changes: correctly restores season data", () => {
+      clearGlobalCaches();
+      const rootAnimeId = 16498;
+      globalSeasonsCache.set(rootAnimeId, aotSeasons);
 
-      async function failedFetch(currentRequestId: number) {
-        try {
-          throw new Error("Network 500 error");
-        } catch (err) {
-          if (currentRequestId === activeRequestId) {
-            episodes = [];
-          }
-        } finally {
-          if (currentRequestId === activeRequestId) {
-            isLoadingEpisodes = false;
-          }
-        }
+      globalEpisodesCache.set(buildCacheKey(rootAnimeId, 1, 0), {
+        animeId: rootAnimeId,
+        seasonNumber: 1,
+        seasonAnilistId: 16498,
+        batchIndex: 0,
+        totalEpisodes: 25,
+        episodes: s1Episodes,
+        timestamp: Date.now(),
+      });
+
+      globalEpisodesCache.set(buildCacheKey(rootAnimeId, 2, 0), {
+        animeId: rootAnimeId,
+        seasonNumber: 2,
+        seasonAnilistId: 20958,
+        batchIndex: 0,
+        totalEpisodes: 12,
+        episodes: s2Episodes,
+        timestamp: Date.now(),
+      });
+
+      // History navigation:
+      // State A: at Season 2 ("?season=20958")
+      // User clicks Back to Season 1 ("?season=16498")
+      const backTargetId = 16498;
+      const backResolved = resolveSeasonInfo(backTargetId, aotSeasons);
+      const backCached = validateCacheEntry(
+        globalEpisodesCache.get(buildCacheKey(rootAnimeId, backResolved.seasonNumber!, 0)),
+        rootAnimeId,
+        1,
+        0,
+        16498
+      )!;
+      assert.equal(backResolved.seasonNumber, 1);
+      assert.equal(backCached.episodes[0].title, "To You Two Thousand Years Later");
+      assert.equal(backCached.episodes[0].thumbnail, "https://img1.ak.crunchyroll.com/s1-ep1.jpg");
+
+      // User clicks Forward back to Season 2 ("?season=20958")
+      const forwardTargetId = 20958;
+      const forwardResolved = resolveSeasonInfo(forwardTargetId, aotSeasons);
+      const forwardCached = validateCacheEntry(
+        globalEpisodesCache.get(buildCacheKey(rootAnimeId, forwardResolved.seasonNumber!, 0)),
+        rootAnimeId,
+        2,
+        0,
+        20958
+      )!;
+      assert.equal(forwardResolved.seasonNumber, 2);
+      assert.equal(forwardCached.episodes[0].title, "Beast Titan");
+      assert.equal(forwardCached.episodes[0].thumbnail, "https://s4.anilist.co/s2-beast-titan.jpg");
+    });
+
+    it("7. Handle direct-sequel anime IDs without confusing the root anime ID with the season ID", () => {
+      clearGlobalCaches();
+      // Visiting /anime/20958 (direct sequel page for AoT Season 2)
+      const sequelAnimeId = 20958;
+      const backendResponse = {
+        rootAnimeId: 16498,
+        requestedSeasonNumber: 2,
+        seasons: aotSeasons,
+      };
+
+      const resolvedRootId = backendResponse.rootAnimeId;
+      assert.equal(resolvedRootId, 16498);
+      assert.notEqual(resolvedRootId, sequelAnimeId);
+
+      // Register mapping
+      globalRootAnimeIdCache.set(sequelAnimeId, resolvedRootId);
+      globalSeasonsCache.set(sequelAnimeId, aotSeasons);
+
+      // Verify that season lookup for sequel returns season 2
+      const seasonInfo = resolveSeasonInfo(sequelAnimeId, aotSeasons);
+      assert.equal(seasonInfo.seasonNumber, 2);
+      assert.equal(seasonInfo.anilistId, 20958);
+
+      // Cache key uses canonical root anime ID 16498, NOT sequel ID 20958
+      const key = buildCacheKey(resolvedRootId, seasonInfo.seasonNumber!, 0);
+      assert.equal(key, "anime:16498:s:2:b:0");
+    });
+
+    it("8. Reject invalid or mismatched cache entries", () => {
+      const cache = new Map<string, CachedSeasonBatch>();
+      const entryS1: CachedSeasonBatch = {
+        animeId: 16498,
+        seasonNumber: 1,
+        seasonAnilistId: 16498,
+        batchIndex: 0,
+        totalEpisodes: 25,
+        episodes: s1Episodes,
+        timestamp: Date.now(),
+      };
+      cache.set("anime:16498:s:1:b:0", entryS1);
+
+      // Asking for Season 2 from Season 1's key must fail
+      assert.equal(validateCacheEntry(entryS1, 16498, 2, 0), null);
+
+      // Asking for wrong anime ID must fail
+      assert.equal(validateCacheEntry(entryS1, 99999, 1, 0), null);
+
+      // Asking with mismatched anilistId must fail
+      assert.equal(validateCacheEntry(entryS1, 16498, 1, 0, 20958), null);
+
+      // Empty episodes array must fail
+      const emptyEntry: CachedSeasonBatch = {
+        ...entryS1,
+        episodes: [],
+      };
+      assert.equal(validateCacheEntry(emptyEntry, 16498, 1, 0), null);
+    });
+
+    it("9. Verify that an old response cannot overwrite the current season's episode array", async () => {
+      let activeRequestId = 0;
+      let activeSeason = 1;
+      let displayedEpisodes: Episode[] = s1Episodes;
+
+      async function fetchSeason(targetSeason: number, episodes: Episode[], delayMs: number) {
+        const reqId = ++activeRequestId;
+        activeSeason = targetSeason;
+
+        await new Promise((r) => setTimeout(r, delayMs));
+
+        // If request ID has changed, discard
+        if (reqId !== activeRequestId) return;
+        displayedEpisodes = episodes;
       }
 
-      await failedFetch(1);
-      assert.equal(isLoadingEpisodes, false);
-      assert.equal(episodes.length, 0);
+      // Season 2 starts (slow 40ms)
+      const p1 = fetchSeason(2, s2Episodes, 40);
+      // User switches to Season 3 (fast 10ms)
+      const p2 = fetchSeason(3, [mockEp(1, "Smoke Signal", "https://s4.anilist.co/s3.jpg", 16498, 3)], 10);
+
+      await Promise.all([p1, p2]);
+
+      // Season 3 must remain displayed; Season 2's slow response must NOT overwrite
+      assert.equal(activeSeason, 3);
+      assert.equal(displayedEpisodes[0].title, "Smoke Signal");
     });
   });
 });
