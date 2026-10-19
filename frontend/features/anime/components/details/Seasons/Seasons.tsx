@@ -10,6 +10,7 @@ interface SeasonsProps {
   seasons: (Relation & { number?: number })[];
   activeSeasonId: number;
   onSeasonSelect: (id: number) => void;
+  onSeasonHover?: (id: number) => void;
   isLoading?: boolean;
 }
 
@@ -17,6 +18,7 @@ export function Seasons({
   seasons,
   activeSeasonId,
   onSeasonSelect,
+  onSeasonHover,
   isLoading = false,
 }: SeasonsProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -58,6 +60,7 @@ export function Seasons({
               key={season.id}
               ref={isActive ? activeRef : null}
               onClick={() => onSeasonSelect(season.id)}
+              onMouseEnter={() => onSeasonHover?.(season.id)}
              className={`
   flex h-14 w-14 items-center justify-center
   rounded-lg text-lg font-bold

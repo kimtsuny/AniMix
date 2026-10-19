@@ -68,7 +68,8 @@ export async function getAnimeSeasons(
 export async function getSeasonEpisodes(
   animeId: number,
   seasonNumber: number,
-  pagination?: PaginationParams
+  pagination?: PaginationParams,
+  options?: RequestInit
 ): Promise<GetSeasonEpisodesResponse> {
   const query = new URLSearchParams();
   if (pagination?.offset !== undefined) {
@@ -81,5 +82,5 @@ export async function getSeasonEpisodes(
   const endpoint = `/anime/${animeId}/seasons/${seasonNumber}/episodes${
     queryString ? `?${queryString}` : ""
   }`;
-  return httpClient<GetSeasonEpisodesResponse>(endpoint);
+  return httpClient<GetSeasonEpisodesResponse>(endpoint, options);
 }
