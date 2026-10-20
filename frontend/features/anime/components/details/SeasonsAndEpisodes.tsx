@@ -8,8 +8,10 @@ import {
 } from "@/features/watch/api/services/episode.service";
 import { Seasons } from "./Seasons/Seasons";
 import { Episodes, EpisodesSkeleton } from "./Episodes";
+import { SeasonUnreleasedPanel } from "./Seasons/SeasonUnreleasedPanel";
 import { Relation } from "@/features/anime/types/relation";
 import { Episode } from "@/features/anime/types/episode";
+import { AnimeDetails } from "@/features/anime/types/anime-details";
 import { DEFAULT_BATCH_SIZE } from "@/features/watch/utils/episodeBatching";
 
 export type SeasonItem = Relation & {
@@ -114,6 +116,8 @@ interface SeasonsAndEpisodesProps {
   initialSeasons?: SeasonItem[];
   initialEpisodes?: Episode[];
   rootAnimeId?: number;
+  anime?: AnimeDetails | null;
+  relations?: Relation[];
 }
 
 export function SeasonsAndEpisodes({
@@ -122,6 +126,8 @@ export function SeasonsAndEpisodes({
   initialSeasons,
   initialEpisodes,
   rootAnimeId: propRootAnimeId,
+  anime,
+  relations,
 }: SeasonsAndEpisodesProps) {
   const searchParams = useSearchParams();
   const urlSeasonParam = searchParams.get("season");
@@ -255,20 +261,56 @@ export function SeasonsAndEpisodes({
         anilistId?: number | null;
       }>
     ): SeasonItem[] => {
-      return rawSeasons.map((s) => ({
-        id: s.anilistId ?? s.id ?? s.number,
-        number: s.number,
-        title: s.title || `Season ${s.number}`,
-        coverImage: null,
-        relationType: "SEASON",
-        format: "TV",
-        status: null,
-        startDate: null,
-        anilistId: s.anilistId,
-        episodeCount: s.episodeCount,
-      }));
+      return rawSeasons.map((s) => {
+        const seasonAnilistId =
+          s.anilistId ?? (s.id && s.id > 100 ? s.id : null);
+        let seasonStatus: string | null = null;
+        let seasonCover: string | null = null;
+
+        if (seasonAnilistId && anime && seasonAnilistId === anime.id) {
+          seasonStatus = anime.status;
+          seasonCover =
+            anime.bannerImage ||
+            anime.coverImage?.extraLarge ||
+            anime.coverImage?.large ||
+            null;
+        } else if (seasonAnilistId && relations) {
+          const match = relations.find((r) => r.id === seasonAnilistId);
+          if (match) {
+            seasonStatus = match.status;
+            seasonCover = match.coverImage;
+          }
+        }
+
+        if (!seasonStatus && relations) {
+          const match = relations.find((r) => {
+            const regex = new RegExp(
+              `(^|\\b)(?:season\\s*0*${s.number}|${s.number}(?:st|nd|rd|th)\\s*season)\\b`,
+              "i"
+            );
+            return regex.test(r.title);
+          });
+          if (match) {
+            seasonStatus = match.status;
+            if (!seasonCover) seasonCover = match.coverImage;
+          }
+        }
+
+        return {
+          id: s.anilistId ?? s.id ?? s.number,
+          number: s.number,
+          title: s.title || `Season ${s.number}`,
+          coverImage: seasonCover,
+          relationType: "SEASON",
+          format: "TV",
+          status: seasonStatus,
+          startDate: null,
+          anilistId: s.anilistId,
+          episodeCount: s.episodeCount,
+        };
+      });
     },
-    []
+    [anime, relations]
   );
 
   // Central coordinator function for loading a season's episodes
@@ -678,6 +720,64 @@ export function SeasonsAndEpisodes({
       });
   };
 
+  // Determine resolved season number and status for current selected season
+  const resolvedCurrentSeason = resolveSeasonInfo(selectedSeasonId, seasons);
+  const currentSeasonNumber =
+    resolvedCurrentSeason.seasonNumber ??
+    (selectedSeasonId < 100
+      ? selectedSeasonId
+      : (anime?.title?.english || anime?.title?.romaji || "").match(/season\s+(\d+)/i)
+      ? parseInt(
+          (anime?.title?.english || anime?.title?.romaji || "").match(/season\s+(\d+)/i)![1],
+          10
+        )
+      : 1);
+
+  const matchedSeasonItem = seasons.find(
+    (s) =>
+      s.id === selectedSeasonId ||
+      (resolvedCurrentSeason.anilistId && s.anilistId === resolvedCurrentSeason.anilistId) ||
+      (currentSeasonNumber !== null && s.number === currentSeasonNumber)
+  );
+
+  let currentSeasonStatus = matchedSeasonItem?.status || null;
+
+  if (!currentSeasonStatus) {
+    if (resolvedCurrentSeason.anilistId && anime && resolvedCurrentSeason.anilistId === anime.id) {
+      currentSeasonStatus = anime.status;
+    } else if (selectedSeasonId === initialSeasonId && anime) {
+      currentSeasonStatus = anime.status;
+    } else if (resolvedCurrentSeason.anilistId && relations) {
+      const match = relations.find((r) => r.id === resolvedCurrentSeason.anilistId);
+      if (match) currentSeasonStatus = match.status;
+    }
+
+    if (!currentSeasonStatus && relations && currentSeasonNumber) {
+      const match = relations.find((r) => {
+        const regex = new RegExp(
+          `(^|\\b)(?:season\\s*0*${currentSeasonNumber}|${currentSeasonNumber}(?:st|nd|rd|th)\\s*season)\\b`,
+          "i"
+        );
+        return regex.test(r.title);
+      });
+      if (match) currentSeasonStatus = match.status;
+    }
+  }
+
+  const isSeasonUnreleased = currentSeasonStatus === "NOT_YET_RELEASED";
+
+  const rawSeasonImage =
+    matchedSeasonItem?.coverImage ||
+    anime?.bannerImage ||
+    fallbackImage ||
+    anime?.coverImage?.extraLarge ||
+    anime?.coverImage?.large ||
+    null;
+
+  const currentSeasonImage = rawSeasonImage
+    ? rawSeasonImage.replace("/cover/medium/", "/cover/large/")
+    : null;
+
   return (
     <div className="space-y-3 relative">
       <Seasons
@@ -691,6 +791,11 @@ export function SeasonsAndEpisodes({
       <div className="relative min-h-[200px]">
         {isLoadingEpisodes ? (
           <EpisodesSkeleton count={5} />
+        ) : isSeasonUnreleased && episodes.length === 0 ? (
+          <SeasonUnreleasedPanel
+            seasonNumber={currentSeasonNumber}
+            image={currentSeasonImage}
+          />
         ) : (
           <Episodes
             episodes={episodes}
@@ -700,6 +805,8 @@ export function SeasonsAndEpisodes({
             activeBatchIndex={activeBatchIndex}
             onBatchChange={handleBatchChange}
             isLoadingBatch={isLoadingBatch}
+            isUnreleased={isSeasonUnreleased}
+            seasonNumber={currentSeasonNumber}
           />
         )}
       </div>

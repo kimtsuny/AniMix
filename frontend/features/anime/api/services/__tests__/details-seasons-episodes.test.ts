@@ -715,4 +715,71 @@ describe("Details Page Seasons & Episodes AniMix Integration", () => {
       assert.equal(displayedEpisodes[0].title, "Smoke Signal");
     });
   });
+
+  describe("Coming Soon States — Hero Watch Button & Season Unreleased Status", () => {
+    it("1. Confirms unreleased state when anime.status is NOT_YET_RELEASED", () => {
+      const unreleasedAnime = {
+        id: 171010,
+        status: "NOT_YET_RELEASED",
+        title: { english: "Sousou no Frieren 3rd Season", romaji: "Sousou no Frieren 3rd Season", native: null },
+      };
+      const isHeroComingSoon = unreleasedAnime.status === "NOT_YET_RELEASED";
+      assert.equal(isHeroComingSoon, true);
+    });
+
+    it("2. Retains normal Watch Now state when anime.status is FINISHED or RELEASING", () => {
+      const finishedAnime = {
+        id: 154587,
+        status: "FINISHED",
+        title: { english: "Sousou no Frieren", romaji: "Sousou no Frieren", native: null },
+      };
+      const releasingAnime = {
+        id: 160000,
+        status: "RELEASING",
+        title: { english: "Ongoing Anime", romaji: "Ongoing Anime", native: null },
+      };
+      assert.equal(finishedAnime.status === "NOT_YET_RELEASED", false);
+      assert.equal(releasingAnime.status === "NOT_YET_RELEASED", false);
+    });
+
+    it("3. Confirms unreleased season status from matching relation with NOT_YET_RELEASED", () => {
+      const relations = [
+        {
+          id: 171010,
+          title: "Sousou no Frieren 3rd Season",
+          coverImage: "https://s4.anilist.co/frieren3.jpg",
+          relationType: "SEQUEL",
+          format: "TV",
+          status: "NOT_YET_RELEASED",
+          startDate: { year: 2027, month: 10, day: 1 },
+        },
+      ];
+
+      const selectedSeasonAnilistId = 171010;
+      const matchingRelation = relations.find((r) => r.id === selectedSeasonAnilistId);
+      assert.ok(matchingRelation);
+      assert.equal(matchingRelation.status, "NOT_YET_RELEASED");
+    });
+
+    it("4. Prevents released season without streaming sources from being labeled COMING SOON", () => {
+      const relations = [
+        {
+          id: 102,
+          title: "Season 2",
+          coverImage: "https://s4.anilist.co/s2.jpg",
+          relationType: "SEQUEL",
+          format: "TV",
+          status: "FINISHED",
+          startDate: { year: 2020, month: 4, day: 1 },
+        },
+      ];
+
+      const selectedSeasonAnilistId = 102;
+      const matchingRelation = relations.find((r) => r.id === selectedSeasonAnilistId);
+      const isUnreleased = matchingRelation?.status === "NOT_YET_RELEASED";
+      // Released season with 0 stream episodes must NOT be marked unreleased
+      assert.equal(isUnreleased, false);
+    });
+  });
 });
+

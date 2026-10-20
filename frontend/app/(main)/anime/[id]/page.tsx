@@ -36,7 +36,7 @@ export default async function AnimeDetailsPage({
       )
   );
 
-  const fallbackImage = anime.bannerImage || anime.coverImage.large;
+  const fallbackImage = anime.bannerImage || anime.coverImage.extraLarge || anime.coverImage.large;
 
   // Determine season number for direct sequel viewing if specified in title, defaulting to 1
   const titleSeasonMatch = (
@@ -54,6 +54,8 @@ export default async function AnimeDetailsPage({
         <SeasonsAndEpisodes
           initialSeasonId={initialSeasonId}
           fallbackImage={fallbackImage}
+          anime={anime}
+          relations={relations}
         />
 
         <Characters characters={characters} />

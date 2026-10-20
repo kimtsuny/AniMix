@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimeDetails } from "@/features/anime/types/anime-details";
 import { Button } from "@/shared/components/ui/button";
-import { Play, Share2, Star, Trophy, Users, Heart, Clock, Film, Tv, Globe, BookOpen } from "lucide-react";
+import { Play, Share2, Star, Trophy, Users, Heart, Clock, Film, Tv, Globe, BookOpen, CalendarDays } from "lucide-react";
 import { Badge } from "../common/Badge";
 import { InfoChip } from "../common/InfoChip";
 import { StatItem } from "../common/StatItem";
@@ -256,11 +256,23 @@ export function Hero({ anime, seasonNumber = 1 }: HeroProps) {
 
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4 w-full">
-            <Link href={`/watch/${anime.id}/${seasonNumber}/1`}>
-              <Button size="lg" className="w-full md:w-auto h-12 px-8 bg-white text-black hover:bg-white/90 shadow-xl shadow-black/20 rounded-xl font-bold text-base transition-all active:scale-95">
-                <Play className="mr-2 h-5 w-5 fill-current" /> Watch Now
+            {anime?.status === "NOT_YET_RELEASED" ? (
+              <Button
+                size="lg"
+                disabled
+                aria-disabled="true"
+                className="w-full md:w-auto h-12 px-7 rounded-xl font-bold text-sm tracking-wider uppercase border border-[#E63946]/50 bg-[#E63946]/10 text-[#E63946] shadow-lg shadow-black/20 backdrop-blur-md cursor-not-allowed select-none !opacity-100 disabled:!opacity-100 disabled:pointer-events-auto flex items-center justify-center gap-2.5 transition-none"
+              >
+                <CalendarDays className="h-5 w-5 text-[#E63946] shrink-0" />
+                <span>COMING SOON</span>
               </Button>
-            </Link>
+            ) : (
+              <Link href={`/watch/${anime?.id}/${seasonNumber}/1`}>
+                <Button size="lg" className="w-full md:w-auto h-12 px-8 bg-white text-black hover:bg-white/90 shadow-xl shadow-black/20 rounded-xl font-bold text-base transition-all active:scale-95">
+                  <Play className="mr-2 h-5 w-5 fill-current" /> Watch Now
+                </Button>
+              </Link>
+            )}
             <Button
               size="lg"
               variant="secondary"

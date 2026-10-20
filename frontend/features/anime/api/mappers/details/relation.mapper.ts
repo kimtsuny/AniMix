@@ -9,7 +9,7 @@ export function mapRelations(data: any): Relation[] {
     .map((edge: any) => ({
       id: edge.node.id,
       title: edge.node.title?.english || edge.node.title?.romaji || "Unknown Title",
-      coverImage: edge.node.coverImage?.large || null,
+      coverImage: edge.node.coverImage?.extraLarge || edge.node.coverImage?.large || null,
       relationType: edge.relationType || "RELATED",
       format: edge.node.format || null,
       status: edge.node.status || null,

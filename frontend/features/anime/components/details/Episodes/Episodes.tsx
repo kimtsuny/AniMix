@@ -23,6 +23,7 @@ import {
   shouldShowEpisodeRangeSelector,
 } from "@/features/watch/utils/episodeBatching";
 import { EpisodeRangeSelector } from "@/features/watch/components/EpisodeSelector/EpisodeRangeSelector";
+import { SeasonUnreleasedPanel } from "../Seasons/SeasonUnreleasedPanel";
 
 interface EpisodesProps {
   episodes: Episode[];
@@ -32,6 +33,8 @@ interface EpisodesProps {
   activeBatchIndex?: number;
   onBatchChange?: (batchIndex: number) => void;
   isLoadingBatch?: boolean;
+  isUnreleased?: boolean;
+  seasonNumber?: number;
 }
 
 export function Episodes({
@@ -42,6 +45,8 @@ export function Episodes({
   activeBatchIndex: controlledBatchIndex,
   onBatchChange,
   isLoadingBatch = false,
+  isUnreleased = false,
+  seasonNumber = 1,
 }: EpisodesProps) {
   const [prevSeasonId, setPrevSeasonId] = useState(seasonId);
   const [internalBatchIndex, setInternalBatchIndex] = useState(0);
@@ -93,6 +98,15 @@ export function Episodes({
   );
 
   const hasEpisodes = episodes && episodes.length > 0;
+
+  if (isUnreleased && !hasEpisodes) {
+    return (
+      <SeasonUnreleasedPanel
+        seasonNumber={seasonNumber}
+        image={fallbackImage}
+      />
+    );
+  }
 
   if (!hasEpisodes && !fallbackImage) {
     return null;

@@ -104,6 +104,7 @@ export const ANIME_DETAILS_PAGE_QUERY = `
               romaji
             }
             coverImage {
+              extraLarge
               large
             }
             format
