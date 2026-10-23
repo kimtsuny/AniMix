@@ -624,10 +624,13 @@ export function SeasonsAndEpisodes({
             // If user arrived with a specific season (or direct sequel), resolve and load it now
             const targetId = selectedSeasonIdRef.current;
             loadSeasonEpisodes(targetId, mapped);
+          } else {
+            setIsLoadingEpisodes(false);
           }
         })
         .catch((err) => {
           console.warn("Failed to load anime seasons metadata:", err);
+          setIsLoadingEpisodes(false);
         })
         .finally(() => {
           setIsLoadingSeasons(false);
