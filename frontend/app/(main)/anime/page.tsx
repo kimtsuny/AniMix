@@ -14,7 +14,7 @@ import {
     getUpcomingAnime,
 } from "@/features/anime";
 import type { HeroAnime, SectionAnime } from "@/features/anime";
-import Profiler from "./_profiler";
+
 
 function extractData<T>(result: PromiseSettledResult<T>, fallback: T): T {
     return result.status === "fulfilled" ? result.value : fallback;
@@ -40,7 +40,6 @@ export default async function AnimePage() {
 
     return (
         <main className="min-h-screen w-full">
-            <Profiler />
             <HeroCarousel data={heroData} />
 
             <div className="relative z-10 flex w-full flex-col gap-10 px-6 md:px-22 pt-4 pb-8 -mt-4">
