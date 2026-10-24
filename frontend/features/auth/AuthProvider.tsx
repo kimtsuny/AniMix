@@ -17,6 +17,7 @@ interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -29,24 +30,52 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const currentUser = await me();
+      setUser(currentUser);
+    } catch (error) {
+      console.error("Failed to authenticate session:", error);
+      setUser(null);
+    }
+  }, []);
+
   useEffect(() => {
+    let isMounted = true;
+
     async function loadUser() {
       try {
         const currentUser = await me();
-        setUser(currentUser);
-      } catch {
-        setUser(null);
+        if (isMounted) {
+          setUser(currentUser);
+        }
+      } catch (error) {
+        console.error("Failed to authenticate session:", error);
+        if (isMounted) {
+          setUser(null);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadUser();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const logout = useCallback(async () => {
-    await logoutApi();
-    setUser(null);
+    try {
+      await logoutApi();
+    } catch (error) {
+      console.error("Failed to logout:", error);
+    } finally {
+      setUser(null);
+    }
   }, []);
 
   return (
@@ -55,6 +84,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         user,
         isLoading,
         logout,
+        refreshUser,
       }}
     >
       {children}

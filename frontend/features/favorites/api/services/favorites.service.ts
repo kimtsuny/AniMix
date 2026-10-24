@@ -1,4 +1,5 @@
 import { graphqlClient } from "@/shared/api/graphql-client";
+import { HttpError } from "@/shared/api/http-client";
 
 import { getFavorites } from "../get-favorites";
 
@@ -75,6 +76,14 @@ export async function getFavoriteAnime(): Promise<FavoriteAnime[]> {
       };
     });
   } catch (error) {
+    if (
+      (error instanceof HttpError && error.status === 401) ||
+      (error as any)?.status === 401 ||
+      (error as any)?.message === "Unauthorized"
+    ) {
+      return [];
+    }
+
     console.error(
       "Failed to fetch favorites:",
       error

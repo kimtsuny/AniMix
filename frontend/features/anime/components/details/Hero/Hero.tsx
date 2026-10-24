@@ -9,6 +9,9 @@ import { Play, Share2, Star, Trophy, Users, Heart, Clock, Film, Tv, Globe, BookO
 import { Badge } from "../common/Badge";
 import { InfoChip } from "../common/InfoChip";
 import { StatItem } from "../common/StatItem";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/features/auth";
+import { HttpError } from "@/shared/api/http-client";
 import { addFavorite } from "@/features/favorites/api/add-favorite";
 import { removeFavorite } from "@/features/favorites/api/remove-favorite";
 import { getFavorites } from "@/features/favorites/api/get-favorites";
@@ -18,15 +21,27 @@ interface HeroProps {
 }
 
 export function Hero({ anime, seasonNumber = 1 }: HeroProps) {
+  const router = useRouter();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isAddingFavorite, setIsAddingFavorite] = useState(false);
 
   useEffect(() => {
     if (!anime) return;
+    if (isAuthLoading) return;
+
+    if (!user) {
+      setIsFavorite(false);
+      return;
+    }
+
+    let isMounted = true;
 
     async function checkFavorite() {
       try {
         const data = await getFavorites();
+
+        if (!isMounted) return;
 
         const exists = data.favorites.some(
           (favorite) =>
@@ -35,6 +50,17 @@ export function Hero({ anime, seasonNumber = 1 }: HeroProps) {
 
         setIsFavorite(exists);
       } catch (error) {
+        if (!isMounted) return;
+
+        if (
+          (error instanceof HttpError && error.status === 401) ||
+          (error as any)?.status === 401 ||
+          (error as any)?.message === "Unauthorized"
+        ) {
+          setIsFavorite(false);
+          return;
+        }
+
         console.error(
           "Failed to check favorite:",
           error
@@ -43,10 +69,19 @@ export function Hero({ anime, seasonNumber = 1 }: HeroProps) {
     }
 
     checkFavorite();
-  }, [anime]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [anime, user, isAuthLoading]);
 
   async function handleFavorite() {
     if (!anime) return;
+
+    if (!user) {
+      router.push("/login");
+      return;
+    }
 
     try {
       setIsAddingFavorite(true);
@@ -61,6 +96,15 @@ export function Hero({ anime, seasonNumber = 1 }: HeroProps) {
         setIsFavorite(true);
       }
     } catch (error) {
+      if (
+        (error instanceof HttpError && error.status === 401) ||
+        (error as any)?.status === 401 ||
+        (error as any)?.message === "Unauthorized"
+      ) {
+        router.push("/login");
+        return;
+      }
+
       console.error(
         "Failed to update favorite:",
         error

@@ -21,6 +21,18 @@ const getBaseUrl = (): string => {
 
 const API_URL = getBaseUrl();
 
+export class HttpError extends Error {
+  status: number;
+  data: unknown;
+
+  constructor(message: string, status: number, data?: unknown) {
+    super(message);
+    this.name = "HttpError";
+    this.status = status;
+    this.data = data;
+  }
+}
+
 export async function httpClient<T>(
   endpoint: string,
   options?: RequestInit
@@ -40,10 +52,19 @@ export async function httpClient<T>(
     ...options,
   });
 
-  const data = await response.json();
+  let data: any = null;
+  try {
+    data = await response.json();
+  } catch {
+    // Response body is not JSON or is empty
+  }
 
   if (!response.ok) {
-    throw new Error(data.message || "Something went wrong");
+    throw new HttpError(
+      data?.message || response.statusText || "Something went wrong",
+      response.status,
+      data
+    );
   }
 
   return data;
