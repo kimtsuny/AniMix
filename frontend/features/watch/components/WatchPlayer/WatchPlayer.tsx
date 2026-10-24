@@ -584,8 +584,8 @@ export function WatchPlayer({
     (event: React.MouseEvent) => {
       // Ignore if pointer is moving to another element inside the player container
       if (
-        event.relatedTarget &&
-        containerRef.current?.contains(event.relatedTarget as Node)
+        event.relatedTarget instanceof Node &&
+        containerRef.current?.contains(event.relatedTarget)
       ) {
         return;
       }
@@ -610,8 +610,8 @@ export function WatchPlayer({
       // Ignore if pointer is moving within controls elements
       const currentTarget = event.currentTarget as HTMLElement;
       if (
-        event.relatedTarget &&
-        currentTarget.contains(event.relatedTarget as Node)
+        event.relatedTarget instanceof Node &&
+        currentTarget.contains(event.relatedTarget)
       ) {
         return;
       }
@@ -878,6 +878,22 @@ export function WatchPlayer({
           return;
         }
 
+        /*
+         * NotAllowedError happens when the browser blocks
+         * autoplay because the user has not interacted with the
+         * document yet. Leave the player paused and ready for user play.
+         */
+        if (
+          error instanceof DOMException &&
+          error.name === "NotAllowedError"
+        ) {
+          if (!cancelled) {
+            setIsPlaying(false);
+            setShowControls(true);
+          }
+          return;
+        }
+
         console.error(
           "[Player] Failed to play:",
           error
@@ -940,8 +956,10 @@ export function WatchPlayer({
         .catch((error) => {
           if (
             error instanceof DOMException &&
-            error.name === "AbortError"
+            (error.name === "AbortError" || error.name === "NotAllowedError")
           ) {
+            setIsPlaying(false);
+            setShowControls(true);
             return;
           }
 
