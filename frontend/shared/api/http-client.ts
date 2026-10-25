@@ -24,12 +24,19 @@ const API_URL = getBaseUrl();
 export class HttpError extends Error {
   status: number;
   data: unknown;
+  retryAfter?: number;
 
-  constructor(message: string, status: number, data?: unknown) {
+  constructor(
+    message: string,
+    status: number,
+    data?: unknown,
+    retryAfter?: number
+  ) {
     super(message);
     this.name = "HttpError";
     this.status = status;
     this.data = data;
+    this.retryAfter = retryAfter;
   }
 }
 
@@ -85,10 +92,32 @@ export async function httpClient<T>(
   }
 
   if (!response.ok) {
+    let retryAfter: number | undefined;
+    const retryHeader = response.headers.get("Retry-After");
+    if (retryHeader) {
+      const parsedSeconds = parseInt(retryHeader, 10);
+      if (!Number.isNaN(parsedSeconds) && parsedSeconds > 0) {
+        retryAfter = parsedSeconds;
+      } else {
+        const parsedDate = Date.parse(retryHeader);
+        if (!Number.isNaN(parsedDate)) {
+          retryAfter = Math.max(0, Math.ceil((parsedDate - Date.now()) / 1000));
+        }
+      }
+    }
+
+    let fallbackMessage = response.statusText || "Something went wrong";
+    if (response.status === 429) {
+      fallbackMessage = "Too many requests. Please wait a moment and try again.";
+    } else if (response.status === 503) {
+      fallbackMessage = "Service temporarily unavailable. Please try again shortly.";
+    }
+
     throw new HttpError(
-      data?.message || response.statusText || "Something went wrong",
+      data?.message || fallbackMessage,
       response.status,
-      data
+      data,
+      retryAfter
     );
   }
 

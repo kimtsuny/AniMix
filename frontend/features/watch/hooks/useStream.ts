@@ -43,6 +43,9 @@ export function useStream(
   const activeTargetKeyRef = useRef<string | null>(targetKey);
   activeTargetKeyRef.current = targetKey;
 
+  const targetRef = useRef(target);
+  targetRef.current = target;
+
   const requestIdRef = useRef(0);
 
   const fetchStream = useCallback(async () => {
@@ -64,15 +67,16 @@ export function useStream(
       setData(null);
 
       let result: StreamResponse;
+      const currentTarget = targetRef.current;
 
-      if (typeof target === "number") {
-        result = await getEpisodeStream(target);
-      } else if (target?.id != null) {
-        result = await getEpisodeStream(target.id);
-      } else if (target?.provider && target?.providerId) {
+      if (typeof currentTarget === "number") {
+        result = await getEpisodeStream(currentTarget);
+      } else if (currentTarget?.id != null) {
+        result = await getEpisodeStream(currentTarget.id);
+      } else if (currentTarget?.provider && currentTarget?.providerId) {
         result = await getAnonymousEpisodeStream(
-          target.provider,
-          target.providerId
+          currentTarget.provider,
+          currentTarget.providerId
         );
       } else {
         return;
@@ -110,7 +114,7 @@ export function useStream(
         setIsLoading(false);
       }
     }
-  }, [targetKey, target]);
+  }, [targetKey]);
 
   useEffect(() => {
     fetchStream();

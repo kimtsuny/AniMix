@@ -6,6 +6,7 @@ interface PlayerProgressProps {
   currentTime: number;
   duration: number;
   onSeek: (time: number) => void;
+  onSeekChange?: (time: number) => void;
 }
 
 function formatSeekTime(seconds: number): string {
@@ -24,6 +25,7 @@ export function PlayerProgress({
   currentTime,
   duration,
   onSeek,
+  onSeekChange,
 }: PlayerProgressProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const hoverBarRef = useRef<HTMLDivElement>(null);
@@ -31,12 +33,19 @@ export function PlayerProgress({
 
   const [isDragging, setIsDragging] = useState(false);
   const isDraggingRef = useRef(false);
+  const [dragTime, setDragTime] = useState<number | null>(null);
+  const dragTimeRef = useRef<number | null>(null);
+
   const durationRef = useRef(duration);
   durationRef.current = duration;
 
   const trackRectRef = useRef<DOMRect | null>(null);
 
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const activeTime = isDragging && dragTime !== null ? dragTime : currentTime;
+  const progress =
+    duration > 0
+      ? Math.max(0, Math.min(100, (activeTime / duration) * 100))
+      : 0;
 
   const getTrackRect = useCallback((): DOMRect | null => {
     if (!trackRectRef.current && trackRef.current) {
@@ -104,16 +113,20 @@ export function PlayerProgress({
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      // Primary mouse button only
+      if (e.button !== 0) return;
       setIsDragging(true);
       isDraggingRef.current = true;
       if (trackRef.current) {
         trackRectRef.current = trackRef.current.getBoundingClientRect();
       }
       const time = getTimeFromPosition(e.clientX);
-      onSeek(time);
+      setDragTime(time);
+      dragTimeRef.current = time;
       updateHoverImmediate(e.clientX);
+      onSeekChange?.(time);
     },
-    [getTimeFromPosition, onSeek, updateHoverImmediate]
+    [getTimeFromPosition, onSeekChange, updateHoverImmediate]
   );
 
   /* Touch handlers for mobile */
@@ -127,10 +140,42 @@ export function PlayerProgress({
         trackRectRef.current = trackRef.current.getBoundingClientRect();
       }
       const time = getTimeFromPosition(touch.clientX);
-      onSeek(time);
+      setDragTime(time);
+      dragTimeRef.current = time;
       updateHoverImmediate(touch.clientX);
+      onSeekChange?.(time);
     },
-    [getTimeFromPosition, onSeek, updateHoverImmediate]
+    [getTimeFromPosition, onSeekChange, updateHoverImmediate]
+  );
+
+  /* Keyboard seeking (5s / 10s steps, home, end) */
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (durationRef.current <= 0) return;
+      let nextTime: number | null = null;
+      const step = 5;
+      const bigStep = 10;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+        nextTime = Math.max(0, currentTime - step);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+        nextTime = Math.min(durationRef.current, currentTime + step);
+      } else if (e.key === "PageDown") {
+        nextTime = Math.max(0, currentTime - bigStep);
+      } else if (e.key === "PageUp") {
+        nextTime = Math.min(durationRef.current, currentTime + bigStep);
+      } else if (e.key === "Home") {
+        nextTime = 0;
+      } else if (e.key === "End") {
+        nextTime = durationRef.current;
+      }
+
+      if (nextTime !== null) {
+        e.preventDefault();
+        onSeek(nextTime);
+      }
+    },
+    [currentTime, onSeek]
   );
 
   useEffect(() => {
@@ -138,13 +183,23 @@ export function PlayerProgress({
 
     const handleMove = (e: MouseEvent) => {
       const time = getTimeFromPosition(e.clientX);
-      onSeek(time);
+      setDragTime(time);
+      dragTimeRef.current = time;
       updateHoverImmediate(e.clientX);
+      onSeekChange?.(time);
     };
 
     const handleUp = (e: MouseEvent) => {
+      const finalTime =
+        dragTimeRef.current ?? getTimeFromPosition(e.clientX);
       setIsDragging(false);
       isDraggingRef.current = false;
+      setDragTime(null);
+      dragTimeRef.current = null;
+
+      // Commit the seek once on gesture completion
+      onSeek(finalTime);
+
       if (trackRef.current) {
         const rect = trackRef.current.getBoundingClientRect();
         const isInside =
@@ -164,14 +219,23 @@ export function PlayerProgress({
       const touch = e.touches[0];
       if (!touch) return;
       const time = getTimeFromPosition(touch.clientX);
-      onSeek(time);
+      setDragTime(time);
+      dragTimeRef.current = time;
       updateHoverImmediate(touch.clientX);
+      onSeekChange?.(time);
     };
 
     const handleTouchEnd = () => {
+      const finalTime = dragTimeRef.current ?? currentTime;
       setIsDragging(false);
       isDraggingRef.current = false;
+      setDragTime(null);
+      dragTimeRef.current = null;
       trackRectRef.current = null;
+
+      // Commit the seek once on touch completion
+      onSeek(finalTime);
+
       if (hoverBarRef.current) hoverBarRef.current.style.opacity = "0";
       if (hoverTimestampRef.current) hoverTimestampRef.current.style.opacity = "0";
     };
@@ -187,17 +251,25 @@ export function PlayerProgress({
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [isDragging, getTimeFromPosition, onSeek, updateHoverImmediate]);
+  }, [
+    isDragging,
+    currentTime,
+    getTimeFromPosition,
+    onSeek,
+    onSeekChange,
+    updateHoverImmediate,
+  ]);
 
   return (
     <div
-      className="group/progress w-full px-3 md:px-5 cursor-pointer select-none"
+      className="group/progress w-full px-3 md:px-5 cursor-pointer select-none focus:outline-none"
       role="slider"
       aria-label="Video progress"
       aria-valuemin={0}
       aria-valuemax={duration}
-      aria-valuenow={currentTime}
+      aria-valuenow={Math.round(activeTime)}
       tabIndex={0}
+      onKeyDown={handleKeyDown}
     >
       <div
         ref={trackRef}
@@ -234,7 +306,7 @@ export function PlayerProgress({
           }}
         />
 
-        {/* Played portion — red (tied purely to actual video playback currentTime) */}
+        {/* Played portion — red (tracks activeTime: scrub preview during drag, video time otherwise) */}
         <div
           className="absolute h-[9px] rounded-full bg-[#e63946] pointer-events-none shadow-[0_0_10px_rgba(230,57,70,0.5)]"
           style={{ width: `${progress}%` }}

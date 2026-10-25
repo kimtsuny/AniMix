@@ -395,21 +395,11 @@ export function WatchPlayer({
         applyQualityLevels();
       }
 
+      let networkRecoveryAttempts = 0;
+
       hls.on(
         Hls.Events.ERROR,
         (_, data) => {
-          console.error(
-            "[HLS] Error:",
-            {
-              type: data.type,
-              details: data.details,
-              fatal: data.fatal,
-              streamUrl: sanitizeStreamUrl(source),
-              streamIdentity: `${activeStream.quality || "auto"} (${sanitizeStreamUrl(source)})`,
-              responseCode: data.response?.code,
-            }
-          );
-
           if (
             requestId !==
             playRequestRef.current
@@ -417,11 +407,33 @@ export function WatchPlayer({
             return;
           }
 
+          // Expected cancelled/aborted request during seek is non-fatal
+          const isSeekCancellation =
+            !data.fatal &&
+            (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR ||
+              data.details === Hls.ErrorDetails.FRAG_LOAD_ERROR ||
+              data.details === Hls.ErrorDetails.INTERNAL_EXCEPTION);
+
+          if (isSeekCancellation) {
+            return;
+          }
+
           /*
-           * Fatal HLS errors should stop the
-           * loading state.
+           * Fatal HLS errors require recovery or stop loading state.
            */
           if (data.fatal) {
+            console.error(
+              "[HLS] Fatal Error:",
+              {
+                type: data.type,
+                details: data.details,
+                fatal: data.fatal,
+                streamUrl: sanitizeStreamUrl(source),
+                streamIdentity: `${activeStream.quality || "auto"} (${sanitizeStreamUrl(source)})`,
+                responseCode: data.response?.code,
+              }
+            );
+
             setIsVideoLoading(false);
 
             switch (data.type) {
@@ -437,12 +449,28 @@ export function WatchPlayer({
                  * Expired AnimeParadise signed tokens (HTTP 500)
                  * cannot be fixed by retrying the stale URL.
                  */
-                console.error(
-                  "[HLS] Fatal network error encountered, stopping playback."
-                );
-                destroyHlsInstance(hls);
-                if (hlsRef.current === hls) {
-                  hlsRef.current = null;
+                if (data.response?.code === 500) {
+                  console.error(
+                    "[HLS] Fatal 500 network error (token likely expired), stopping playback."
+                  );
+                  destroyHlsInstance(hls);
+                  if (hlsRef.current === hls) {
+                    hlsRef.current = null;
+                  }
+                } else if (networkRecoveryAttempts < 2) {
+                  networkRecoveryAttempts++;
+                  console.warn(
+                    `[HLS] Fatal network error, attempting recovery attempt ${networkRecoveryAttempts}/2 via startLoad()...`
+                  );
+                  hls.startLoad();
+                } else {
+                  console.error(
+                    "[HLS] Network error retry limit reached, stopping playback."
+                  );
+                  destroyHlsInstance(hls);
+                  if (hlsRef.current === hls) {
+                    hlsRef.current = null;
+                  }
                 }
                 break;
 
@@ -456,6 +484,8 @@ export function WatchPlayer({
                 }
                 break;
             }
+          } else {
+            console.warn("[HLS] Non-fatal notice:", data.details);
           }
         }
       );

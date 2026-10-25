@@ -8,6 +8,7 @@ import {
 
 import {
   getSeasonEpisodes,
+  getCachedSeasonEpisodes,
   type Episode,
   type Season,
   type Anime,
@@ -28,14 +29,21 @@ export function useEpisodes(
   animeId: number,
   seasonNumber: number
 ): UseEpisodesResult {
-  const [anime, setAnime] = useState<Anime | null>(null);
-  const [seasons, setSeasons] = useState<Season[]>([]);
-  const [episodes, setEpisodes] = useState<Episode[]>([]);
-  const [selectedEpisode, setSelectedEpisode] =
-    useState<Episode | null>(null);
+  const initialCache = getCachedSeasonEpisodes(animeId, seasonNumber);
 
-  const [loadedAnimeId, setLoadedAnimeId] = useState<number | null>(null);
-  const [loadedSeasonNumber, setLoadedSeasonNumber] = useState<number | null>(null);
+  const [anime, setAnime] = useState<Anime | null>(() => initialCache?.anime ?? null);
+  const [seasons, setSeasons] = useState<Season[]>(() => initialCache?.seasons ?? []);
+  const [episodes, setEpisodes] = useState<Episode[]>(() => initialCache?.season?.episodes ?? []);
+  const [selectedEpisode, setSelectedEpisode] = useState<Episode | null>(
+    () => initialCache?.season?.episodes?.[0] ?? null
+  );
+
+  const [loadedAnimeId, setLoadedAnimeId] = useState<number | null>(
+    () => (initialCache ? animeId : null)
+  );
+  const [loadedSeasonNumber, setLoadedSeasonNumber] = useState<number | null>(
+    () => (initialCache ? seasonNumber : null)
+  );
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +59,20 @@ export function useEpisodes(
 
   useEffect(() => {
     let cancelled = false;
+
+    // Check if valid cached data already exists
+    const cached = getCachedSeasonEpisodes(animeId, seasonNumber);
+    if (cached) {
+      setAnime(cached.anime);
+      setSeasons((prev) => (prev.length > 0 ? prev : cached.seasons));
+      setEpisodes(cached.season.episodes);
+      setLoadedAnimeId(animeId);
+      setLoadedSeasonNumber(seasonNumber);
+      setSelectedEpisode(cached.season.episodes[0] ?? null);
+      setError(null);
+      setIsLoading(false);
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -110,7 +132,9 @@ export function useEpisodes(
       setIsLoading(true);
       setError(null);
 
-      const data = await getSeasonEpisodes(animeId, seasonNumber);
+      const data = await getSeasonEpisodes(animeId, seasonNumber, undefined, {
+        force: true,
+      });
 
       setAnime(data.anime);
       setSeasons(data.seasons);

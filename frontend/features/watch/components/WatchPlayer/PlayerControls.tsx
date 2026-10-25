@@ -33,6 +33,7 @@ interface PlayerControlsProps {
   onPreviousEpisode: () => void;
   onNextEpisode: () => void;
   onSeek: (time: number) => void;
+  onSeekChange?: (time: number) => void;
   onVolumeChange: (volume: number) => void;
   onMuteToggle: () => void;
   onFullscreenToggle: () => void;
@@ -68,6 +69,7 @@ export function PlayerControls({
   onPreviousEpisode,
   onNextEpisode,
   onSeek,
+  onSeekChange,
   onVolumeChange,
   onMuteToggle,
   onFullscreenToggle,
@@ -88,6 +90,7 @@ export function PlayerControls({
           currentTime={currentTime}
           duration={duration}
           onSeek={onSeek}
+          onSeekChange={onSeekChange}
         />
 
         {/* Controls row */}
