@@ -33,6 +33,31 @@ export class HttpError extends Error {
   }
 }
 
+export function isUnauthorizedError(error: unknown): boolean {
+  if (error instanceof HttpError && error.status === 401) {
+    return true;
+  }
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    (error as { status: unknown }).status === 401
+  ) {
+    return true;
+  }
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error
+  ) {
+    const msg = (error as { message: unknown }).message;
+    if (msg === "Unauthorized" || msg === "Invalid token") {
+      return true;
+    }
+  }
+  return false;
+}
+
 export async function httpClient<T>(
   endpoint: string,
   options?: RequestInit
@@ -52,7 +77,7 @@ export async function httpClient<T>(
     ...options,
   });
 
-  let data: any = null;
+  let data: (Record<string, unknown> & { message?: string }) | null = null;
   try {
     data = await response.json();
   } catch {
@@ -67,5 +92,5 @@ export async function httpClient<T>(
     );
   }
 
-  return data;
+  return data as T;
 }

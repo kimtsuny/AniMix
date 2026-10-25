@@ -11,7 +11,7 @@ import { InfoChip } from "../common/InfoChip";
 import { StatItem } from "../common/StatItem";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth";
-import { HttpError } from "@/shared/api/http-client";
+import { isUnauthorizedError } from "@/shared/api/http-client";
 import { addFavorite } from "@/features/favorites/api/add-favorite";
 import { removeFavorite } from "@/features/favorites/api/remove-favorite";
 import { getFavorites } from "@/features/favorites/api/get-favorites";
@@ -52,11 +52,7 @@ export function Hero({ anime, seasonNumber = 1 }: HeroProps) {
       } catch (error) {
         if (!isMounted) return;
 
-        if (
-          (error instanceof HttpError && error.status === 401) ||
-          (error as any)?.status === 401 ||
-          (error as any)?.message === "Unauthorized"
-        ) {
+        if (isUnauthorizedError(error)) {
           setIsFavorite(false);
           return;
         }
@@ -96,11 +92,7 @@ export function Hero({ anime, seasonNumber = 1 }: HeroProps) {
         setIsFavorite(true);
       }
     } catch (error) {
-      if (
-        (error instanceof HttpError && error.status === 401) ||
-        (error as any)?.status === 401 ||
-        (error as any)?.message === "Unauthorized"
-      ) {
+      if (isUnauthorizedError(error)) {
         router.push("/login");
         return;
       }

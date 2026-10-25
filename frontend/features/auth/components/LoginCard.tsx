@@ -12,6 +12,7 @@ import { login } from "../api/login";
 import { register } from "../api/register";
 import { socialLogin } from "../api/social-login";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../hooks/useAuth";
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -40,44 +41,51 @@ const itemVariants: Variants = {
  */
 export default function LoginCard() {
   const [isLoading, setIsLoading] = useState(false);
-const router = useRouter();
-const [mode, setMode] = useState<"login" | "register">("login");
-const isRegisterMode = mode === "register";
+  const router = useRouter();
+  const { refreshUser } = useAuth();
+  const [mode, setMode] = useState<"login" | "register">("login");
+  const isRegisterMode = mode === "register";
 
   const handleFormSubmit = useCallback(
-  async (data: LoginFormData) => {
-    setIsLoading(true);
+    async (data: LoginFormData) => {
+      setIsLoading(true);
 
-    try {
-      if (mode === "register") {
-        await register(
-          data.username!,
-          data.email,
-          data.password
-        );
-      } else {
-        await login(
-          data.email,
-          data.password
-        );
+      try {
+        if (mode === "register") {
+          await register(
+            data.username!,
+            data.email,
+            data.password
+          );
+        } else {
+          await login(
+            data.email,
+            data.password
+          );
+        }
+
+        await refreshUser();
+        router.replace("/");
+      } finally {
+        setIsLoading(false);
       }
+    },
+    [mode, refreshUser, router]
+  );
 
-      router.replace("/");
-    } finally {
-      setIsLoading(false);
-    }
-  },
-  [mode, router]
-);
-
-  const handleSocialLogin = useCallback(async (provider: SocialProvider) => {
-    setIsLoading(true);
-    try {
-      await socialLogin(provider);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const handleSocialLogin = useCallback(
+    async (provider: SocialProvider) => {
+      setIsLoading(true);
+      try {
+        await socialLogin(provider);
+        await refreshUser();
+        router.replace("/");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [refreshUser, router]
+  );
 
   const handleSignInClick = useCallback(() => {
     // Trigger the form submit via the LoginForm's internal form

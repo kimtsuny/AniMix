@@ -1,31 +1,40 @@
-import { httpClient, HttpError } from "@/shared/api/http-client";
+import { httpClient, isUnauthorizedError } from "@/shared/api/http-client";
 import type { User } from "../types/auth";
 
 let inFlightMePromise: Promise<User | null> | null = null;
 
-export async function me(): Promise<User | null> {
-  if (inFlightMePromise) {
+export interface MeOptions {
+  force?: boolean;
+}
+
+async function fetchMe(): Promise<User | null> {
+  try {
+    return await httpClient<User>("/auth/me", {
+      method: "GET",
+    });
+  } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+export async function me(options?: MeOptions): Promise<User | null> {
+  if (inFlightMePromise && !options?.force) {
     return inFlightMePromise;
   }
 
-  inFlightMePromise = (async () => {
-    try {
-      return await httpClient<User>("/auth/me", {
-        method: "GET",
-      });
-    } catch (error) {
-      if (
-        (error instanceof HttpError && error.status === 401) ||
-        (error as any)?.status === 401 ||
-        (error as any)?.message === "Unauthorized"
-      ) {
-        return null;
-      }
-      throw error;
-    } finally {
-      inFlightMePromise = null;
-    }
-  })();
+  const promise = fetchMe();
+  inFlightMePromise = promise;
 
-  return inFlightMePromise;
+  promise
+    .finally(() => {
+      if (inFlightMePromise === promise) {
+        inFlightMePromise = null;
+      }
+    })
+    .catch(() => {});
+
+  return promise;
 }

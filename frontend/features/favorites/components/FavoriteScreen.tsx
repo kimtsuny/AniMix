@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useAuth } from "@/features/auth";
-import { HttpError } from "@/shared/api/http-client";
+import { isUnauthorizedError } from "@/shared/api/http-client";
 import { getFavoriteAnime } from "../api/services/favorites.service";
 import { useFavoritesStore } from "../store/favorites.store";
 import { FavoriteSearch } from "./FavoriteSearch";
@@ -44,11 +44,7 @@ export function FavoriteScreen() {
       } catch (error) {
         if (!isMounted) return;
 
-        if (
-          (error instanceof HttpError && error.status === 401) ||
-          (error as any)?.status === 401 ||
-          (error as any)?.message === "Unauthorized"
-        ) {
+        if (isUnauthorizedError(error)) {
           setFavorites([]);
           return;
         }

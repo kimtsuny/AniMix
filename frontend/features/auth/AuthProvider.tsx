@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -12,6 +13,7 @@ import {
 import type { User } from "./types/auth";
 import { me } from "./api/me";
 import { logout as logoutApi } from "./api/logout";
+import { isUnauthorizedError } from "@/shared/api/http-client";
 
 interface AuthContextValue {
   user: User | null;
@@ -29,14 +31,22 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const latestRequestIdRef = useRef(0);
 
   const refreshUser = useCallback(async () => {
+    const requestId = ++latestRequestIdRef.current;
     try {
-      const currentUser = await me();
+      const currentUser = await me({ force: true });
+      if (requestId !== latestRequestIdRef.current) return;
       setUser(currentUser);
     } catch (error) {
-      console.error("Failed to authenticate session:", error);
-      setUser(null);
+      if (requestId !== latestRequestIdRef.current) return;
+      if (isUnauthorizedError(error)) {
+        setUser(null);
+      } else {
+        console.error("Failed to authenticate session:", error);
+        setUser(null);
+      }
     }
   }, []);
 
@@ -44,18 +54,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let isMounted = true;
 
     async function loadUser() {
+      const requestId = ++latestRequestIdRef.current;
       try {
         const currentUser = await me();
-        if (isMounted) {
-          setUser(currentUser);
-        }
+        if (!isMounted || requestId !== latestRequestIdRef.current) return;
+        setUser(currentUser);
       } catch (error) {
-        console.error("Failed to authenticate session:", error);
-        if (isMounted) {
+        if (!isMounted || requestId !== latestRequestIdRef.current) return;
+        if (isUnauthorizedError(error)) {
+          setUser(null);
+        } else {
+          console.error("Failed to authenticate session:", error);
           setUser(null);
         }
       } finally {
-        if (isMounted) {
+        if (isMounted && requestId === latestRequestIdRef.current) {
           setIsLoading(false);
         }
       }
@@ -69,6 +82,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const logout = useCallback(async () => {
+    latestRequestIdRef.current++;
     try {
       await logoutApi();
     } catch (error) {
