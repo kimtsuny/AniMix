@@ -60,22 +60,9 @@ export function useEpisodes(
   useEffect(() => {
     let cancelled = false;
 
-    // Check if valid cached data already exists
-    const cached = getCachedSeasonEpisodes(animeId, seasonNumber);
-    if (cached) {
-      setAnime(cached.anime);
-      setSeasons((prev) => (prev.length > 0 ? prev : cached.seasons));
-      setEpisodes(cached.season.episodes);
-      setLoadedAnimeId(animeId);
-      setLoadedSeasonNumber(seasonNumber);
-      setSelectedEpisode(cached.season.episodes[0] ?? null);
-      setError(null);
-      setIsLoading(false);
+    if (loadedAnimeId === animeId && loadedSeasonNumber === seasonNumber) {
       return;
     }
-
-    setIsLoading(true);
-    setError(null);
 
     getSeasonEpisodes(animeId, seasonNumber)
       .then((data) => {

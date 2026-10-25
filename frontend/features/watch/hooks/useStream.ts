@@ -39,12 +39,14 @@ export function useStream(
       ? `anon:${target.provider}:${target.providerId}`
       : null;
 
-  // Track the latest active target key and request generation counter
+  // Track the latest active target key and target reference
   const activeTargetKeyRef = useRef<string | null>(targetKey);
-  activeTargetKeyRef.current = targetKey;
-
   const targetRef = useRef(target);
-  targetRef.current = target;
+
+  useEffect(() => {
+    activeTargetKeyRef.current = targetKey;
+    targetRef.current = target;
+  }, [targetKey, target]);
 
   const requestIdRef = useRef(0);
 

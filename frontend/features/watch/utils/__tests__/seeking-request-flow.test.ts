@@ -316,6 +316,7 @@ describe("AniMix — Seeking Interaction and Request Flow Verification", () => {
       const s3 = await getAnimeSeasons(195539);
       assert.strictEqual(fetchCallCount, 1, "Cached getAnimeSeasons served with 0 network calls");
       assert.strictEqual(s3.rootAnimeId, 195539);
+      assert.strictEqual(getCachedAnimeSeasons(195539)?.rootAnimeId, 195539);
     });
   });
 
